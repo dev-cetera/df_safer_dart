@@ -195,8 +195,8 @@ extension ResultExtension<T> on Result<T> {
   }
 
   @pragma('vm:prefer-inline')
-  Ok<T> unwrap() {
-    return ok;
+  T unwrap() {
+    return ok.value;
   }
 
   @pragma('vm:prefer-inline')
