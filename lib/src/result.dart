@@ -201,7 +201,7 @@ final class Ok<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> get err {
-    throw Panic.message('Cannot get [err] from Ok.');
+    throw Panic('Cannot get [err] from Ok.');
   }
 
   @override
@@ -273,7 +273,7 @@ final class Err<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Ok<T> get ok {
-    throw Panic.message('Cannot get [ok] from Err.');
+    throw Panic('Cannot get [ok] from Err.');
   }
 
   @override

@@ -20,7 +20,7 @@ class PanicIf {
 
   void validate() {
     if (condition) {
-      throw Panic(this);
+      throw Panic.validate(this);
     }
   }
 }
@@ -30,9 +30,9 @@ class PanicIf {
 final class Panic {
   final PanicIf validate;
 
-  const Panic(this.validate);
+  const Panic.validate(this.validate);
 
-  Panic.message(String message) : validate = PanicIf(true, message);
+  Panic(String message) : validate = PanicIf(true, message);
 
   @override
   String toString() {

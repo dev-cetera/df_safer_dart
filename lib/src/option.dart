@@ -81,7 +81,7 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   None<T> get none {
-    throw Panic.message('Cannot get [none] from Some.');
+    throw Panic('Cannot get [none] from Some.');
   }
 
   @override
@@ -161,7 +161,7 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Some<T> get some {
-    throw Panic.message('Cannot get [some] from a None.');
+    throw Panic('Cannot get [some] from a None.');
   }
 
   @override
@@ -181,7 +181,7 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Panic.message('Cannot [unwrap] a None.');
+    throw Panic('Cannot [unwrap] a None.');
   }
 
   @override
