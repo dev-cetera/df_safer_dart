@@ -1,0 +1,39 @@
+##.title
+## ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+##
+## Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
+## source code is governed by an MIT-style license described in the LICENSE
+## file located in this project's root directory.
+##
+## See: https://opensource.org/license/mit
+##
+## ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+##.title~
+
+name: df_safer_dart
+description: A package inspired by Rust and functional programming to bring more structure and clarity to your Dart applications.
+version: 0.1.0
+repository: https://github.com/dev_cetera/dart_package_template
+funding:
+  - https://www.buymeacoffee.com/robmllze
+topics:
+  - rust
+  - error-handling
+  - functional-programming
+
+## -----------------------------------------------------------------------------
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+## -----------------------------------------------------------------------------
+
+dependencies:
+  meta: ^1.15.0
+
+## -----------------------------------------------------------------------------
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
+  http:
