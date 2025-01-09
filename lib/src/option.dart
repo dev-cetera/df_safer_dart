@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'result.dart';
+import '../df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -25,7 +25,35 @@ sealed class Option<T> {
     }
   }
 
-  Result<T> get asResult => isSome ? Ok<T>(some.value) : Err(None<T>());
+  bool get isSome;
+
+  bool get isNone;
+
+  Some<T> get some;
+
+  None<T> get none;
+
+  void ifSome(void Function(T value) fn);
+
+  void ifNone(void Function() fn);
+
+  T unwrap();
+
+  T unwrapOr(T fallback);
+
+  T unwrapOrElse(T Function() fallback);
+
+  Option<R> map<R>(R Function(T value) fn);
+
+  Some<R> mapToSome<R>(R Function(Option<T> option) fn);
+
+  Option<R> flatMap<R>(Option<R> Function(T value) fn);
+
+  Option<T> filter(bool Function(T value) test);
+
+  Option<(T, R)> union<R>(Option<R> other); //land, lor, lxor
+
+  Result<T> get asResult;
 
   B fold<B>(B Function(T value) onSome, B Function() onNone);
 }
@@ -38,15 +66,82 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(B Function(T value) onSome, B Function() onNone) {
-    return onSome(value);
+  bool get isSome => true;
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isNone => false;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<T> get some {
+    return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() {
-    return '${Some<T>}($value)';
+  None<T> get none {
+    throw Panic.message('Cannot get [none] from Some.');
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifNone(void Function() fn) {
+    // Do nothing.
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifSome(void Function(T value) fn) => fn(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function() fallback) => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<R> map<R>(R Function(T value) fn) => Some(fn(value));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<R> mapToSome<R>(R Function(Option<T> option) fn) => Some(fn(some));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<R> flatMap<R>(Option<R> Function(T value) fn) => fn(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<(T, R)> union<R>(Option<R> other) {
+    if (other is Some<R>) {
+      return Some((value, other.unwrap()));
+    }
+    return const None();
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<T> get asResult => Ok<T>(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  B fold<B>(B Function(T value) onSome, B Function() onNone) => onSome(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  String toString() => '${Some<T>}($value)';
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -56,15 +151,77 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(B Function(T value) onSome, B Function() onNone) {
-    return onNone();
+  bool get isSome => false;
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isNone => true;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<T> get some {
+    throw Panic.message('Cannot get [some] from a None.');
   }
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() {
-    return '${None<T>}()';
+  void ifNone(void Function() fn) => fn();
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifSome(void Function(T value) fn) {
+    // Do nothing.
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<T> get none => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() {
+    throw Panic.message('Cannot [unwrap] a None.');
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => fallback;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function() fallback) => fallback();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<R> map<R>(R Function(T value) fn) => None<R>();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<R> mapToSome<R>(R Function(Option<T> option) fn) => Some(fn(none));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<R> flatMap<R>(Option<R> Function(T value) fn) => None<R>();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<T> get asResult => Err(None<T>());
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<T> filter(bool Function(T value) test) => none;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<(T, R)> union<R>(Option<R> other) => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  B fold<B>(B Function(T value) onSome, B Function() onNone) => onNone();
+
+  @override
+  @pragma('vm:prefer-inline')
+  String toString() => '${None<T>}()';
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -86,60 +243,5 @@ mixin _EqualityMixin<T> on Option<T> {
       (e) => e.hashCode,
       () => null.hashCode,
     );
-  }
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-extension OptionExtension<T> on Option<T> {
-  @pragma('vm:prefer-inline')
-  bool get isSome {
-    return this is Some<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  bool get isNone {
-    return this is None<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  Some<T> get some {
-    assert(isSome, 'This is not a Some: $this');
-    return this as Some<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  None<T> get none {
-    assert(isNone, 'This is not a None: $this');
-    return this as None<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  T unwrap() {
-    return some.value;
-  }
-
-  @pragma('vm:prefer-inline')
-  T unwrapOr(T defaultValue) {
-    if (isSome) {
-      return some.value;
-    }
-    return defaultValue;
-  }
-
-  @pragma('vm:prefer-inline')
-  Option<R> map<R>(R Function(T value) fn) {
-    if (isSome) {
-      return Some(fn(some.value));
-    }
-    return const None();
-  }
-
-  @pragma('vm:prefer-inline')
-  Option<R> mapOr<R>(R Function(Option<T> option) fn) {
-    if (isSome) {
-      return Some(fn(some));
-    }
-    return Some(fn(const None()));
   }
 }

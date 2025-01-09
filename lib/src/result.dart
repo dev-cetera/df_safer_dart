@@ -13,6 +13,7 @@
 import 'dart:async';
 
 import 'option.dart';
+import 'panic.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -35,6 +36,30 @@ sealed class Result<T> {
 
   @pragma('vm:prefer-inline')
   FutureOr<Result<T>> then() => this;
+
+  bool get isOk;
+
+  bool get isErr;
+
+  Ok<T> get ok;
+
+  Err<T> get err;
+
+  void ifOk(void Function(T value) fn);
+
+  void ifErr(void Function(Object error) fn);
+
+  T unwrap();
+
+  T unwrapOr(T fallback);
+
+  T unwrapOrElse(T Function(Object error) fallback);
+
+  Result<R> map<R>(R Function(T value) fn);
+
+  Result<R> flatMap<R>(Result<R> Function(T value) fn);
+
+  Result<T> mapErr(Object Function(Object error) fn);
 
   FutureOr<B> fold<B>(
     B Function(T value) onOk,
@@ -80,19 +105,78 @@ final class FutureResult<T> extends Result<T> {
   }
 
   @override
-  @pragma('vm:prefer-inline')
-  bool operator ==(Object other) {
-    throw UnsupportedError(
-      'FutureTry does not support == operator',
-    );
+  bool get isOk {
+    throw UnimplementedError();
   }
 
   @override
-  @pragma('vm:prefer-inline')
+  bool get isErr {
+    throw UnimplementedError();
+  }
+
+  @override
+  Ok<T> get ok {
+    throw UnimplementedError();
+  }
+
+  @override
+  Err<T> get err {
+    throw UnimplementedError();
+  }
+
+  @override
+  void ifOk(void Function(T value) fn) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void ifErr(void Function(Object error) fn) {
+    throw UnimplementedError();
+  }
+
+  @override
+  T unwrap() {
+    throw UnimplementedError();
+  }
+
+  @override
+  T unwrapOr(T fallback) {
+    throw UnimplementedError();
+  }
+
+  @override
+  T unwrapOrElse(T Function(Object error) fallback) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Result<R> map<R>(R Function(T value) fn) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Result<R> flatMap<R>(Result<R> Function(T value) fn) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Result<T> mapErr(Object Function(Object error) fn) {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    throw UnimplementedError();
+  }
+
+  @override
   int get hashCode {
-    throw UnsupportedError(
-      'FutureTry does not support hashCode',
-    );
+    throw UnimplementedError();
+  }
+
+  @override
+  String toString() {
+    throw UnimplementedError();
   }
 }
 
@@ -101,6 +185,60 @@ final class FutureResult<T> extends Result<T> {
 final class Ok<T> extends Result<T> with _EqualityMixin<T> {
   final T value;
   const Ok(this.value) : super._();
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isOk => true;
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isErr => false;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<T> get ok => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<T> get err {
+    throw Panic.message('Cannot get [err] from Ok.');
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifOk(void Function(T value) fn) {
+    fn(value);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifErr(void Function(Object error) fn) {
+    // Do nothing.
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function(Object error) fallback) => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> map<R>(R Function(T value) fn) => Ok(fn(value));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> flatMap<R>(Result<R> Function(T value) fn) => fn(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<T> mapErr(Object Function(Object error) fn) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -123,6 +261,60 @@ final class Ok<T> extends Result<T> with _EqualityMixin<T> {
 final class Err<T> extends Result<T> with _EqualityMixin<T> {
   final Object value;
   const Err(this.value) : super._();
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isOk => false;
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool get isErr => true;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<T> get ok {
+    throw Panic.message('Cannot get [ok] from Err.');
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<T> get err => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifOk(void Function(T value) fn) {
+    // Do nothing.
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  void ifErr(void Function(Object error) fn) {
+    fn(value);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => throw value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => fallback;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function(Object error) fallback) => fallback(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> map<R>(R Function(T value) fn) => Err(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> flatMap<R>(Result<R> Function(T value) fn) => Err(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<T> mapErr(Object Function(Object error) fn) => Err(fn(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -166,65 +358,5 @@ mixin _EqualityMixin<T> on Result<T> {
       (e) => e.hashCode,
       (e) => e.hashCode,
     );
-  }
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-extension ResultExtension<T> on Result<T> {
-  @pragma('vm:prefer-inline')
-  bool get isOk {
-    return this is Ok<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  bool get isErr {
-    return this is Err<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  Ok<T> get ok {
-    assert(isOk, 'This is not a Success: $this');
-    return this as Ok<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  Err<T> get err {
-    assert(isErr, 'This is not a Failure: $this');
-    return this as Err<T>;
-  }
-
-  @pragma('vm:prefer-inline')
-  T unwrap() {
-    return ok.value;
-  }
-
-  @pragma('vm:prefer-inline')
-  Err<T> unwrapErr() {
-    return err;
-  }
-
-  @pragma('vm:prefer-inline')
-  T unwrapOr(T defaultValue) {
-    if (isOk) {
-      return ok.value;
-    }
-    return defaultValue;
-  }
-
-  @pragma('vm:prefer-inline')
-  Result<R> map<R>(R Function(T value) fn) {
-    if (isOk) {
-      return Ok(fn(ok.value));
-    }
-    return Err(err.value);
-  }
-
-  @pragma('vm:prefer-inline')
-  Result<R> mapOr<R>(R Function(Option<T> option) fn) {
-    if (isOk) {
-      return Ok(fn(ok.asOption));
-    }
-    return Ok(fn(const None()));
   }
 }

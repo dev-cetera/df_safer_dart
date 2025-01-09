@@ -32,8 +32,10 @@ final class Panic {
 
   const Panic(this.validate);
 
+  Panic.message(String message) : validate = PanicIf(true, message);
+
   @override
   String toString() {
-    return '[Panic]: ${validate.message.isNotEmpty ? validate.message : 'A critical condition was not met!'}';
+    return '[Panic]: ${validate.message.isNotEmpty ? validate.message : 'Critical condition not met!'}';
   }
 }
