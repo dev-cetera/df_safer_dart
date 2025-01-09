@@ -121,7 +121,10 @@ extension OptionExtension<T> on Option<T> {
 
   @pragma('vm:prefer-inline')
   T unwrapOr(T defaultValue) {
-    return fold((value) => value, () => defaultValue);
+    if (isSome) {
+      return some.value;
+    }
+    return defaultValue;
   }
 
   @pragma('vm:prefer-inline')
