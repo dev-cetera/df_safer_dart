@@ -3,7 +3,7 @@
 ## [0.1.1]
 
 - Released @ 1/2025 (UTC)
-- feat: Option constructor  can take null value
+- feat: Option constructor can take null value
 
 ## [0.1.0]
 
