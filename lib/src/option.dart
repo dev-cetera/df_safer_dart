@@ -15,7 +15,15 @@ import 'result.dart';
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 sealed class Option<T> {
-  const Option();
+  const Option._();
+
+  factory Option(T? value) {
+    if (value != null) {
+      return Some(value);
+    } else {
+      return const None();
+    }
+  }
 
   Result<T> get asResult => isSome ? Ok<T>(some.value) : Err(None<T>());
 
@@ -26,7 +34,7 @@ sealed class Option<T> {
 
 final class Some<T> extends Option<T> with _EqualityMixin<T> {
   final T value;
-  const Some(this.value);
+  const Some(this.value) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -44,7 +52,7 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class None<T> extends Option<T> with _EqualityMixin<T> {
-  const None();
+  const None() : super._();
 
   @override
   @pragma('vm:prefer-inline')

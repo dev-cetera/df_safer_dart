@@ -22,7 +22,15 @@ sealed class Result<T> {
   Option<T> get asOption => isOk ? Some(ok.value) : const None();
 
   factory Result(FutureOr<T> Function() fn) {
-    return tryCatch(fn, (e) => e);
+    try {
+      final value = fn();
+      if (value is Future<T>) {
+        return FutureResult(value);
+      }
+      return Ok(value);
+    } catch (e) {
+      return Err(e);
+    }
   }
 
   @pragma('vm:prefer-inline')
@@ -32,22 +40,6 @@ sealed class Result<T> {
     B Function(T value) onOk,
     B Function(Object error) onErr,
   );
-
-  @pragma('vm:prefer-inline')
-  static Result<T> tryCatch<T, E extends Object>(
-    FutureOr<T> Function() fn,
-    E Function(Object e) onError,
-  ) {
-    try {
-      final value = fn();
-      if (value is Future<T>) {
-        return FutureResult(value);
-      }
-      return Ok(value);
-    } catch (e) {
-      return Err(onError(e));
-    }
-  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -113,8 +105,8 @@ final class Ok<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   B fold<B>(
-    B Function(T successValue) onOk,
-    B Function(Object failureValue) onErr,
+    B Function(T value) onOk,
+    B Function(Object error) onErr,
   ) {
     return onOk(value);
   }
@@ -135,8 +127,8 @@ final class Err<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   B fold<B>(
-    B Function(T successValue) onOk,
-    B Function(Object failureValue) onErr,
+    B Function(T value) onOk,
+    B Function(Object error) onErr,
   ) {
     return onErr(value);
   }
@@ -154,16 +146,16 @@ mixin _EqualityMixin<T> on Result<T> {
   @override
   @pragma('vm:prefer-inline')
   B fold<B>(
-    B Function(T successValue) onOk,
-    B Function(Object failureValue) onErr,
+    B Function(T value) onOk,
+    B Function(Object error) onErr,
   );
 
   @override
   @pragma('vm:prefer-inline')
   bool operator ==(Object other) {
     return this.fold(
-      (e) => other is Ok && e == other.value,
-      (e) => other is Err && e == other.value,
+      (e) => other is Ok<T> && e == other.value,
+      (e) => other is Err<T> && e == other.value,
     );
   }
 
@@ -179,7 +171,7 @@ mixin _EqualityMixin<T> on Result<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension TryExtension<T> on Result<T> {
+extension ResultExtension<T> on Result<T> {
   @pragma('vm:prefer-inline')
   bool get isOk {
     return this is Ok<T>;
