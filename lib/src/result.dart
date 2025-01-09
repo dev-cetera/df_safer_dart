@@ -106,83 +106,112 @@ final class FutureResult<T> extends Result<T> {
 
   @override
   bool get isOk {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [isOk]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   bool get isErr {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [isErr]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   Ok<T> get ok {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [ok]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   Err<T> get err {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [err]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   void ifOk(void Function(T value) fn) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [ifOk]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   void ifErr(void Function(Object error) fn) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [ifErr]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   T unwrap() {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [unwrap]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   T unwrapOr(T fallback) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [unwrapOr]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   T unwrapOrElse(T Function(Object error) fallback) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [unwrapOrElse]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   Result<R> map<R>(R Function(T value) fn) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [map]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   Result<R> flatMap<R>(Result<R> Function(T value) fn) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [flatMap]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   Result<T> mapErr(Object Function(Object error) fn) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [mapErr]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [==]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
   int get hashCode {
-    throw UnimplementedError();
+    throw Panic(
+      '[FutureResult] does not support [hashCode]. Use [then] first to get either [Ok] or [Err].',
+    );
   }
 
   @override
+  @pragma('vm:prefer-inline')
   String toString() {
-    throw UnimplementedError();
+    return '${FutureResult<T>}($value)';
   }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Ok<T> extends Result<T> with _EqualityMixin<T> {
+class Ok<T> extends Result<T> with _EqualityMixin<T> {
   final T value;
   const Ok(this.value) : super._();
 
@@ -258,7 +287,7 @@ final class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Err<T> extends Result<T> with _EqualityMixin<T> {
+class Err<T> extends Result<T> with _EqualityMixin<T> {
   final Object value;
   const Err(this.value) : super._();
 
