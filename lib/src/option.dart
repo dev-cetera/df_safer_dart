@@ -131,4 +131,12 @@ extension OptionExtension<T> on Option<T> {
     }
     return const None();
   }
+
+  @pragma('vm:prefer-inline')
+  Option<R> mapOr<R>(R Function(Option<T> option) fn) {
+    if (isSome) {
+      return Some(fn(some));
+    }
+    return Some(fn(const None()));
+  }
 }

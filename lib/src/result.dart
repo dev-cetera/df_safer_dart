@@ -213,10 +213,18 @@ extension ResultExtension<T> on Result<T> {
   }
 
   @pragma('vm:prefer-inline')
-  Result<U> map<U>(U Function(T value) fn) {
+  Result<R> map<R>(R Function(T value) fn) {
     if (isOk) {
       return Ok(fn(ok.value));
     }
     return Err(err.value);
+  }
+
+  @pragma('vm:prefer-inline')
+  Result<R> mapOr<R>(R Function(Option<T> option) fn) {
+    if (isOk) {
+      return Ok(fn(ok.asOption));
+    }
+    return Ok(fn(const None()));
   }
 }

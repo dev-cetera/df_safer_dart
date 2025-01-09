@@ -12,7 +12,7 @@
 
 name: df_safer_dart
 description: A package inspired by Rust and functional programming to bring more structure and clarity to your Dart applications.
-version: 0.1.1
+version: 0.1.2
 repository: https://github.com/dev_cetera/dart_package_template
 funding:
   - https://www.buymeacoffee.com/robmllze
