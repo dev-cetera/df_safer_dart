@@ -8,6 +8,6 @@
 //.title~
 
 export './option.dart';
-export 'panic.dart';
+export './panic.dart';
 export './lazy.dart';
 export './result.dart';
