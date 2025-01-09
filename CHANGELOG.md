@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.2]
+
+- Released @ 1/2025 (UTC)
+- feat: Add mapOr extension
+
 ## [0.1.1]
 
 - Released @ 1/2025 (UTC)
