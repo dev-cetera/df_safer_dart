@@ -3,7 +3,7 @@
 ## [0.1.3]
 
 - Released @ 1/2025 (UTC)
-- fix:  Fixed unwrap() return type
+- fix: Fixed unwrap() return type
 
 ## [0.1.2]
 
