@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.4]
+
+- Released @ 1/2025 (UTC)
+- chore: Optimize Option and Result
+
 ## [0.1.3]
 
 - Released @ 1/2025 (UTC)

@@ -120,7 +120,8 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
