@@ -63,9 +63,9 @@ sealed class Result<T> {
 
   FutureOr<B> fold<B>(B Function(T value) onOk, B Function(Object error) onErr);
 
-  Result<dynamic> and<B>(Result<B> other);
+  Result<dynamic> and<R>(Result<R> other);
 
-  Result<dynamic> or(Result<T> other);
+  Result<dynamic> or<R>(Result<R> other);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -204,14 +204,14 @@ final class FutureResult<T> extends Result<T> {
   }
 
   @override
-  Result<dynamic> and<B>(Result<B> other) {
+  Result<dynamic> and<R>(Result<R> other) {
     throw Panic(
       '[FutureResult] does not support [and]. Use [then] first to get either [Ok] or [Err].',
     );
   }
 
   @override
-  Result<dynamic> or(Result<T> other) {
+  Result<dynamic> or<R>(Result<R> other) {
     throw Panic(
       '[FutureResult] does not support [or]. Use [then] first to get either [Ok] or [Err].',
     );
@@ -295,7 +295,7 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<B>(Result<B> other) {
+  Result<dynamic> and<R>(Result<R> other) {
     if (other.isOk) {
       return Ok((value, other.unwrap()));
     } else {
@@ -305,7 +305,7 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or(Result<T> other) => this;
+  Result<dynamic> or<R>(Result<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -389,7 +389,7 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or(Result<T> other) => other;
+  Result<dynamic> or<R>(Result<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')

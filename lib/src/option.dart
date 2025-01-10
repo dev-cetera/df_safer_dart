@@ -53,13 +53,13 @@ sealed class Option<T> {
 
   Result<T> get asResult;
 
-  B fold<B>(B Function(T value) onSome, B Function() onNone);
+  R fold<R>(R Function(T value) onSome, R Function() onNone);
 
-  Option<(T, B)> and<B>(Option<B> other);
+  Option<(T, R)> and<R>(Option<R> other);
 
-  Option<dynamic> or(Option<T> other);
+  Option<dynamic> or<R>(Option<R> other);
   
-  Option<dynamic> xor(Option<T> other);
+  Option<dynamic> xor<R>(Option<R> other);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -133,11 +133,11 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(B Function(T value) onSome, B Function() onNone) => onSome(value);
+  R fold<R>(R Function(T value) onSome, R Function() onNone) => onSome(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, B)> and<B>(Option<B> other) {
+  Option<(T, R)> and<R>(Option<R> other) {
     if (other.isSome) {
       return Some((value, other.unwrap()));
     } else {
@@ -147,11 +147,11 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or(Option<T> other) => this;
+  Option<dynamic> or<R>(Option<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> xor(Option<T> other) {
+  Option<dynamic> xor<R>(Option<R> other) {
     if (other.isNone) {
       return this;
     } else {
@@ -235,19 +235,19 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(B Function(T value) onSome, B Function() onNone) => onNone();
+  R fold<R>(R Function(T value) onSome, R Function() onNone) => onNone();
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, B)> and<B>(Option<B> other) => const None();
+  Option<(T, R)> and<R>(Option<R> other) => const None();
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or(Option<T> other) => other;
+  Option<dynamic> or<R>(Option<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> xor(Option<T> other) {
+  Option<dynamic> xor<R>(Option<R> other) {
     if (other.isSome) {
       return other;
     } else {
