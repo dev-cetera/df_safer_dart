@@ -56,7 +56,9 @@ sealed class Option<T> {
   B fold<B>(B Function(T value) onSome, B Function() onNone);
 
   Option<(T, B)> and<B>(Option<B> other);
+
   Option<dynamic> or(Option<T> other);
+  
   Option<dynamic> xor(Option<T> other);
 }
 

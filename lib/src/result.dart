@@ -61,10 +61,7 @@ sealed class Result<T> {
 
   Result<T> mapErr(Object Function(Object error) fn);
 
-  FutureOr<B> fold<B>(
-    B Function(T value) onOk,
-    B Function(Object error) onErr,
-  );
+  FutureOr<B> fold<B>(B Function(T value) onOk, B Function(Object error) onErr);
 
   Result<dynamic> and<B>(Result<B> other);
 
