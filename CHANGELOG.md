@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.5]
+
+- Released @ 1/2025 (UTC)
+- feat: Implement and, or and xor
+
 ## [0.1.4]
 
 - Released @ 1/2025 (UTC)
