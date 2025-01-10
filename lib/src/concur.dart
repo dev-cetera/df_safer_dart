@@ -51,6 +51,8 @@ sealed class Concur<T> {
     Future<B> Function(Future<T> value) onAsync,
   );
 
+  Concur<R> map<R>(R Function(T value) fn);
+
   FutureOr<T> get value;
 }
 
@@ -96,6 +98,9 @@ final class Sync<T> extends Concur<T> {
   ) {
     return onSync(value);
   }
+
+  @override
+  Concur<R> map<R>(R Function(T value) fn) => Sync(fn(value));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -140,4 +145,7 @@ final class Async<T> extends Concur<T> {
   ) {
     return onAsync(value);
   }
+
+  @override
+  Concur<R> map<R>(R Function(T value) fn) => Async(value.then(fn));
 }
