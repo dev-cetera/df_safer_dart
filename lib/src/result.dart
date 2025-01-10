@@ -61,7 +61,7 @@ sealed class Result<T> {
 
   Result<T> mapErr(Object Function(Object error) fn);
 
-  FutureOr<B> fold<B>(B Function(T value) onOk, B Function(Object error) onErr);
+  FutureOr<R> fold<R>(R Function(T value) onOk, R Function(Object error) onErr);
 
   Result<dynamic> and<R>(Result<R> other);
 
@@ -75,9 +75,9 @@ final class FutureResult<T> extends Result<T> {
   const FutureResult(this.value) : super._();
 
   @override
-  FutureOr<B> fold<B>(
-    B Function(T value) onOk,
-    B Function(Object error) onErr,
+  FutureOr<R> fold<R>(
+    R Function(T value) onOk,
+    R Function(Object error) onErr,
   ) {
     if (this is Ok<T>) {
       return onOk((this as Ok<T>).value);
@@ -286,9 +286,9 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(
-    B Function(T value) onOk,
-    B Function(Object error) onErr,
+  R fold<R>(
+    R Function(T value) onOk,
+    R Function(Object error) onErr,
   ) {
     return onOk(value);
   }
@@ -319,6 +319,8 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 class Err<T> extends Result<T> with _EqualityMixin<T> {
   final Object value;
   const Err(this.value) : super._();
+
+  Err<B> cast<B>() => Err<B>(err.value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -376,16 +378,16 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(
-    B Function(T value) onOk,
-    B Function(Object error) onErr,
+  R fold<R>(
+    R Function(T value) onOk,
+    R Function(Object error) onErr,
   ) {
     return onErr(value);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<B>(Result<B> other) => err;
+  Result<dynamic> and<R>(Result<R> other) => err;
 
   @override
   @pragma('vm:prefer-inline')
@@ -403,9 +405,9 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 mixin _EqualityMixin<T> on Result<T> {
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(
-    B Function(T value) onOk,
-    B Function(Object error) onErr,
+  R fold<R>(
+    R Function(T value) onOk,
+    R Function(Object error) onErr,
   );
 
   @override
