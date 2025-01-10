@@ -16,13 +16,6 @@ import '../df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ConcurExtension<T> on FutureOr<T> {
-  @pragma('vm:prefer-inline')
-  Concur<T> get concur => Concur(this);
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
 sealed class Concur<T> {
   const Concur._();
 
@@ -52,6 +45,8 @@ sealed class Concur<T> {
   );
 
   Concur<R> map<R>(R Function(T value) fn);
+
+  Concur<R> flatMap<R>(Concur<R> Function(T value) fn);
 
   FutureOr<T> get value;
 }
@@ -100,7 +95,12 @@ final class Sync<T> extends Concur<T> {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Concur<R> map<R>(R Function(T value) fn) => Sync(fn(value));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Concur<R> flatMap<R>(Concur<R> Function(T value) fn) => fn(value);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -139,6 +139,7 @@ final class Async<T> extends Concur<T> {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   FutureOr<B> fold<B>(
     B Function(T value) onSync,
     Future<B> Function(Future<T> value) onAsync,
@@ -147,5 +148,26 @@ final class Async<T> extends Concur<T> {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Concur<R> map<R>(R Function(T value) fn) => Async(value.then(fn));
+
+  @override
+  Concur<R> flatMap<R>(Concur<R> Function(T value) fn) {
+    return Async(
+      value.then((result) {
+        final mapped = fn(result);
+        return mapped.isAsync ? mapped.value : Future.value(mapped.value);
+      }),
+    );
+  }
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+FutureOr<T> flattenConcur<T>(Concur<Concur<T>> src) {
+  if (src.isSync) {
+    return src.sync.value.value;
+  } else {
+    return src.async.value.then((e) => e.value);
+  }
 }
