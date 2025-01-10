@@ -33,9 +33,9 @@ sealed class Option<T> {
 
   None<T> get none;
 
-  void ifSome(void Function(T value) fn);
+  Option<T> ifSome(void Function(T value) fn);
 
-  void ifNone(void Function() fn);
+  Option<T> ifNone(void Function() fn);
 
   T unwrap();
 
@@ -85,18 +85,21 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   None<T> get none {
-    throw Panic('Cannot get [none] from Some.');
+    throw Panic('[Some] Cannot get [none] from Some.');
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifNone(void Function() fn) {
-    // Do nothing.
+  Option<T> ifNone(void Function() fn) {
+    return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifSome(void Function(T value) fn) => fn(value);
+  Option<T> ifSome(void Function(T value) fn) {
+    fn(value);
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -183,17 +186,20 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Some<T> get some {
-    throw Panic('Cannot get [some] from a None.');
+    throw Panic('[None] Cannot get [some] from a None.');
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifNone(void Function() fn) => fn();
+  Option<T> ifNone(void Function() fn) {
+    fn();
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifSome(void Function(T value) fn) {
-    // Do nothing.
+  Option<T> ifSome(void Function(T value) fn) {
+    return this;
   }
 
   @override
@@ -203,7 +209,7 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Panic('Cannot [unwrap] a None.');
+    throw Panic('[None] Cannot [unwrap] a None.');
   }
 
   @override

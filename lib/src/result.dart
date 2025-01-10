@@ -45,9 +45,9 @@ sealed class Result<T> {
 
   Err<T> get err;
 
-  void ifOk(void Function(T value) fn);
+  Result<T> ifOk(void Function(T value) fn);
 
-  void ifErr(void Function(Object error) fn);
+  Result<T> ifErr(void Function(Object error) fn);
 
   T unwrap();
 
@@ -134,14 +134,14 @@ final class FutureResult<T> extends Result<T> {
   }
 
   @override
-  void ifOk(void Function(T value) fn) {
+  Result<T> ifOk(void Function(T value) fn) {
     throw Panic(
       '[FutureResult] does not support [ifOk]. Use [then] first to get either [Ok] or [Err].',
     );
   }
 
   @override
-  void ifErr(void Function(Object error) fn) {
+  Result<T> ifErr(void Function(Object error) fn) {
     throw Panic(
       '[FutureResult] does not support [ifErr]. Use [then] first to get either [Ok] or [Err].',
     );
@@ -245,19 +245,20 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> get err {
-    throw Panic('Cannot get [err] from Ok.');
+    throw Panic('[Ok] Cannot get [err] from Ok.');
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifOk(void Function(T value) fn) {
+  Result<T> ifOk(void Function(T value) fn) {
     fn(value);
+    return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifErr(void Function(Object error) fn) {
-    // Do nothing.
+  Result<T> ifErr(void Function(Object error) fn) {
+    return this;
   }
 
   @override
@@ -333,7 +334,7 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   Ok<T> get ok {
-    throw Panic('Cannot get [ok] from Err.');
+    throw Panic('[Err] Cannot get [ok] from Err.');
   }
 
   @override
@@ -342,14 +343,15 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  void ifOk(void Function(T value) fn) {
-    // Do nothing.
+  Result<T> ifOk(void Function(T value) fn) {
+    return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  void ifErr(void Function(Object error) fn) {
+  Result<T> ifErr(void Function(Object error) fn) {
     fn(value);
+    return this;
   }
 
   @override
