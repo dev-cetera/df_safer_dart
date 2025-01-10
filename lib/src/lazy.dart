@@ -14,6 +14,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../df_safer_dart.dart';
+
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A class that provides lazy initialization for instances of type [T].
@@ -21,7 +23,7 @@ class Lazy<T extends Object> {
   /// Holds the current singleton instance of type [T] or `null` if no
   /// [singleton] instance was created.
   @protected
-  FutureOr<T>? currentInstance;
+  Option<FutureOr<T>> currentInstance = const None();
 
   /// A constructor function that creates instances of type [T].
   final TConstructor<T> _constructor;
@@ -29,14 +31,18 @@ class Lazy<T extends Object> {
   Lazy(this._constructor);
 
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
-  FutureOr<T> get singleton => currentInstance ??= _constructor();
+  @pragma('vm:prefer-inline')
+  FutureOr<T> get singleton =>
+      (currentInstance.isNone ? currentInstance = Some(_constructor()) : currentInstance).unwrap();
 
   /// Returns a new instance of [T] each time, acting as a factory.
+  @pragma('vm:prefer-inline')
   FutureOr<T> get factory => _constructor();
 
   /// Resets the singleton instance, by setting [currentInstance] back to `null`
   /// allowing it to be re-created via [singleton].
-  void resetSingleton() => currentInstance = null;
+  @pragma('vm:prefer-inline')
+  void resetSingleton() => currentInstance = const None();
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
