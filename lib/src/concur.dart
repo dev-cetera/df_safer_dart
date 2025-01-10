@@ -46,7 +46,8 @@ sealed class Concur<T> {
 
   Concur<T> ifAsync(void Function(Future<T> future) fn);
 
-  FutureOr<B> fold<B>(B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync);
+  FutureOr<B> fold<B>(
+      B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync,);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -84,7 +85,8 @@ final class Sync<T> extends Concur<T> {
   Concur<T> ifAsync(void Function(Future<T> future) fn) => this;
 
   @override
-  FutureOr<B> fold<B>(B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync) {
+  FutureOr<B> fold<B>(
+      B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync,) {
     return onSync(value);
   }
 }
@@ -124,7 +126,8 @@ final class Async<T> extends Concur<T> {
   }
 
   @override
-  FutureOr<B> fold<B>(B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync) {
+  FutureOr<B> fold<B>(
+      B Function(T value) onSync, Future<B> Function(Future<T> value) onAsync,) {
     return onAsync(value);
   }
 }

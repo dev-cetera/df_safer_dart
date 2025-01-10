@@ -30,8 +30,10 @@ class Lazy<T extends Object> {
 
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
-  Concur<T> get singleton =>
-      (currentInstance.isNone ? currentInstance = Some(_constructor()) : currentInstance).unwrap();
+  Concur<T> get singleton => (currentInstance.isNone
+          ? currentInstance = Some(_constructor())
+          : currentInstance)
+      .unwrap();
 
   /// Returns a new instance of [T] each time, acting as a factory.
   @pragma('vm:prefer-inline')
