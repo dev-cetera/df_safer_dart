@@ -164,10 +164,12 @@ final class Async<T> extends Concur<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-FutureOr<T> flattenConcur<T>(Concur<Concur<T>> src) {
-  if (src.isSync) {
-    return src.sync.value.value;
-  } else {
-    return src.async.value.then((e) => e.value);
-  }
+Concur<T> flattenConcur<T>(Concur<Concur<T>> src) {
+  return Concur(() {
+    if (src.isSync) {
+      return src.sync.value.value;
+    } else {
+      return src.async.value.then((e) => e.value);
+    }
+  }());
 }
