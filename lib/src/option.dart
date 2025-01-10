@@ -58,7 +58,7 @@ sealed class Option<T> {
   Option<(T, R)> and<R>(Option<R> other);
 
   Option<dynamic> or<R>(Option<R> other);
-  
+
   Option<dynamic> xor<R>(Option<R> other);
 }
 
@@ -124,8 +124,7 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -170,6 +169,8 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
 final class None<T> extends Option<T> with _EqualityMixin<T> {
   const None() : super._();
+
+  None<R> cast<R>() => None<R>();
 
   @override
   @pragma('vm:prefer-inline')

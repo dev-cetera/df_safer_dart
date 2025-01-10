@@ -320,7 +320,7 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
   final Object value;
   const Err(this.value) : super._();
 
-  Err<B> cast<B>() => Err<B>(err.value);
+  Err<R> cast<R>() => Err<R>(err.value);
 
   @override
   @pragma('vm:prefer-inline')
