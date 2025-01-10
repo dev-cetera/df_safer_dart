@@ -51,11 +51,13 @@ sealed class Option<T> {
 
   Option<T> filter(bool Function(T value) test);
 
-  Option<(T, R)> union<R>(Option<R> other); //land, lor, lxor
-
   Result<T> get asResult;
 
   B fold<B>(B Function(T value) onSome, B Function() onNone);
+
+  Option<(T, B)> and<B>(Option<B> other);
+  Option<dynamic> or(Option<T> other);
+  Option<dynamic> xor(Option<T> other);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -120,17 +122,7 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<(T, R)> union<R>(Option<R> other) {
-    if (other is Some<R>) {
-      return Some((value, other.unwrap()));
-    }
-    return const None();
-  }
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -139,6 +131,32 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   B fold<B>(B Function(T value) onSome, B Function() onNone) => onSome(value);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<(T, B)> and<B>(Option<B> other) {
+    if (other.isSome) {
+      return Some((value, other.unwrap()));
+    } else {
+      return const None();
+    }
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<dynamic> or(Option<T> other) => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<dynamic> xor(Option<T> other) {
+    if (other.isNone) {
+      return this;
+    } else {
+      return const None();
+    }
+  }
+
+  None<T> toNone() => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -214,11 +232,25 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, R)> union<R>(Option<R> other) => const None();
+  B fold<B>(B Function(T value) onSome, B Function() onNone) => onNone();
 
   @override
   @pragma('vm:prefer-inline')
-  B fold<B>(B Function(T value) onSome, B Function() onNone) => onNone();
+  Option<(T, B)> and<B>(Option<B> other) => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<dynamic> or(Option<T> other) => other;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<dynamic> xor(Option<T> other) {
+    if (other.isSome) {
+      return other;
+    } else {
+      return const None();
+    }
+  }
 
   @override
   @pragma('vm:prefer-inline')
