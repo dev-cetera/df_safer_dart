@@ -16,14 +16,27 @@ import '../df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Concur<T> {
+sealed class Concur<T extends Object> {
   const Concur._();
 
-  factory Concur(FutureOr<T> value) {
-    if (value is Future<T>) {
-      return Async(value);
-    } else {
-      return Sync(value);
+  static Concur<T> tryCatch<T extends Object>(
+    FutureOr<T> Function() functionCanThrow,
+  ) {
+    try {
+      final test = functionCanThrow();
+      if (test is! Future<T>) {
+        return Sync(Ok(test));
+      } else {
+        return Async(() async {
+          try {
+            return Ok<T>(await test);
+          } catch (e) {
+            return Err<T>(e);
+          }
+        }());
+      }
+    } catch (e) {
+      return Sync(Err<T>(e));
     }
   }
 
@@ -31,33 +44,50 @@ sealed class Concur<T> {
 
   bool get isAsync;
 
-  Sync<T> get sync;
+  Result<Sync<T>> get sync;
 
-  Async<T> get async;
+  Result<Async<T>> get async;
 
-  Concur<T> ifSync(void Function(T value) fn);
+  @pragma('vm:prefer-inline')
+  Sync<T> uwSync() => sync.unwrap();
 
-  Concur<T> ifAsync(void Function(Future<T> future) fn);
+  @pragma('vm:prefer-inline')
+  Async<T> uwAsync() => async.unwrap();
 
-  FutureOr<B> fold<B>(
-    B Function(T value) onSync,
-    Future<B> Function(Future<T> value) onAsync,
+  @pragma('vm:prefer-inline')
+  T uwSyncValue() => uwSync().uwValue();
+
+  @pragma('vm:prefer-inline')
+  Future<T> uwAsyncValue() => uwAsync().uwValue();
+
+  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn);
+
+  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn);
+
+  Concur<R> map<R extends Object>(Result<R> Function(Result<T> value) fn);
+
+  Option<Concur<R>> fold<R extends Object>(
+    Option<Concur<R>> Function(Result<T> value) onSync,
+    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   );
-
-  Concur<R> map<R>(R Function(T value) fn);
-
-  Concur<R> flatMap<R>(Concur<R> Function(T value) fn);
-
-  FutureOr<T> get value;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Sync<T> extends Concur<T> {
-  @override
-  final T value;
+final class Sync<T extends Object> extends Concur<T> {
+  final Result<T> result;
 
-  const Sync(this.value) : super._();
+  @pragma('vm:prefer-inline')
+  Ok<T> get ok => result.ok;
+
+  @pragma('vm:prefer-inline')
+  Err<T> get err => result.err;
+
+  @pragma('vm:prefer-inline')
+  T uwValue() => ok.unwrap();
+
+  @pragma('vm:prefer-inline')
+  const Sync(this.result) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -69,47 +99,52 @@ final class Sync<T> extends Concur<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<T> get sync => this;
+  Result<Sync<T>> get sync => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> get async => throw Panic('[Sync] Cannot get [async] from Sync.');
+  Result<Async<T>> get async => const Err('Cannot get async from Sync.');
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<T> ifSync(void Function(T value) fn) {
-    fn(value);
-    return this;
+  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn) {
+    return fn(result).map((e) => this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<T> ifAsync(void Function(Future<T> future) fn) => this;
+  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) => Ok(this);
 
   @override
-  FutureOr<B> fold<B>(
-    B Function(T value) onSync,
-    Future<B> Function(Future<T> value) onAsync,
+  Option<Concur<R>> fold<R extends Object>(
+    Option<Concur<R>> Function(Result<T> value) onSync,
+    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   ) {
-    return onSync(value);
+    return onSync(result);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<R> map<R>(R Function(T value) fn) => Sync(fn(value));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Concur<R> flatMap<R>(Concur<R> Function(T value) fn) => fn(value);
+  Sync<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
+    return Sync(fn(result));
+  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Async<T> extends Concur<T> {
-  @override
-  final Future<T> value;
+final class Async<T extends Object> extends Concur<T> {
+  final Future<Result<T>> result;
 
-  const Async(this.value) : super._();
+  @pragma('vm:prefer-inline')
+  Future<Ok<T>> get ok => result.then((e) => e.ok);
+
+  @pragma('vm:prefer-inline')
+  Future<Err<T>> get err => result.then((e) => e.err);
+
+  @pragma('vm:prefer-inline')
+  Future<T> uwValue() => ok.then((e) => e.unwrap());
+
+  const Async(this.result) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -121,55 +156,41 @@ final class Async<T> extends Concur<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<T> get sync => throw Panic('[Async] Cannot get [sync] from Async.');
+  Result<Sync<T>> get sync => const Err('Cannot get sync from Async.');
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> get async => this;
+  Result<Async<T>> get async => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<T> ifSync(void Function(T value) fn) => this;
+  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<T> ifAsync(void Function(Future<T> future) fn) {
-    fn(value);
-    return this;
+  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) {
+    return fn(result).map((e) => this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  FutureOr<B> fold<B>(
-    B Function(T value) onSync,
-    Future<B> Function(Future<T> value) onAsync,
+  Option<Concur<R>> fold<R extends Object>(
+    Option<Concur<R>> Function(Result<T> value) onSync,
+    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   ) {
-    return onAsync(value);
+    return onAsync(result);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Concur<R> map<R>(R Function(T value) fn) => Async(value.then(fn));
-
   @override
-  Concur<R> flatMap<R>(Concur<R> Function(T value) fn) {
-    return Async(
-      value.then((result) {
-        final mapped = fn(result);
-        return mapped.isAsync ? mapped.value : Future.value(mapped.value);
-      }),
-    );
+  Async<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
+    return Async(result.then((e) => fn(e)));
   }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-Concur<T> flattenConcur<T>(Concur<Concur<T>> src) {
-  return Concur(() {
-    if (src.isSync) {
-      return src.sync.value.value;
-    } else {
-      return src.async.value.then((e) => e.value);
-    }
-  }());
-}
+// Result<Concur<T>> flattenConcur<T extends Object>(Concur<Concur<T>> src) {
+//   return Concur.create(() => src.value.flatMap((inner) => inner.value));
+// }

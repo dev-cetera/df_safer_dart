@@ -7,7 +7,9 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+export './safe_completer.dart';
 export './concur.dart';
+export 'safe_seq.dart';
 export './option.dart';
 export './panic.dart';
 export './lazy.dart';

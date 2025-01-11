@@ -10,32 +10,15 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'dart:async';
-
 import 'option.dart';
 import 'panic.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Result<T> {
+sealed class Result<T extends Object> {
   const Result._();
 
   Option<T> get asOption => isOk ? Some(ok.value) : const None();
-
-  factory Result(FutureOr<T> Function() fn) {
-    try {
-      final value = fn();
-      if (value is Future<T>) {
-        return FutureResult(value);
-      }
-      return Ok(value);
-    } catch (e) {
-      return Err(e);
-    }
-  }
-
-  @pragma('vm:prefer-inline')
-  FutureOr<Result<T>> then() => this;
 
   bool get isOk;
 
@@ -55,180 +38,31 @@ sealed class Result<T> {
 
   T unwrapOrElse(T Function(Object error) fallback);
 
-  Result<R> map<R>(R Function(T value) fn);
+  Result<R> map<R extends Object>(R Function(T value) fn);
 
-  Result<R> flatMap<R>(Result<R> Function(T value) fn);
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn);
 
   Result<T> mapErr(Object Function(Object error) fn);
 
-  FutureOr<R> fold<R>(R Function(T value) onOk, R Function(Object error) onErr);
+  Result<R> fold<R extends Object>(
+    Result<R> Function(T value) onOk,
+    Result<R> Function(Object error) onErr,
+  );
 
-  Result<dynamic> and<R>(Result<R> other);
+  Result<dynamic> and<R extends Object>(Result<R> other);
 
-  Result<dynamic> or<R>(Result<R> other);
+  Result<dynamic> or<R extends Object>(Result<R> other);
+
+  Result<Result<R>> cast<R extends Object>();
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class FutureResult<T> extends Result<T> {
-  final FutureOr<dynamic> value;
-  const FutureResult(this.value) : super._();
-
-  @override
-  FutureOr<R> fold<R>(
-    R Function(T value) onOk,
-    R Function(Object error) onErr,
-  ) {
-    if (this is Ok<T>) {
-      return onOk((this as Ok<T>).value);
-    } else if (this is Err<T>) {
-      return onErr((this as Err<T>).value);
-    }
-    return () async {
-      return (await then()).fold(onOk, onErr);
-    }();
-  }
-
-  @override
-  FutureOr<Result<T>> then() {
-    if (value is Future<T>) {
-      final value1 = value as Future<T>;
-      return () async {
-        try {
-          return Ok<T>(await value1);
-        } catch (e) {
-          return Err<T>(e);
-        }
-      }();
-    }
-
-    return this;
-  }
-
-  @override
-  bool get isOk {
-    throw Panic(
-      '[FutureResult] does not support [isOk]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  bool get isErr {
-    throw Panic(
-      '[FutureResult] does not support [isErr]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Ok<T> get ok {
-    throw Panic(
-      '[FutureResult] does not support [ok]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Err<T> get err {
-    throw Panic(
-      '[FutureResult] does not support [err]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<T> ifOk(void Function(T value) fn) {
-    throw Panic(
-      '[FutureResult] does not support [ifOk]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<T> ifErr(void Function(Object error) fn) {
-    throw Panic(
-      '[FutureResult] does not support [ifErr]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  T unwrap() {
-    throw Panic(
-      '[FutureResult] does not support [unwrap]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  T unwrapOr(T fallback) {
-    throw Panic(
-      '[FutureResult] does not support [unwrapOr]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  T unwrapOrElse(T Function(Object error) fallback) {
-    throw Panic(
-      '[FutureResult] does not support [unwrapOrElse]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<R> map<R>(R Function(T value) fn) {
-    throw Panic(
-      '[FutureResult] does not support [map]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<R> flatMap<R>(Result<R> Function(T value) fn) {
-    throw Panic(
-      '[FutureResult] does not support [flatMap]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<T> mapErr(Object Function(Object error) fn) {
-    throw Panic(
-      '[FutureResult] does not support [mapErr]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    throw Panic(
-      '[FutureResult] does not support [==]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  int get hashCode {
-    throw Panic(
-      '[FutureResult] does not support [hashCode]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<dynamic> and<R>(Result<R> other) {
-    throw Panic(
-      '[FutureResult] does not support [and]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  Result<dynamic> or<R>(Result<R> other) {
-    throw Panic(
-      '[FutureResult] does not support [or]. Use [then] first to get either [Ok] or [Err].',
-    );
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  String toString() {
-    return '${FutureResult<T>}($value)';
-  }
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-class Ok<T> extends Result<T> with _EqualityMixin<T> {
+class Ok<T extends Object> extends Result<T> {
   final T value;
   const Ok(this.value) : super._();
+
+  factory Ok.fn(T Function() fn) => Ok(fn());
 
   @override
   @pragma('vm:prefer-inline')
@@ -275,11 +109,11 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R>(R Function(T value) fn) => Ok(fn(value));
+  Result<R> map<R extends Object>(R Function(T value) fn) => Ok(fn(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> flatMap<R>(Result<R> Function(T value) fn) => fn(value);
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn) => fn(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -287,16 +121,16 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R fold<R>(
-    R Function(T value) onOk,
-    R Function(Object error) onErr,
+  Result<R> fold<R extends Object>(
+    Result<R> Function(T value) onOk,
+    Result<R> Function(Object error) onErr,
   ) {
     return onOk(value);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R>(Result<R> other) {
+  Result<dynamic> and<R extends Object>(Result<R> other) {
     if (other.isOk) {
       return Ok((value, other.unwrap()));
     } else {
@@ -306,22 +140,32 @@ class Ok<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or<R>(Result<R> other) => this;
+  Result<dynamic> or<R extends Object>(Result<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
   String toString() {
     return '${Ok<T>}($value)';
   }
+
+  @override
+  Result<Result<R>> cast<R extends Object>() {
+    final value = unwrap();
+    if (value is R) {
+      return Ok(Ok(value));
+    } else {
+      return Err('Cannot cast ${value.runtimeType} to $R');
+    }
+  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class Err<T> extends Result<T> with _EqualityMixin<T> {
+class Err<T extends Object> extends Result<T> {
   final Object value;
   const Err(this.value) : super._();
 
-  Err<R> cast<R>() => Err<R>(err.value);
+  factory Err.fn(T Function() fn) => Err(fn());
 
   @override
   @pragma('vm:prefer-inline')
@@ -368,11 +212,11 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R>(R Function(T value) fn) => Err(value);
+  Result<R> map<R extends Object>(R Function(T value) fn) => Err(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> flatMap<R>(Result<R> Function(T value) fn) => Err(value);
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn) => Err(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -380,53 +224,29 @@ class Err<T> extends Result<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R fold<R>(
-    R Function(T value) onOk,
-    R Function(Object error) onErr,
+  Result<R> fold<R extends Object>(
+    Result<R> Function(T value) onOk,
+    Result<R> Function(Object error) onErr,
   ) {
     return onErr(value);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R>(Result<R> other) => err;
+  Result<dynamic> and<R extends Object>(Result<R> other) => err;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or<R>(Result<R> other) => other;
+  Result<dynamic> or<R extends Object>(Result<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
   String toString() {
     return '${Err<T>}($value)';
   }
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-mixin _EqualityMixin<T> on Result<T> {
-  @override
-  @pragma('vm:prefer-inline')
-  R fold<R>(
-    R Function(T value) onOk,
-    R Function(Object error) onErr,
-  );
 
   @override
   @pragma('vm:prefer-inline')
-  bool operator ==(Object other) {
-    return this.fold(
-      (e) => other is Ok<T> && e == other.value,
-      (e) => other is Err<T> && e == other.value,
-    );
-  }
-
   @override
-  @pragma('vm:prefer-inline')
-  int get hashCode {
-    return fold(
-      (e) => e.hashCode,
-      (e) => e.hashCode,
-    );
-  }
+  Result<Result<R>> cast<R extends Object>() => Err(err.value);
 }

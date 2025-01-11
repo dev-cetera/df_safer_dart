@@ -10,14 +10,15 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import '../df_safer_dart.dart';
+import 'panic.dart';
+import 'result.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Option<T> {
+sealed class Option<T extends Object> {
   const Option._();
 
-  factory Option(T? value) {
+  factory Option.fromNullable(T? value) {
     if (value != null) {
       return Some(value);
     } else {
@@ -43,29 +44,35 @@ sealed class Option<T> {
 
   T unwrapOrElse(T Function() fallback);
 
-  Option<R> map<R>(R Function(T value) fn);
+  Option<R> map<R extends Object>(R Function(T value) fn);
 
-  Some<R> mapToSome<R>(R Function(Option<T> option) fn);
+  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn);
 
-  Option<R> flatMap<R>(Option<R> Function(T value) fn);
+  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn);
 
   Option<T> filter(bool Function(T value) test);
 
   Result<T> get asResult;
 
-  R fold<R>(R Function(T value) onSome, R Function() onNone);
+  Option<R> fold<R extends Object>(
+    Option<R> Function(T value) onSome,
+    Option<R> Function() onNone,
+  );
 
-  Option<(T, R)> and<R>(Option<R> other);
+  Option<(T, R)> and<R extends Object>(Option<R> other);
 
-  Option<dynamic> or<R>(Option<R> other);
+  Option<dynamic> or<R extends Object>(Option<R> other);
 
-  Option<dynamic> xor<R>(Option<R> other);
+  Option<dynamic> xor<R extends Object>(Option<R> other);
+
+  Result<Option<R>> cast<R extends Object>();
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Some<T> extends Option<T> with _EqualityMixin<T> {
+final class Some<T extends Object> extends Option<T> {
   final T value;
+
   const Some(this.value) : super._();
 
   @override
@@ -115,20 +122,19 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R>(R Function(T value) fn) => Some(fn(value));
+  Option<R> map<R extends Object>(R Function(T value) fn) => Some(fn(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> mapToSome<R>(R Function(Option<T> option) fn) => Some(fn(some));
+  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn) => Some(fn(some));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> flatMap<R>(Option<R> Function(T value) fn) => fn(value);
+  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn) => fn(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -136,11 +142,16 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R fold<R>(R Function(T value) onSome, R Function() onNone) => onSome(value);
+  Option<R> fold<R extends Object>(
+    Option<R> Function(T value) onSome,
+    Option<R> Function() onNone,
+  ) {
+    return onSome(value);
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, R)> and<R>(Option<R> other) {
+  Option<(T, R)> and<R extends Object>(Option<R> other) {
     if (other.isSome) {
       return Some((value, other.unwrap()));
     } else {
@@ -150,11 +161,11 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or<R>(Option<R> other) => this;
+  Option<dynamic> or<R extends Object>(Option<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> xor<R>(Option<R> other) {
+  Option<dynamic> xor<R extends Object>(Option<R> other) {
     if (other.isNone) {
       return this;
     } else {
@@ -167,14 +178,22 @@ final class Some<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   String toString() => '${Some<T>}($value)';
+
+  @override
+  Result<Option<R>> cast<R extends Object>() {
+    final value = unwrap();
+    if (value is R) {
+      return Ok(Option.fromNullable(value));
+    } else {
+      return Err('Cannot cast ${value.runtimeType} to $R');
+    }
+  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class None<T> extends Option<T> with _EqualityMixin<T> {
+final class None<T extends Object> extends Option<T> {
   const None() : super._();
-
-  None<R> cast<R>() => None<R>();
 
   @override
   @pragma('vm:prefer-inline')
@@ -223,15 +242,15 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R>(R Function(T value) fn) => None<R>();
+  Option<R> map<R extends Object>(R Function(T value) fn) => None<R>();
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> mapToSome<R>(R Function(Option<T> option) fn) => Some(fn(none));
+  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn) => Some(fn(none));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> flatMap<R>(Option<R> Function(T value) fn) => None<R>();
+  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn) => None<R>();
 
   @override
   @pragma('vm:prefer-inline')
@@ -243,19 +262,24 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R fold<R>(R Function(T value) onSome, R Function() onNone) => onNone();
+  Option<R> fold<R extends Object>(
+    Option<R> Function(T value) onSome,
+    Option<R> Function() onNone,
+  ) {
+    return onNone();
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, R)> and<R>(Option<R> other) => const None();
+  Option<(T, R)> and<R extends Object>(Option<R> other) => const None();
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or<R>(Option<R> other) => other;
+  Option<dynamic> or<R extends Object>(Option<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> xor<R>(Option<R> other) {
+  Option<dynamic> xor<R extends Object>(Option<R> other) {
     if (other.isSome) {
       return other;
     } else {
@@ -266,26 +290,8 @@ final class None<T> extends Option<T> with _EqualityMixin<T> {
   @override
   @pragma('vm:prefer-inline')
   String toString() => '${None<T>}()';
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-mixin _EqualityMixin<T> on Option<T> {
-  @override
-  @pragma('vm:prefer-inline')
-  bool operator ==(Object other) {
-    return fold(
-      (e) => other is Some && e == other.value,
-      () => other is None && none == other.none,
-    );
-  }
 
   @override
   @pragma('vm:prefer-inline')
-  int get hashCode {
-    return fold(
-      (e) => e.hashCode,
-      () => null.hashCode,
-    );
-  }
+  Result<Option<R>> cast<R extends Object>() => const Ok(None());
 }
