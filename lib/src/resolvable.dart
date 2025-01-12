@@ -21,26 +21,11 @@ import '../df_safer_dart.dart';
 sealed class Resolvable<T extends Object> {
   const Resolvable._();
 
-  static Resolvable<T> wrap<T extends Object>(
-    FutureOr<T> Function() functionCanThrow,
-  ) {
-    try {
-      final test = functionCanThrow();
-      if (test is! Future<T>) {
-        return Sync(Ok(test));
-      } else {
-        return Async(() async {
-          try {
-            return Ok<T>(await test);
-          } on Err catch (e) {
-            return Err<T>(e.value);
-          } catch (e) {
-            return Err<T>(e);
-          }
-        }());
-      }
-    } catch (e) {
-      return Sync(Err<T>(e));
+  factory Resolvable.resolve(FutureOr<T> Function() functionCanThrow) {
+    if (functionCanThrow is Future<T> Function()) {
+      return Async.resolve(functionCanThrow);
+    } else {
+      return Sync.resolve(functionCanThrow as T Function());
     }
   }
 
@@ -93,6 +78,14 @@ final class Sync<T extends Object> extends Resolvable<T> {
   final Result<T> value;
 
   const Sync(this.value) : super._();
+
+  factory Sync.resolve(T Function() functionCanThrow) {
+    try {
+      return Sync(Ok(functionCanThrow()));
+    } catch (e) {
+      return Sync(Err<T>(e));
+    }
+  }
 
   @protected
   @pragma('vm:prefer-inline')
@@ -161,6 +154,18 @@ final class Async<T extends Object> extends Resolvable<T> {
   final Future<Result<T>> value;
 
   const Async(this.value) : super._();
+
+  factory Async.resolve(Future<T> Function() functionCanThrow) {
+    return Async(() async {
+      try {
+        return Ok<T>(await functionCanThrow());
+      } on Err catch (e) {
+        return Err<T>(e.value);
+      } catch (e) {
+        return Err<T>(e);
+      }
+    }());
+  }
 
   @visibleForTesting
   @pragma('vm:prefer-inline')

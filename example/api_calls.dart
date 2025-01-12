@@ -1,4 +1,4 @@
-// Example: Using Concur and Result for safer error handling without try-catch
+// Example: Using Resolvable and Result for safer error handling without try-catch
 // blocks. Explicit error handling is enforced, providing compile-time safety.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
@@ -18,15 +18,18 @@ void main() async {
 }
 
 Async<String> fetchIpAddress() {
-  // Wrap a potentially throwing function with Concur.wrap. This contains
-  // all errors. The idea is to never use try-catch blocks and instead
-  // use explicit error handling by placing potentiall throwing functions
-  // in Concur.wrap.
-  return Resolvable.wrap(
+  // Wrap a potentially throwing function with Async. This contains all errors.
+  // The idea is to never use try-catch blocks and instead use explicit
+  // functional error handling by placing potentiall throwing functions
+  // in Async.
+  return Async.resolve(
+    // Always await all asynchronous operations inside Async to ensure that
+    // exceptions are properly caught and wrapped in a Result. This is one
+    // of very few things you must remember for Resolvable.
     () async {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
       // Throw an Err if the status code is not 200. Any other exceptions within
-      // Concur.wrap will be caught and wrapped in an Err.
+      // Resolvable.wrap will be caught and wrapped in an Err.
       if (response.statusCode != 200) {
         throw const Err('Failed to fetch IP address');
       }
@@ -34,9 +37,5 @@ Async<String> fetchIpAddress() {
       final ip = data['ipeee'] as String;
       return ip;
     },
-    // This will deliberately trrigger a linter warning, to make you aware
-    // that unwrap() is a potentially throwing function and that you need
-    // to only use it when you're certain it won't throw. You can disable lints
-    // for this line with "// ignore: invalid_use_of_visible_for_testing_member"
-  ).async.unwrap();
+  );
 }

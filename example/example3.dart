@@ -1,4 +1,4 @@
-// Example: Using Concur to deal with either a sync or async value.
+// Example: Using Resolvable to deal with either a sync or async value.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 
@@ -7,7 +7,7 @@ void main() async {
   final string1 = stringMapper(string);
   print(string1.unwrapSyncValue());
 
-  final futureString = Resolvable.wrap(
+  final futureString = Resolvable.resolve(
     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
   );
   final futureString1 = stringMapper(futureString);

@@ -3,7 +3,7 @@
 ## [0.2.0]
 
 - Released @ 1/2025 (UTC)
-- feat: New Concur class to seamlessly manage Future,<T> T and FutureOr<T>
+- feat: New Resolvable class to seamlessly manage Future,<T> T and FutureOr<T>
 
 ## [0.1.5]
 
