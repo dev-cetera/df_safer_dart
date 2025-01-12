@@ -188,9 +188,3 @@ final class Async<T extends Object> extends Concur<T> {
     return Async(result.then((e) => fn(e)));
   }
 }
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-// Result<Concur<T>> flattenConcur<T extends Object>(Concur<Concur<T>> src) {
-//   return Concur.create(() => src.value.flatMap((inner) => inner.value));
-// }
