@@ -10,8 +10,8 @@ void main() async {
     safeCompleter1.complete(42);
   });
 
-  // Process the value from safeCompleter1.concur.
-  final concur1 = safeCompleter1.concur;
+  // Process the value from safeCompleter1.resolvable.
+  final concur1 = safeCompleter1.resolvable;
   if (concur1.isSync) {
     print('It is sync: ${concur1.unwrapSyncValue()}');
   } else {
@@ -21,8 +21,8 @@ void main() async {
   final safeCompleter2 = SafeCompleter<int>();
   safeCompleter2.complete(43);
 
-  // Process the value from safeCompleter2.concur.
-  final concur2 = safeCompleter2.concur;
+  // Process the value from safeCompleter2.resolvable.
+  final concur2 = safeCompleter2.resolvable;
   if (concur2.isSync) {
     print('It is sync: ${concur2.unwrapSyncValue()}');
   } else {

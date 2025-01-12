@@ -7,13 +7,13 @@ void main() async {
   final string1 = stringMapper(string);
   print(string1.unwrapSyncValue());
 
-  final futureString = Concur.wrap(
+  final futureString = Resolvable.wrap(
     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
   );
   final futureString1 = stringMapper(futureString);
   print(await futureString1.unwrapAsyncValue());
 }
 
-Concur<String> stringMapper(Concur<String> input) {
+Resolvable<String> stringMapper(Resolvable<String> input) {
   return input.map((e) => e.map((e) => e.toUpperCase()));
 }

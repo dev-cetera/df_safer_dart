@@ -18,10 +18,10 @@ import '../df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Concur<T extends Object> {
-  const Concur._();
+sealed class Resolvable<T extends Object> {
+  const Resolvable._();
 
-  static Concur<T> wrap<T extends Object>(
+  static Resolvable<T> wrap<T extends Object>(
     FutureOr<T> Function() functionCanThrow,
   ) {
     try {
@@ -72,15 +72,15 @@ sealed class Concur<T extends Object> {
   @pragma('vm:prefer-inline')
   Future<T> unwrapAsyncValue() => unwrapAsync().unwrapValue();
 
-  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn);
+  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn);
 
-  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn);
+  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn);
 
-  Concur<R> map<R extends Object>(Result<R> Function(Result<T> value) fn);
+  Resolvable<R> map<R extends Object>(Result<R> Function(Result<T> value) fn);
 
-  Option<Concur<R>> fold<R extends Object>(
-    Option<Concur<R>> Function(Result<T> value) onSync,
-    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
+  Option<Resolvable<R>> fold<R extends Object>(
+    Option<Resolvable<R>> Function(Result<T> value) onSync,
+    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
   );
 
   Async<T> toAsync();
@@ -88,7 +88,7 @@ sealed class Concur<T extends Object> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Sync<T extends Object> extends Concur<T> {
+final class Sync<T extends Object> extends Resolvable<T> {
   @visibleForTesting
   final Result<T> value;
 
@@ -127,18 +127,18 @@ final class Sync<T extends Object> extends Concur<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn) {
+  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn) {
     return fn(value).map((e) => this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) => Ok(this);
+  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) => Ok(this);
 
   @override
-  Option<Concur<R>> fold<R extends Object>(
-    Option<Concur<R>> Function(Result<T> value) onSync,
-    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
+  Option<Resolvable<R>> fold<R extends Object>(
+    Option<Resolvable<R>> Function(Result<T> value) onSync,
+    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
   ) {
     return onSync(value);
   }
@@ -156,7 +156,7 @@ final class Sync<T extends Object> extends Concur<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Async<T extends Object> extends Concur<T> {
+final class Async<T extends Object> extends Resolvable<T> {
   @visibleForTesting
   final Future<Result<T>> value;
 
@@ -195,19 +195,19 @@ final class Async<T extends Object> extends Concur<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn) => Ok(this);
+  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) {
+  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) {
     return fn(value).map((e) => this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<Concur<R>> fold<R extends Object>(
-    Option<Concur<R>> Function(Result<T> value) onSync,
-    Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
+  Option<Resolvable<R>> fold<R extends Object>(
+    Option<Resolvable<R>> Function(Result<T> value) onSync,
+    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
   ) {
     return onAsync(value);
   }

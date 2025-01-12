@@ -12,7 +12,7 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import 'concur.dart';
+import 'resolvable.dart';
 import 'option.dart';
 import 'result.dart';
 
@@ -36,8 +36,8 @@ class SafeCompleter<T extends Object> {
   //
   //
 
-  /// Completes the operation with the provided [concur].
-  Concur<T> completeC(Concur<T> value) {
+  /// Completes the operation with the provided [resolvable].
+  Resolvable<T> completeC(Resolvable<T> value) {
     if (isCompleted) return const Sync(Err('[SafeCompleter] Already completed!'));
     if (value.isAsync) {
       return value.async.unwrap().map((e) {
@@ -66,12 +66,12 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Concur<T> complete(FutureOr<T> value) => completeC(Concur.wrap(() => value));
+  Resolvable<T> complete(FutureOr<T> value) => completeC(Resolvable.wrap(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
-  Concur<T> get concur {
-    return Concur.wrap(
+  Resolvable<T> get resolvable {
+    return Resolvable.wrap(
       () => _value.fold((e) => Some(e), () => Some(_completer.future)).some.unwrap(),
     );
   }

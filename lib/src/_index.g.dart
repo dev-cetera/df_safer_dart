@@ -8,7 +8,7 @@
 //.title~
 
 export './safe_completer.dart';
-export './concur.dart';
+export 'resolvable.dart';
 export './option.dart';
 export './lazy.dart';
 export './result.dart';
