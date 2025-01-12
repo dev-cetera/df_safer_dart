@@ -10,6 +10,5 @@
 export './safe_completer.dart';
 export './concur.dart';
 export './option.dart';
-export './panic.dart';
 export './lazy.dart';
 export './result.dart';

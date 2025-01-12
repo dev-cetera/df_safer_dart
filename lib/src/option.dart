@@ -10,7 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'panic.dart';
+import 'package:meta/meta.dart';
+
 import 'result.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -30,25 +31,24 @@ sealed class Option<T extends Object> {
 
   bool get isNone;
 
+  @visibleForTesting
   Some<T> get some;
 
+  @visibleForTesting
   None<T> get none;
 
   Option<T> ifSome(void Function(T value) fn);
 
   Option<T> ifNone(void Function() fn);
 
+  @visibleForTesting
   T unwrap();
 
   T unwrapOr(T fallback);
 
-  T unwrapOrElse(T Function() fallback);
+  T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
 
   Option<R> map<R extends Object>(R Function(T value) fn);
-
-  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn);
-
-  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn);
 
   Option<T> filter(bool Function(T value) test);
 
@@ -62,8 +62,6 @@ sealed class Option<T extends Object> {
   Option<(T, R)> and<R extends Object>(Option<R> other);
 
   Option<dynamic> or<R extends Object>(Option<R> other);
-
-  Option<dynamic> xor<R extends Object>(Option<R> other);
 
   Result<Option<R>> cast<R extends Object>();
 }
@@ -85,21 +83,16 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<T> get some {
-    return this;
-  }
+  Some<T> get some => this;
+
+  @protected
+  @override
+  @pragma('vm:prefer-inline')
+  None<T> get none => throw const Err('Cannot get none from Some.');
 
   @override
   @pragma('vm:prefer-inline')
-  None<T> get none {
-    throw Panic('[Some] Cannot get [none] from Some.');
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<T> ifNone(void Function() fn) {
-    return this;
-  }
+  Option<T> ifNone(void Function() fn) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -118,19 +111,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() fallback) => value;
-
-  @override
-  @pragma('vm:prefer-inline')
   Option<R> map<R extends Object>(R Function(T value) fn) => Some(fn(value));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn) => Some(fn(some));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn) => fn(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -163,16 +144,7 @@ final class Some<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   Option<dynamic> or<R extends Object>(Option<R> other) => this;
 
-  @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> xor<R extends Object>(Option<R> other) {
-    if (other.isNone) {
-      return this;
-    } else {
-      return const None();
-    }
-  }
-
   None<T> toNone() => const None();
 
   @override
@@ -203,11 +175,10 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   bool get isNone => true;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Some<T> get some {
-    throw Panic('[None] Cannot get [some] from a None.');
-  }
+  Some<T> get some => throw const Err('Cannot get some from a None.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -218,19 +189,16 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifSome(void Function(T value) fn) {
-    return this;
-  }
+  Option<T> ifSome(void Function(T value) fn) => this;
 
   @override
   @pragma('vm:prefer-inline')
   None<T> get none => this;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() {
-    throw Panic('[None] Cannot [unwrap] a None.');
-  }
+  T unwrap() => throw const Err('Cannot unwrap a None.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -238,19 +206,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() fallback) => fallback();
-
-  @override
-  @pragma('vm:prefer-inline')
   Option<R> map<R extends Object>(R Function(T value) fn) => None<R>();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<R> mapToSome<R extends Object>(R Function(Option<T> option) fn) => Some(fn(none));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<R> flatMap<R extends Object>(Option<R> Function(T value) fn) => None<R>();
 
   @override
   @pragma('vm:prefer-inline')
@@ -276,16 +232,6 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Option<dynamic> or<R extends Object>(Option<R> other) => other;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<dynamic> xor<R extends Object>(Option<R> other) {
-    if (other.isSome) {
-      return other;
-    } else {
-      return const None();
-    }
-  }
 
   @override
   @pragma('vm:prefer-inline')

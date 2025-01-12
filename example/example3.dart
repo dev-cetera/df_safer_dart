@@ -5,13 +5,13 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 void main() async {
   final string = const Sync(Ok('Hello World!'));
   final string1 = stringMapper(string);
-  print(string1.uwSyncValue());
+  print(string1.unwrapSyncValue());
 
-  final futureString = Concur.tryCatch(
+  final futureString = Concur.wrap(
     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
   );
   final futureString1 = stringMapper(futureString);
-  print(await futureString1.uwAsyncValue());
+  print(await futureString1.unwrapAsyncValue());
 }
 
 Concur<String> stringMapper(Concur<String> input) {

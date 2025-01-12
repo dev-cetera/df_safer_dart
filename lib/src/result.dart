@@ -10,8 +10,9 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+import 'package:meta/meta.dart';
+
 import 'option.dart';
-import 'panic.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -24,23 +25,25 @@ sealed class Result<T extends Object> {
 
   bool get isErr;
 
+  @visibleForTesting
   Ok<T> get ok;
 
+  @visibleForTesting
   Err<T> get err;
 
   Result<T> ifOk(void Function(T value) fn);
 
-  Result<T> ifErr(void Function(Object error) fn);
+  Result<T> ifErr(void Function(Err<T> error) fn);
 
+  @visibleForTesting
   T unwrap();
 
   T unwrapOr(T fallback);
 
-  T unwrapOrElse(T Function(Object error) fallback);
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
 
   Result<R> map<R extends Object>(R Function(T value) fn);
-
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn);
 
   Result<T> mapErr(Object Function(Object error) fn);
 
@@ -76,11 +79,10 @@ class Ok<T extends Object> extends Result<T> {
   @pragma('vm:prefer-inline')
   Ok<T> get ok => this;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> get err {
-    throw Panic('[Ok] Cannot get [err] from Ok.');
-  }
+  Err<T> get err => throw const Err('Cannot get err from Ok.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -91,9 +93,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Object error) fn) {
-    return this;
-  }
+  Result<T> ifErr(void Function(Err<T> error) fn) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -105,15 +105,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function(Object error) fallback) => value;
-
-  @override
-  @pragma('vm:prefer-inline')
   Result<R> map<R extends Object>(R Function(T value) fn) => Ok(fn(value));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn) => fn(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -144,9 +136,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() {
-    return '${Ok<T>}($value)';
-  }
+  String toString() => '${Ok<T>}($value)';
 
   @override
   Result<Result<R>> cast<R extends Object>() {
@@ -175,11 +165,10 @@ class Err<T extends Object> extends Result<T> {
   @pragma('vm:prefer-inline')
   bool get isErr => true;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> get ok {
-    throw Panic('[Err] Cannot get [ok] from Err.');
-  }
+  Ok<T> get ok => throw const Err('Cannot get ok from Err.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -187,20 +176,19 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(T value) fn) {
-    return this;
-  }
+  Result<T> ifOk(void Function(T value) fn) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Object error) fn) {
-    fn(value);
+  Result<T> ifErr(void Function(Err<T> error) fn) {
+    fn(this);
     return this;
   }
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => throw value;
+  T unwrap() => throw const Err('Cannot unwrap an Err.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -208,15 +196,7 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function(Object error) fallback) => fallback(value);
-
-  @override
-  @pragma('vm:prefer-inline')
   Result<R> map<R extends Object>(R Function(T value) fn) => Err(value);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) fn) => Err(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -241,9 +221,7 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() {
-    return '${Err<T>}($value)';
-  }
+  String toString() => '${Err<T>}($value)';
 
   @override
   @pragma('vm:prefer-inline')

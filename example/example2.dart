@@ -13,9 +13,9 @@ void main() async {
   // Process the value from safeCompleter1.concur.
   final concur1 = safeCompleter1.concur;
   if (concur1.isSync) {
-    print('It is sync: ${concur1.uwSyncValue()}');
+    print('It is sync: ${concur1.unwrapSyncValue()}');
   } else {
-    print('It is async: ${await concur1.uwAsyncValue()}');
+    print('It is async: ${await concur1.unwrapAsyncValue()}');
   }
 
   final safeCompleter2 = SafeCompleter<int>();
@@ -24,8 +24,8 @@ void main() async {
   // Process the value from safeCompleter2.concur.
   final concur2 = safeCompleter2.concur;
   if (concur2.isSync) {
-    print('It is sync: ${concur2.uwSyncValue()}');
+    print('It is sync: ${concur2.unwrapSyncValue()}');
   } else {
-    print('It is async: ${await concur2.uwAsyncValue()}');
+    print('It is async: ${await concur2.unwrapAsyncValue()}');
   }
 }

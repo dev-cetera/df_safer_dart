@@ -12,6 +12,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -19,7 +21,7 @@ import '../df_safer_dart.dart';
 sealed class Concur<T extends Object> {
   const Concur._();
 
-  static Concur<T> tryCatch<T extends Object>(
+  static Concur<T> wrap<T extends Object>(
     FutureOr<T> Function() functionCanThrow,
   ) {
     try {
@@ -30,6 +32,8 @@ sealed class Concur<T extends Object> {
         return Async(() async {
           try {
             return Ok<T>(await test);
+          } on Err catch (e) {
+            return Err<T>(e.value);
           } catch (e) {
             return Err<T>(e);
           }
@@ -44,21 +48,29 @@ sealed class Concur<T extends Object> {
 
   bool get isAsync;
 
+  @visibleForTesting
   Result<Sync<T>> get sync;
 
+  @visibleForTesting
   Result<Async<T>> get async;
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Sync<T> uwSync() => sync.unwrap();
+  // ignore: invalid_use_of_visible_for_testing_member
+  Sync<T> unwrapSync() => sync.unwrap();
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Async<T> uwAsync() => async.unwrap();
+  // ignore: invalid_use_of_visible_for_testing_member
+  Async<T> unwrapAsync() => async.unwrap();
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  T uwSyncValue() => uwSync().uwValue();
+  T unwrapSyncValue() => unwrapSync().unwrapValue();
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<T> uwAsyncValue() => uwAsync().uwValue();
+  Future<T> unwrapAsyncValue() => unwrapAsync().unwrapValue();
 
   Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn);
 
@@ -70,24 +82,31 @@ sealed class Concur<T extends Object> {
     Option<Concur<R>> Function(Result<T> value) onSync,
     Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   );
+
+  Async<T> toAsync();
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class Sync<T extends Object> extends Concur<T> {
-  final Result<T> result;
+  @visibleForTesting
+  final Result<T> value;
 
-  @pragma('vm:prefer-inline')
-  Ok<T> get ok => result.ok;
+  const Sync(this.value) : super._();
 
+  @protected
   @pragma('vm:prefer-inline')
-  Err<T> get err => result.err;
+  // ignore: invalid_use_of_visible_for_testing_member
+  Ok<T> get ok => value.ok;
 
+  @protected
   @pragma('vm:prefer-inline')
-  T uwValue() => ok.unwrap();
+  // ignore: invalid_use_of_visible_for_testing_member
+  Err<T> get err => value.err;
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  const Sync(this.result) : super._();
+  T unwrapValue() => ok.unwrap();
 
   @override
   @pragma('vm:prefer-inline')
@@ -101,6 +120,7 @@ final class Sync<T extends Object> extends Concur<T> {
   @pragma('vm:prefer-inline')
   Result<Sync<T>> get sync => Ok(this);
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   Result<Async<T>> get async => const Err('Cannot get async from Sync.');
@@ -108,7 +128,7 @@ final class Sync<T extends Object> extends Concur<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Concur<T>> ifSync(Result<void> Function(Result<T> value) fn) {
-    return fn(result).map((e) => this);
+    return fn(value).map((e) => this);
   }
 
   @override
@@ -120,31 +140,41 @@ final class Sync<T extends Object> extends Concur<T> {
     Option<Concur<R>> Function(Result<T> value) onSync,
     Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   ) {
-    return onSync(result);
+    return onSync(value);
   }
 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
-    return Sync(fn(result));
+    return Sync(fn(value));
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<T> toAsync() => Async(Future.value(value));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class Async<T extends Object> extends Concur<T> {
-  final Future<Result<T>> result;
+  @visibleForTesting
+  final Future<Result<T>> value;
 
+  const Async(this.value) : super._();
+
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<Ok<T>> get ok => result.then((e) => e.ok);
+  // ignore: invalid_use_of_visible_for_testing_member
+  Future<Ok<T>> get ok => value.then((e) => e.ok);
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<Err<T>> get err => result.then((e) => e.err);
+  // ignore: invalid_use_of_visible_for_testing_member
+  Future<Err<T>> get err => value.then((e) => e.err);
 
+  @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<T> uwValue() => ok.then((e) => e.unwrap());
-
-  const Async(this.result) : super._();
+  Future<T> unwrapValue() => ok.then((e) => e.unwrap());
 
   @override
   @pragma('vm:prefer-inline')
@@ -154,6 +184,7 @@ final class Async<T extends Object> extends Concur<T> {
   @pragma('vm:prefer-inline')
   bool get isAsync => true;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   Result<Sync<T>> get sync => const Err('Cannot get sync from Async.');
@@ -169,7 +200,7 @@ final class Async<T extends Object> extends Concur<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Concur<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) {
-    return fn(result).map((e) => this);
+    return fn(value).map((e) => this);
   }
 
   @override
@@ -178,13 +209,17 @@ final class Async<T extends Object> extends Concur<T> {
     Option<Concur<R>> Function(Result<T> value) onSync,
     Option<Concur<R>> Function(Future<Result<T>> value) onAsync,
   ) {
-    return onAsync(result);
+    return onAsync(value);
   }
 
   @override
   @pragma('vm:prefer-inline')
   @override
   Async<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
-    return Async(result.then((e) => fn(e)));
+    return Async(value.then((e) => fn(e)));
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<T> toAsync() => this;
 }

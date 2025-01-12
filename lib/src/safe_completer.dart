@@ -66,12 +66,12 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Concur<T> complete(FutureOr<T> value) => completeC(Concur.tryCatch(() => value));
+  Concur<T> complete(FutureOr<T> value) => completeC(Concur.wrap(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
   Concur<T> get concur {
-    return Concur.tryCatch(
+    return Concur.wrap(
       () => _value.fold((e) => Some(e), () => Some(_completer.future)).some.unwrap(),
     );
   }
