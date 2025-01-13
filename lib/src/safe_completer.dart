@@ -32,17 +32,13 @@ class SafeCompleter<T extends Object> {
 
   Option<FutureOr<T>> _value = const None();
 
-  //
-  //
-  //
-
   /// Completes the operation with the provided [resolvable].
-  Resolvable<T> completeC(Resolvable<T> value) {
+  Resolvable<T> resolve(Resolvable<T> value) {
     if (isCompleted) {
       return Sync(
         Err(
-          stack: [SafeCompleter, completeC],
-          error: 'Cannot complete a completed SafeCompleter',
+          stack: [SafeCompleter, resolve],
+          error: 'Cannot complete an already completed SafeCompleter.',
         ),
       );
     }
@@ -55,7 +51,7 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) => completeC(Resolvable.resolve(() => value));
+  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.resolve(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
