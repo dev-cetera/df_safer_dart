@@ -17,20 +17,28 @@ void main() async {
 }
 
 Async<String> fetchIpAddress() {
-  // Wrap a potentially throwing function with Async. This contains all errors.
-  // The idea is to never use try-catch blocks and instead use explicit
-  // functional error handling by placing potentiall throwing functions
-  // in Async.
-  return Async.resolve(
-    // Always await all asynchronous operations inside Async to ensure that
-    // exceptions are properly caught and wrapped in a Result. This is one
-    // of very few things you must remember for Resolvable.
+  // Async.unsafe, Sync.unsafe or Resolvable.unsafe can be used to wrap
+  // potentially throwing code.
+  //
+  // The only rules here are:
+  //
+  // 1. ALWAYS await all asynchronous operations inside Async.unsafe
+  // (or Resolvable.unsafe) to ensure that exceptions are properly caught and
+  // wrapped in a Result.
+  //
+  // 2. Only deal with asynchronous operations in Async.unsafe or
+  // Resolvable.unsafe. Not in Sync.unsafe.
+  //
+  // 3. You can throw any Objects within unsafe, but prefer throwing Err
+  // objects as it is the standard and will help with debugging.
+  return Async.unsafe(
     () async {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
       // Throw an Err if the status code is not 200. Any other exceptions within
       // Resolvable.wrap will be caught and wrapped in an Err.
       if (response.statusCode != 200) {
         throw const Err(
+          // The stack will be printed when the error is thrown.
           stack: [fetchIpAddress],
           error: 'Failed to fetch IP address',
         );

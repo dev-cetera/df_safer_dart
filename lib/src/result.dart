@@ -237,7 +237,7 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() => '${Err<T>}($error)';
+  String toString() => '${Err<T>}(stack: [${stack.join(', ')}], error: $error)';
 
   @protected
   @override

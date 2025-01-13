@@ -51,12 +51,12 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.resolve(() => value));
+  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
   Resolvable<T> get resolvable {
-    return Resolvable.resolve(
+    return Resolvable.unsafe(
       // ignore: invalid_use_of_visible_for_testing_member
       () => _value.fold((e) => Some(e), () => Some(_completer.future)).some().unwrap().unwrap(),
     );

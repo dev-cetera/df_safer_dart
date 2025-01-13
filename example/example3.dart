@@ -8,7 +8,7 @@ void main() async {
   // ignore: invalid_use_of_visible_for_testing_member
   print(string1.unwrapSyncValue());
 
-  final futureString = Resolvable.resolve(
+  final futureString = Resolvable.unsafe(
     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
   );
   final futureString1 = stringMapper(futureString);

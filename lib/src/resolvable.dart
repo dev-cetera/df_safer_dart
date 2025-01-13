@@ -21,11 +21,11 @@ import '../df_safer_dart.dart';
 sealed class Resolvable<T extends Object> {
   const Resolvable._();
 
-  factory Resolvable.resolve(FutureOr<T> Function() functionCanThrow) {
+  factory Resolvable.unsafe(FutureOr<T> Function() functionCanThrow) {
     if (functionCanThrow is Future<T> Function()) {
-      return Async.resolve(functionCanThrow);
+      return Async.unsafe(functionCanThrow);
     } else {
-      return Sync.resolve(functionCanThrow as T Function());
+      return Sync.unsafe(functionCanThrow as T Function());
     }
   }
 
@@ -79,13 +79,13 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   const Sync(this.value) : super._();
 
-  factory Sync.resolve(T Function() functionCanThrow) {
+  factory Sync.unsafe(T Function() functionCanThrow) {
     try {
       return Sync(Ok(functionCanThrow()));
     } catch (e) {
       return Sync(
         Err<T>(
-          stack: [Sync<T>, Sync.resolve],
+          stack: [Sync<T>, Sync.unsafe],
           error: e,
         ),
       );
@@ -169,7 +169,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   const Async(this.value) : super._();
 
-  factory Async.resolve(Future<T> Function() functionCanThrow) {
+  factory Async.unsafe(Future<T> Function() functionCanThrow) {
     return Async(() async {
       try {
         return Ok<T>(await functionCanThrow());
@@ -177,7 +177,7 @@ final class Async<T extends Object> extends Resolvable<T> {
         return e.castErr<T>();
       } catch (e) {
         return Err<T>(
-          stack: [Async<T>, Async.resolve],
+          stack: [Async<T>, Async.unsafe],
           error: e,
         );
       }
