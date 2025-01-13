@@ -22,10 +22,22 @@ sealed class Resolvable<T extends Object> {
   const Resolvable._();
 
   factory Resolvable.unsafe(FutureOr<T> Function() functionCanThrow) {
-    if (functionCanThrow is Future<T> Function()) {
-      return Async.unsafe(functionCanThrow);
-    } else {
-      return Sync.unsafe(functionCanThrow as T Function());
+    try {
+      final result = functionCanThrow();
+      if (result is Future<T>) {
+        return Async.unsafe(() => result);
+      } else {
+        return Sync(Ok(result));
+      }
+    } on Err catch (e) {
+      return Sync(e.castErr<T>());
+    } catch (e) {
+      return Sync(
+        Err<T>(
+          stack: [Sync<T>, Sync.unsafe],
+          error: e,
+        ),
+      );
     }
   }
 
@@ -82,6 +94,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   factory Sync.unsafe(T Function() functionCanThrow) {
     try {
       return Sync(Ok(functionCanThrow()));
+    } on Err catch (e) {
+      return Sync(e.castErr<T>());
     } catch (e) {
       return Sync(
         Err<T>(
