@@ -29,25 +29,25 @@ sealed class Resolvable<T extends Object> {
     }
   }
 
-  bool get isSync;
+  bool isSync();
 
-  bool get isAsync;
-
-  @visibleForTesting
-  Result<Sync<T>> get sync;
+  bool isAsync();
 
   @visibleForTesting
-  Result<Async<T>> get async;
+  Result<Sync<T>> sync();
 
   @visibleForTesting
-  @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Sync<T> unwrapSync() => sync.unwrap();
+  Result<Async<T>> async();
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
-  Async<T> unwrapAsync() => async.unwrap();
+  Sync<T> unwrapSync() => sync().unwrap();
+
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  // ignore: invalid_use_of_visible_for_testing_member
+  Async<T> unwrapAsync() => async().unwrap();
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
@@ -83,40 +83,51 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return Sync(Ok(functionCanThrow()));
     } catch (e) {
-      return Sync(Err<T>(e));
+      return Sync(
+        Err<T>(
+          stack: [Sync<T>, Sync.resolve],
+          error: e,
+        ),
+      );
     }
   }
 
   @protected
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
-  Ok<T> get ok => value.ok;
+  Option<Ok<T>> ok() => value.ok();
 
   @protected
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
-  Err<T> get err => value.err;
+  Option<Err<T>> err() => value.err();
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  T unwrapValue() => ok.unwrap();
+  // ignore: invalid_use_of_visible_for_testing_member
+  T unwrapValue() => ok().unwrap().unwrap();
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isSync => true;
+  bool isSync() => true;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isAsync => false;
+  bool isAsync() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Sync<T>> get sync => Ok(this);
+  Result<Sync<T>> sync() => Ok(this);
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Async<T>> get async => const Err('Cannot get async from Sync.');
+  Result<Async<T>> async() {
+    return Err(
+      stack: [Sync<T>, sync],
+      error: 'Cannot get Async from Sync.',
+    );
+  }
 
   @protected
   @override
@@ -163,9 +174,12 @@ final class Async<T extends Object> extends Resolvable<T> {
       try {
         return Ok<T>(await functionCanThrow());
       } on Err catch (e) {
-        return Err<T>(e.value);
+        return e.castErr<T>();
       } catch (e) {
-        return Err<T>(e);
+        return Err<T>(
+          stack: [Async<T>, Async.resolve],
+          error: e,
+        );
       }
     }());
   }
@@ -173,33 +187,39 @@ final class Async<T extends Object> extends Resolvable<T> {
   @visibleForTesting
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
-  Future<Ok<T>> get ok => value.then((e) => e.ok);
+  Future<Option<Ok<T>>> ok() => value.then((e) => e.ok());
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
-  Future<Err<T>> get err => value.then((e) => e.err);
+  Future<Option<Err<T>>> err() => value.then((e) => e.err());
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<T> unwrapValue() => ok.then((e) => e.unwrap());
+  // ignore: invalid_use_of_visible_for_testing_member
+  Future<T> unwrapValue() => ok().then((e) => e.unwrap().unwrap());
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isSync => false;
+  bool isSync() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isAsync => true;
+  bool isAsync() => true;
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Sync<T>> get sync => const Err('Cannot get sync from Async.');
+  Result<Sync<T>> sync() {
+    return Err(
+      stack: [Async<T>, sync],
+      error: 'Cannot get Sync from Async.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Async<T>> get async => Ok(this);
+  Result<Async<T>> async() => Ok(this);
 
   @protected
   @override

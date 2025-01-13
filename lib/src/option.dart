@@ -29,15 +29,15 @@ sealed class Option<T extends Object> {
     }
   }
 
-  bool get isSome;
+  bool isSome();
 
-  bool get isNone;
-
-  @visibleForTesting
-  Some<T> get some;
+  bool isNone();
 
   @visibleForTesting
-  None<T> get none;
+  Result<Some<T>> some();
+
+  @visibleForTesting
+  Result<None<T>> none();
 
   Option<T> ifSome(void Function(Some<T> some) callback);
 
@@ -77,20 +77,25 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isSome => true;
+  bool isSome() => true;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isNone => false;
+  bool isNone() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  Some<T> get some => this;
+  Ok<Some<T>> some() => Ok(this);
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  None<T> get none => throw const Err('Cannot get none from Some.');
+  Result<None<T>> none() {
+    return Err(
+      stack: [Some<T>, some],
+      error: 'Cannot get None from Some.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -135,7 +140,7 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Option<(T, R)> and<R extends Object>(Option<R> other) {
-    if (other.isSome) {
+    if (other.isSome()) {
       return Some((value, other.unwrap()));
     } else {
       return const None();
@@ -159,7 +164,10 @@ final class Some<T extends Object> extends Option<T> {
     if (value is R) {
       return Ok(Option.fromNullable(value));
     } else {
-      return Err('Cannot cast ${value.runtimeType} to $R');
+      return Err(
+        stack: [Some<T>, cast],
+        error: 'Cannot cast ${value.runtimeType} to $R',
+      );
     }
   }
 }
@@ -171,16 +179,21 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isSome => false;
+  bool isSome() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isNone => true;
+  bool isNone() => true;
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Some<T> get some => throw const Err('Cannot get some from a None.');
+  Result<Some<T>> some() {
+    return Err(
+      stack: [None<T>, some],
+      error: 'Cannot get Some from a None.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -195,7 +208,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  None<T> get none => this;
+  Ok<None<T>> none() => Ok(this);
 
   @protected
   @override
@@ -226,7 +239,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => none;
+  Option<T> filter(bool Function(T value) test) => const None();
 
   @override
   @pragma('vm:prefer-inline')

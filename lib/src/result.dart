@@ -19,17 +19,18 @@ import 'option.dart';
 sealed class Result<T extends Object> {
   const Result._();
 
-  Option<T> get asOption => isOk() ? Some(ok().value) : const None();
+  // ignore: invalid_use_of_visible_for_testing_member
+  Option<T> get asOption => isOk() ? Some(ok().unwrap().value) : const None();
 
   bool isOk();
 
   bool isErr();
 
   @visibleForTesting
-  Ok<T> ok();
+  Option<Ok<T>> ok();
 
   @visibleForTesting
-  Err<T> err();
+  Option<Err<T>> err();
 
   Result<T> ifOk(void Function(Ok<T> ok) callback);
 
@@ -60,12 +61,15 @@ sealed class Result<T extends Object> {
     if (result.isOk()) {
       final innerResult = result.unwrap();
       if (innerResult.isOk()) {
-        return innerResult.ok();
+        // ignore: invalid_use_of_visible_for_testing_member
+        return innerResult.ok().unwrap();
       } else {
-        return innerResult.err().castErr();
+        // ignore: invalid_use_of_visible_for_testing_member
+        return innerResult.err().unwrap().castErr();
       }
     }
-    return result.err().castErr();
+    // ignore: invalid_use_of_visible_for_testing_member
+    return result.err().unwrap().castErr();
   }
 }
 
@@ -85,17 +89,12 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ok() => this;
+  Some<Ok<T>> ok() => Some(this);
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() {
-    throw Err(
-      stack: [Ok, err],
-      error: 'Cannot get err from Ok.',
-    );
-  }
+  None<Err<T>> err() => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -135,7 +134,8 @@ class Ok<T extends Object> extends Result<T> {
     if (other.isOk()) {
       return Ok((value, other.unwrap()));
     } else {
-      return other.err();
+      // ignore: invalid_use_of_visible_for_testing_member
+      return other.err().unwrap();
     }
   }
 
@@ -154,7 +154,7 @@ class Ok<T extends Object> extends Result<T> {
       return Ok(Ok(value));
     } else {
       return Err(
-        stack: [Err, cast],
+        stack: [Err<T>, cast],
         error: 'Cannot cast ${value.runtimeType} to $R',
       );
     }
@@ -182,16 +182,11 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ok() {
-    throw Err(
-      stack: [Err, ok],
-      error: 'Cannot get ok from Err.',
-    );
-  }
+  None<Ok<T>> ok() => const None();
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() => this;
+  Some<Err<T>> err() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -209,7 +204,7 @@ class Err<T extends Object> extends Result<T> {
   @pragma('vm:prefer-inline')
   T unwrap() {
     throw Err(
-      stack: [Err, unwrap],
+      stack: [Err<T>, unwrap],
       error: 'Cannot unwrap an Err.',
     );
   }
@@ -234,7 +229,7 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R extends Object>(Result<R> other) => err();
+  Result<dynamic> and<R extends Object>(Result<R> other) => err().unwrap();
 
   @override
   @pragma('vm:prefer-inline')

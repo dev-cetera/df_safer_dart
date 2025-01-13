@@ -38,7 +38,14 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> completeC(Resolvable<T> value) {
-    if (isCompleted) return const Sync(Err('[SafeCompleter] Already completed!')); // errrrrrrr
+    if (isCompleted) {
+      return Sync(
+        Err(
+          stack: [SafeCompleter, completeC],
+          error: 'Cannot complete a completed SafeCompleter',
+        ),
+      );
+    }
     return value.map((e) {
       _value = Some(e);
       _completer.complete(e);
@@ -54,11 +61,12 @@ class SafeCompleter<T extends Object> {
   @pragma('vm:prefer-inline')
   Resolvable<T> get resolvable {
     return Resolvable.resolve(
-      () => _value.fold((e) => Some(e), () => Some(_completer.future)).some.unwrap(),
+      // ignore: invalid_use_of_visible_for_testing_member
+      () => _value.fold((e) => Some(e), () => Some(_completer.future)).some().unwrap().unwrap(),
     );
   }
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
-  bool get isCompleted => _completer.isCompleted || _value.isSome;
+  bool get isCompleted => _completer.isCompleted || _value.isSome();
 }

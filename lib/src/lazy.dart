@@ -31,7 +31,7 @@ class Lazy<T extends Object> {
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    return (currentInstance.isNone ? currentInstance = Some(_constructor()) : currentInstance)
+    return (currentInstance.isNone() ? currentInstance = Some(_constructor()) : currentInstance)
         // ignore: invalid_use_of_visible_for_testing_member
         .unwrap();
   }

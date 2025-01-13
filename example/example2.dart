@@ -11,21 +11,25 @@ void main() async {
   });
 
   // Process the value from safeCompleter1.resolvable.
-  final concur1 = safeCompleter1.resolvable;
-  if (concur1.isSync) {
-    print('It is sync: ${concur1.unwrapSyncValue()}');
+  final r1 = safeCompleter1.resolvable;
+  if (r1.isSync()) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    print('It is sync: ${r1.unwrapSyncValue()}');
   } else {
-    print('It is async: ${await concur1.unwrapAsyncValue()}');
+    // ignore: invalid_use_of_visible_for_testing_member
+    print('It is async: ${await r1.unwrapAsyncValue()}');
   }
 
   final safeCompleter2 = SafeCompleter<int>();
   safeCompleter2.complete(43);
 
   // Process the value from safeCompleter2.resolvable.
-  final concur2 = safeCompleter2.resolvable;
-  if (concur2.isSync) {
-    print('It is sync: ${concur2.unwrapSyncValue()}');
+  final r2 = safeCompleter2.resolvable;
+  if (r2.isSync()) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    print('It is sync: ${r2.unwrapSyncValue()}');
   } else {
-    print('It is async: ${await concur2.unwrapAsyncValue()}');
+    // ignore: invalid_use_of_visible_for_testing_member
+    print('It is async: ${await r2.unwrapAsyncValue()}');
   }
 }
