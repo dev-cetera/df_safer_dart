@@ -57,11 +57,11 @@ sealed class Resolvable<T extends Object> {
   @pragma('vm:prefer-inline')
   Future<T> unwrapAsyncValue() => unwrapAsync().unwrapValue();
 
-  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn);
+  Resolvable<T> ifSync(void Function(Sync<T> sync) callback);
 
-  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn);
+  Resolvable<T> ifAsync(void Function(Async<T> async) callback);
 
-  Resolvable<R> map<R extends Object>(Result<R> Function(Result<T> value) fn);
+  Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
   Option<Resolvable<R>> fold<R extends Object>(
     Option<Resolvable<R>> Function(Result<T> value) onSync,
@@ -118,15 +118,18 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Result<Async<T>> get async => const Err('Cannot get async from Sync.');
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn) {
-    return fn(value).map((e) => this);
+  Sync<T> ifSync(void Function(Sync<T> sync) callback) {
+    callback(this);
+    return this;
   }
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) => Ok(this);
+  Sync<T> ifAsync(void Function(Async<T> async) callback) => this;
 
   @override
   Option<Resolvable<R>> fold<R extends Object>(
@@ -138,8 +141,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
-    return Sync(fn(value));
+  Sync<R> map<R extends Object>(R Function(T value) mapper) {
+    return Sync(value.map((e) => mapper(e)));
   }
 
   @override
@@ -198,14 +201,17 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Result<Async<T>> get async => Ok(this);
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Resolvable<T>> ifSync(Result<void> Function(Result<T> value) fn) => Ok(this);
+  Async<T> ifSync(void Function(Sync<T> async) callback) => this;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Resolvable<T>> ifAsync(Result<void> Function(Future<Result<T>> future) fn) {
-    return fn(value).map((e) => this);
+  Async<T> ifAsync(void Function(Async<T> async) callback) {
+    callback(this);
+    return this;
   }
 
   @override
@@ -220,8 +226,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   @override
-  Async<R> map<R extends Object>(Result<R> Function(Result<T> value) fn) {
-    return Async(value.then((e) => fn(e)));
+  Async<R> map<R extends Object>(R Function(T value) mapper) {
+    return Async(value.then((e) => e.map(mapper)));
   }
 
   @override

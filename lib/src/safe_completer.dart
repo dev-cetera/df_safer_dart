@@ -38,30 +38,12 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> completeC(Resolvable<T> value) {
-    if (isCompleted) return const Sync(Err('[SafeCompleter] Already completed!'));
-    if (value.isAsync) {
-      return value.async.unwrap().map((e) {
-        return e.fold(
-          (e) {
-            _value = Some(e);
-            _completer.complete(e);
-            return Ok<T>(e);
-          },
-          (e) => Err<T>(e),
-        );
-      });
-    } else {
-      return value.sync.unwrap().map((e) {
-        return e.fold(
-          (e) {
-            _value = Some(e);
-            _completer.complete(e);
-            return Ok<T>(e);
-          },
-          (e) => Err<T>(e),
-        );
-      });
-    }
+    if (isCompleted) return const Sync(Err('[SafeCompleter] Already completed!')); // errrrrrrr
+    return value.map((e) {
+      _value = Some(e);
+      _completer.complete(e);
+      return e;
+    });
   }
 
   /// Completes the operation with the provided [value].

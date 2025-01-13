@@ -19,21 +19,21 @@ import 'option.dart';
 sealed class Result<T extends Object> {
   const Result._();
 
-  Option<T> get asOption => isOk ? Some(ok.value) : const None();
+  Option<T> get asOption => isOk() ? Some(ok().value) : const None();
 
-  bool get isOk;
+  bool isOk();
 
-  bool get isErr;
-
-  @visibleForTesting
-  Ok<T> get ok;
+  bool isErr();
 
   @visibleForTesting
-  Err<T> get err;
+  Ok<T> ok();
 
-  Result<T> ifOk(void Function(T value) fn);
+  @visibleForTesting
+  Err<T> err();
 
-  Result<T> ifErr(void Function(Err<T> error) fn);
+  Result<T> ifOk(void Function(Ok<T> ok) callback);
+
+  Result<T> ifErr(void Function(Err<T> err) callback);
 
   @visibleForTesting
   T unwrap();
@@ -43,9 +43,7 @@ sealed class Result<T extends Object> {
   @pragma('vm:prefer-inline')
   T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
 
-  Result<R> map<R extends Object>(R Function(T value) fn);
-
-  Result<T> mapErr(Object Function(Object error) fn);
+  Result<R> map<R extends Object>(R Function(T value) mapper);
 
   Result<R> fold<R extends Object>(
     Result<R> Function(T value) onOk,
@@ -57,6 +55,18 @@ sealed class Result<T extends Object> {
   Result<dynamic> or<R extends Object>(Result<R> other);
 
   Result<Result<R>> cast<R extends Object>();
+
+  static Result<T> reduce<T extends Object>(Result<Result<T>> result) {
+    if (result.isOk()) {
+      final innerResult = result.unwrap();
+      if (innerResult.isOk()) {
+        return innerResult.ok();
+      } else {
+        return innerResult.err().castErr();
+      }
+    }
+    return result.err().castErr();
+  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -65,35 +75,38 @@ class Ok<T extends Object> extends Result<T> {
   final T value;
   const Ok(this.value) : super._();
 
-  factory Ok.fn(T Function() fn) => Ok(fn());
+  @override
+  @pragma('vm:prefer-inline')
+  bool isOk() => true;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isOk => true;
+  bool isErr() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isErr => false;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<T> get ok => this;
+  Ok<T> ok() => this;
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> get err => throw const Err('Cannot get err from Ok.');
+  Err<T> err() {
+    throw Err(
+      stack: [Ok, err],
+      error: 'Cannot get err from Ok.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(T value) fn) {
-    fn(value);
+  Result<T> ifOk(void Function(Ok<T> ok) callback) {
+    callback(this);
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Err<T> error) fn) => this;
+  Result<T> ifErr(void Function(Err<T> err) callback) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -105,11 +118,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) fn) => Ok(fn(value));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<T> mapErr(Object Function(Object error) fn) => this;
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -123,10 +132,10 @@ class Ok<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<dynamic> and<R extends Object>(Result<R> other) {
-    if (other.isOk) {
+    if (other.isOk()) {
       return Ok((value, other.unwrap()));
     } else {
-      return other.err;
+      return other.err();
     }
   }
 
@@ -144,7 +153,10 @@ class Ok<T extends Object> extends Result<T> {
     if (value is R) {
       return Ok(Ok(value));
     } else {
-      return Err('Cannot cast ${value.runtimeType} to $R');
+      return Err(
+        stack: [Err, cast],
+        error: 'Cannot cast ${value.runtimeType} to $R',
+      );
     }
   }
 }
@@ -152,43 +164,55 @@ class Ok<T extends Object> extends Result<T> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 class Err<T extends Object> extends Result<T> {
-  final Object value;
-  const Err(this.value) : super._();
-
-  factory Err.fn(T Function() fn) => Err(fn());
-
-  @override
-  @pragma('vm:prefer-inline')
-  bool get isOk => false;
+  final List<Object> stack;
+  final Object error;
+  const Err({
+    required this.stack,
+    required this.error,
+  }) : super._();
 
   @override
   @pragma('vm:prefer-inline')
-  bool get isErr => true;
+  bool isOk() => false;
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool isErr() => true;
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> get ok => throw const Err('Cannot get ok from Err.');
+  Ok<T> ok() {
+    throw Err(
+      stack: [Err, ok],
+      error: 'Cannot get ok from Err.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> get err => this;
+  Err<T> err() => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(T value) fn) => this;
+  Result<T> ifOk(void Function(Ok<T> ok) callback) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Err<T> error) fn) {
-    fn(this);
+  Result<T> ifErr(void Function(Err<T> err) callback) {
+    callback(this);
     return this;
   }
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => throw const Err('Cannot unwrap an Err.');
+  T unwrap() {
+    throw Err(
+      stack: [Err, unwrap],
+      error: 'Cannot unwrap an Err.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -196,11 +220,7 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) fn) => Err(value);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<T> mapErr(Object Function(Object error) fn) => Err(fn(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => castErr<R>();
 
   @override
   @pragma('vm:prefer-inline')
@@ -208,12 +228,13 @@ class Err<T extends Object> extends Result<T> {
     Result<R> Function(T value) onOk,
     Result<R> Function(Object error) onErr,
   ) {
-    return onErr(value);
+    return onErr(error);
   }
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R extends Object>(Result<R> other) => err;
+  Result<dynamic> and<R extends Object>(Result<R> other) => err();
 
   @override
   @pragma('vm:prefer-inline')
@@ -221,10 +242,13 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() => '${Err<T>}($value)';
+  String toString() => '${Err<T>}($error)';
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  @override
-  Result<Result<R>> cast<R extends Object>() => Err(err.value);
+  Result<Result<R>> cast<R extends Object>() => castErr();
+
+  @pragma('vm:prefer-inline')
+  Err<R> castErr<R extends Object>() => Err(stack: stack, error: error);
 }

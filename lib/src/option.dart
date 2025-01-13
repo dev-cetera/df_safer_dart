@@ -14,6 +14,8 @@ import 'package:meta/meta.dart';
 
 import 'result.dart';
 
+// TOD: DO NOT USE GETTERS< JUST USE FUNCTIONS
+
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 sealed class Option<T extends Object> {
@@ -37,9 +39,9 @@ sealed class Option<T extends Object> {
   @visibleForTesting
   None<T> get none;
 
-  Option<T> ifSome(void Function(T value) fn);
+  Option<T> ifSome(void Function(Some<T> some) callback);
 
-  Option<T> ifNone(void Function() fn);
+  Option<T> ifNone(void Function() callback);
 
   @visibleForTesting
   T unwrap();
@@ -48,11 +50,11 @@ sealed class Option<T extends Object> {
 
   T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
 
-  Option<R> map<R extends Object>(R Function(T value) fn);
+  Option<R> map<R extends Object>(R Function(T value) mapper);
 
   Option<T> filter(bool Function(T value) test);
 
-  Result<T> get asResult;
+  Result<T> asResult();
 
   Option<R> fold<R extends Object>(
     Option<R> Function(T value) onSome,
@@ -92,12 +94,12 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifNone(void Function() fn) => this;
+  Option<T> ifNone(void Function() callback) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifSome(void Function(T value) fn) {
-    fn(value);
+  Option<T> ifSome(void Function(Some<T> some) callback) {
+    callback(this);
     return this;
   }
 
@@ -111,7 +113,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R extends Object>(R Function(T value) fn) => Some(fn(value));
+  Option<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -119,7 +121,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> get asResult => Ok<T>(value);
+  Result<T> asResult() => Ok<T>(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -182,14 +184,14 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifNone(void Function() fn) {
-    fn();
+  Option<T> ifNone(void Function() callback) {
+    callback();
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifSome(void Function(T value) fn) => this;
+  Option<T> ifSome(void Function(Some<T> some) callback) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -198,7 +200,12 @@ final class None<T extends Object> extends Option<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => throw const Err('Cannot unwrap a None.');
+  T unwrap() {
+    throw Err(
+      stack: [None<T>, unwrap],
+      error: 'Cannot unwrap a None.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -206,11 +213,16 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R extends Object>(R Function(T value) fn) => None<R>();
+  Option<R> map<R extends Object>(R Function(T value) mapper) => None<R>();
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> get asResult => Err(None<T>());
+  Result<T> asResult() {
+    return Err(
+      stack: [None<T>, asResult],
+      error: 'Cannot convert a None to a Result.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
