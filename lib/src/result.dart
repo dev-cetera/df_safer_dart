@@ -10,13 +10,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'package:meta/meta.dart';
-
-import 'option.dart';
+part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Result<T extends Object> {
+sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
   // ignore: invalid_use_of_visible_for_testing_member
@@ -46,18 +44,18 @@ sealed class Result<T extends Object> {
 
   Result<R> map<R extends Object>(R Function(T value) mapper);
 
-  Result<R> fold<R extends Object>(
-    Result<R> Function(T value) onOk,
-    Result<R> Function(Object error) onErr,
+  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
+    TOption Function(T value) onOk,
+    TOption Function(Object error) onErr,
   );
 
   Result<dynamic> and<R extends Object>(Result<R> other);
 
   Result<dynamic> or<R extends Object>(Result<R> other);
 
-  Result<Result<R>> cast<R extends Object>();
+  Result<R> cast<R extends Object>();
 
-  static Result<T> reduce<T extends Object>(Result<Result<T>> result) {
+  static Result<T> combine<T extends Object>(Result<Result<T>> result) {
     if (result.isOk()) {
       final innerResult = result.unwrap();
       if (innerResult.isOk()) {
@@ -121,9 +119,9 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> fold<R extends Object>(
-    Result<R> Function(T value) onOk,
-    Result<R> Function(Object error) onErr,
+  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
+    TOption Function(T value) onOk,
+    TOption Function(Object error) onErr,
   ) {
     return onOk(value);
   }
@@ -148,10 +146,10 @@ class Ok<T extends Object> extends Result<T> {
   String toString() => '${Ok<T>}($value)';
 
   @override
-  Result<Result<R>> cast<R extends Object>() {
+  Result<R> cast<R extends Object>() {
     final value = unwrap();
     if (value is R) {
-      return Ok(Ok(value));
+      return Result.combine(Ok(Ok(value)));
     } else {
       return Err(
         stack: [Err<T>, cast],
@@ -219,9 +217,9 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> fold<R extends Object>(
-    Result<R> Function(T value) onOk,
-    Result<R> Function(Object error) onErr,
+  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
+    TOption Function(T value) onOk,
+    TOption Function(Object error) onErr,
   ) {
     return onErr(error);
   }
@@ -242,7 +240,7 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Result<R>> cast<R extends Object>() => castErr();
+  Result<R> cast<R extends Object>() => castErr();
 
   @pragma('vm:prefer-inline')
   Err<R> castErr<R extends Object>() => Err(stack: stack, error: error);

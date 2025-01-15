@@ -10,15 +10,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'package:meta/meta.dart';
-
-import 'result.dart';
-
-// TOD: DO NOT USE GETTERS< JUST USE FUNCTIONS
+part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Option<T extends Object> {
+sealed class Option<T extends Object> extends Monad<T> {
   const Option._();
 
   factory Option.fromNullable(T? value) {
@@ -56,9 +52,9 @@ sealed class Option<T extends Object> {
 
   Result<T> asResult();
 
-  Option<R> fold<R extends Object>(
-    Option<R> Function(T value) onSome,
-    Option<R> Function() onNone,
+  TOption fold<R extends Object, TOption extends Option<R>>(
+    TOption Function(T value) onSome,
+    TOption Function() onNone,
   );
 
   Option<(T, R)> and<R extends Object>(Option<R> other);
@@ -130,9 +126,9 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> fold<R extends Object>(
-    Option<R> Function(T value) onSome,
-    Option<R> Function() onNone,
+  TOption fold<R extends Object, TOption extends Option<R>>(
+    TOption Function(T value) onSome,
+    TOption Function() onNone,
   ) {
     return onSome(value);
   }
@@ -243,9 +239,9 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> fold<R extends Object>(
-    Option<R> Function(T value) onSome,
-    Option<R> Function() onNone,
+  TOption fold<R extends Object, TOption extends Option<R>>(
+    TOption Function(T value) onSome,
+    TOption Function() onNone,
   ) {
     return onNone();
   }

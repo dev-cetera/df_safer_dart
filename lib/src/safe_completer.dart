@@ -12,9 +12,7 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import 'resolvable.dart';
-import 'option.dart';
-import 'result.dart';
+import 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

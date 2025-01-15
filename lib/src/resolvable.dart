@@ -10,16 +10,13 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'dart:async';
-
-import 'package:meta/meta.dart';
-
-import '../df_safer_dart.dart';
+part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-sealed class Resolvable<T extends Object> {
-  const Resolvable._();
+sealed class Resolvable<T extends Object> extends Monad<T> {
+  final FutureOr<Result<T>> value;
+  const Resolvable._(this.value);
 
   factory Resolvable.unsafe(FutureOr<T> Function() functionCanThrow) {
     try {
@@ -75,9 +72,9 @@ sealed class Resolvable<T extends Object> {
 
   Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
-  Option<Resolvable<R>> fold<R extends Object>(
-    Option<Resolvable<R>> Function(Result<T> value) onSync,
-    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
+  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
+    TOption Function(Result<T> value) onSync,
+    TOption Function(Future<Result<T>> value) onAsync,
   );
 
   Async<T> toAsync();
@@ -86,10 +83,11 @@ sealed class Resolvable<T extends Object> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class Sync<T extends Object> extends Resolvable<T> {
-  @visibleForTesting
+  @override
+  // ignore: overridden_fields
   final Result<T> value;
 
-  const Sync(this.value) : super._();
+  const Sync(this.value) : super._(value);
 
   factory Sync.unsafe(T Function() functionCanThrow) {
     try {
@@ -157,9 +155,9 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Sync<T> ifAsync(void Function(Async<T> async) callback) => this;
 
   @override
-  Option<Resolvable<R>> fold<R extends Object>(
-    Option<Resolvable<R>> Function(Result<T> value) onSync,
-    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
+  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
+    TOption Function(Result<T> value) onSync,
+    TOption Function(Future<Result<T>> value) onAsync,
   ) {
     return onSync(value);
   }
@@ -178,10 +176,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class Async<T extends Object> extends Resolvable<T> {
-  @visibleForTesting
+  @override
+  // ignore: overridden_fields
   final Future<Result<T>> value;
 
-  const Async(this.value) : super._();
+  const Async(this.value) : super._(value);
 
   factory Async.unsafe(Future<T> Function() functionCanThrow) {
     return Async(() async {
@@ -250,9 +249,9 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<Resolvable<R>> fold<R extends Object>(
-    Option<Resolvable<R>> Function(Result<T> value) onSync,
-    Option<Resolvable<R>> Function(Future<Result<T>> value) onAsync,
+  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
+    TOption Function(Result<T> value) onSync,
+    TOption Function(Future<Result<T>> value) onAsync,
   ) {
     return onAsync(value);
   }

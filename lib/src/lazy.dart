@@ -12,7 +12,7 @@
 
 import 'package:meta/meta.dart';
 
-import '../df_safer_dart.dart';
+import 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

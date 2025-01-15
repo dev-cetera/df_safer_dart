@@ -8,7 +8,5 @@
 //.title~
 
 export './safe_completer.dart';
-export 'resolvable.dart';
-export './option.dart';
 export './lazy.dart';
-export './result.dart';
+export 'monad.dart';
