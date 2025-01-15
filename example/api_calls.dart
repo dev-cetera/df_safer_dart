@@ -8,11 +8,14 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   // Fetch the IP address and handle both success and error results.
-  fetchIpAddress().map(
-    (e) {
-      print('IP address: $e');
-      return e;
-    },
+
+  final result = fetchIpAddress().thenMap(
+    (result) => result.ifOk((e) {
+      // ignore: invalid_use_of_visible_for_testing_member
+      print('IP address: ${result.unwrap()}');
+    }).ifErr((e) {
+      print('Error: $e');
+    }),
   );
 }
 

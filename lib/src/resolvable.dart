@@ -70,6 +70,8 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Resolvable<T> ifAsync(void Function(Async<T> async) callback);
 
+  Resolvable<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete);
+
   Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
   TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
@@ -153,6 +155,12 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(void Function(Async<T> async) callback) => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete) {
+    return Sync(onComplete(value));
+  }
 
   @override
   TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
@@ -245,6 +253,22 @@ final class Async<T extends Object> extends Resolvable<T> {
   Async<T> ifAsync(void Function(Async<T> async) callback) {
     callback(this);
     return this;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete) {
+    return Async.unsafe(() async {
+      final a = await value;
+      if (a.isErr()) {
+        throw a;
+      }
+      final b = onComplete(a);
+      if (b.isErr()) {
+        throw b;
+      }
+      return b.unwrap();
+    });
   }
 
   @override
