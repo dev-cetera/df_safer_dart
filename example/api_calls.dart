@@ -8,8 +8,7 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   // Fetch the IP address and handle both success and error results.
-
-  final result = fetchIpAddress().thenMap(
+  fetchIpAddress().thenMap(
     (result) => result.ifOk((e) {
       // ignore: invalid_use_of_visible_for_testing_member
       print('IP address: ${result.unwrap()}');
