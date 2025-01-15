@@ -44,7 +44,7 @@ Async<String> fetchIpAddress() {
         );
       }
       final data = jsonDecode(response.body);
-      final ip = data['ipeee'] as String;
+      final ip = data['ip'] as String;
       return ip;
     },
   );
