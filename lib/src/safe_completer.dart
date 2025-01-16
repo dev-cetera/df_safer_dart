@@ -33,9 +33,9 @@ class SafeCompleter<T extends Object> {
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> value) {
     if (isCompleted) {
-      return Sync(
+      return const Sync(
         Err(
-          stack: [SafeCompleter, resolve],
+          stack: [SafeCompleter, 'resolve'],
           error: 'Cannot complete an already completed SafeCompleter.',
         ),
       );

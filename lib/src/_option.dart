@@ -87,8 +87,8 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<None<T>> none() {
-    return Err(
-      stack: [Some<T>, some],
+    return const Err(
+      stack: [Some, 'some'],
       error: 'Cannot get None from Some.',
     );
   }
@@ -135,7 +135,7 @@ final class Some<T extends Object> extends Option<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [Some<T>, fold],
+          stack: [Some, 'fold'],
           error: e,
         ),
       );
@@ -170,7 +170,7 @@ final class Some<T extends Object> extends Option<T> {
       return Ok(Option.fromNullable(value));
     } else {
       return Err(
-        stack: [Some<T>, cast],
+        stack: [Some, 'cast'],
         error: 'Cannot cast ${value.runtimeType} to $R',
       );
     }
@@ -194,8 +194,8 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> some() {
-    return Err(
-      stack: [None<T>, some],
+    return const Err(
+      stack: [None, 'some'],
       error: 'Cannot get Some from a None.',
     );
   }
@@ -215,12 +215,13 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   Ok<None<T>> none() => Ok(this);
 
+  @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(
-      stack: [None<T>, unwrap],
+    throw const Err(
+      stack: [None, 'unwrap'],
       error: 'Cannot unwrap a None.',
     );
   }
@@ -236,8 +237,8 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<T> asResult() {
-    return Err(
-      stack: [None<T>, asResult],
+    return const Err(
+      stack: [None, 'asResult'],
       error: 'Cannot convert a None to a Result.',
     );
   }
@@ -257,7 +258,7 @@ final class None<T extends Object> extends Option<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [None<T>, fold],
+          stack: [None, 'fold'],
           error: e,
         ),
       );

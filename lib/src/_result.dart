@@ -128,7 +128,7 @@ class Ok<T extends Object> extends Result<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [Ok<T>, fold],
+          stack: [Ok, 'fold'],
           error: e,
         ),
       );
@@ -162,7 +162,7 @@ class Ok<T extends Object> extends Result<T> {
       return Result.combine(Ok(Ok(value)));
     } else {
       return Err(
-        stack: [Err<T>, cast],
+        stack: [Err, 'cast'],
         error: 'Cannot cast ${value.runtimeType} to $R',
       );
     }
@@ -207,12 +207,13 @@ class Err<T extends Object> extends Result<T> {
     return this;
   }
 
+  @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(
-      stack: [Err<T>, unwrap],
+    throw const Err(
+      stack: [Err, 'unwrap'],
       error: 'Cannot unwrap an Err.',
     );
   }
@@ -236,7 +237,7 @@ class Err<T extends Object> extends Result<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [Err<T>, fold],
+          stack: [Err, 'fold'],
           error: e,
         ),
       );

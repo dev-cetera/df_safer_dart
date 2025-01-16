@@ -31,7 +31,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } catch (e) {
       return Sync(
         Err<T>(
-          stack: [Sync<T>, Sync.unsafe],
+          stack: [Sync, 'Sync.unsafe'],
           error: e,
         ),
       );
@@ -48,23 +48,23 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   @visibleForTesting
   Result<Async<T>> async();
 
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Sync<T> unwrapSync() => sync().unwrap();
+  // @visibleForTesting
+  // @pragma('vm:prefer-inline')
+  // // ignore: invalid_use_of_visible_for_testing_member
+  // Sync<T> unwrapSync() => sync().unwrap();
 
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Async<T> unwrapAsync() => async().unwrap();
+  // @visibleForTesting
+  // @pragma('vm:prefer-inline')
+  // // ignore: invalid_use_of_visible_for_testing_member
+  // Async<T> unwrapAsync() => async().unwrap();
 
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  T unwrapSyncValue() => unwrapSync().value.unwrap();
+  // @visibleForTesting
+  // @pragma('vm:prefer-inline')
+  // T unwrapSyncValue() => unwrapSync().value.unwrap();
 
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  Future<T> unwrapAsyncValue() => unwrapAsync().value.then((e) => e.unwrap());
+  // @visibleForTesting
+  // @pragma('vm:prefer-inline')
+  // Future<T> unwrapAsyncValue() => unwrapAsync().value.then((e) => e.unwrap());
 
   Resolvable<T> ifSync(void Function(Sync<T> sync) callback);
 
@@ -121,7 +121,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     } catch (e) {
       return Sync(
         Err<T>(
-          stack: [Sync<T>, Sync.unsafe],
+          stack: [Sync, 'Sync.unsafe'],
           error: e,
         ),
       );
@@ -150,12 +150,13 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Result<Sync<T>> sync() => Ok(this);
 
+  @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
   Result<Async<T>> async() {
-    return Err(
-      stack: [Sync<T>, sync],
+    return const Err(
+      stack: [Sync, 'sync'],
       error: 'Cannot get Async from Sync.',
     );
   }
@@ -183,7 +184,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [Sync<T>, fold],
+          stack: [Sync, 'fold'],
           error: e,
         ),
       );
@@ -230,7 +231,7 @@ final class Async<T extends Object> extends Resolvable<T> {
         return e.castErr<T>();
       } catch (e) {
         return Err<T>(
-          stack: [Async<T>, Async.unsafe],
+          stack: [Async, 'Async.unsafe'],
           error: e,
         );
       }
@@ -259,8 +260,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Sync<T>> sync() {
-    return Err(
-      stack: [Async<T>, sync],
+    return const Err(
+      stack: [Async, 'sync'],
       error: 'Cannot get Sync from Async.',
     );
   }
@@ -293,7 +294,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     } catch (e) {
       return SyncSome(
         Err(
-          stack: [Async<T>, fold],
+          stack: [Async, 'fold'],
           error: e,
         ),
       );

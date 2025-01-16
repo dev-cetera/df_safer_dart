@@ -77,10 +77,29 @@ sealed class Monad<T extends Object> {
   @pragma('vm:prefer-inline')
   Err _castError<R extends Object>() {
     return Err(
-      stack: [Monad<T>, reduce],
+      stack: [Monad, 'reduce'],
       error: 'Failed to cast $T to $R.',
     );
   }
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+extension UnwrapOnResolvableOptionX<T extends Object> on ResolvableOption<T> {
+  @pragma('vm:prefer-inline')
+  FutureOr<T> unwrap() {
+    if (isSync()) {
+      return unwrapSync();
+    } else {
+      return unwrapAsync();
+    }
+  }
+
+  @pragma('vm:prefer-inline')
+  T unwrapSync() => sync().unwrap().value.unwrap().unwrap();
+
+  @pragma('vm:prefer-inline')
+  Future<T> unwrapAsync() => async().unwrap().value.then((e) => e.unwrap().unwrap());
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
