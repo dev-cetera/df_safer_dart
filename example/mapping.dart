@@ -1,4 +1,6 @@
-// Example: Using Resolvable to deal with either a sync or async value.
+// Example:
+//
+// Using Resolvable to deal with either a sync or async value.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 

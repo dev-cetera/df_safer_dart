@@ -1,3 +1,8 @@
+// Example:
+//
+// Using the reduce function to reduce long complicated chains of Monads
+// to a single result of type ResolvableOption.
+
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() async {

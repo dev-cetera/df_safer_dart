@@ -1,4 +1,7 @@
-// Example: Using SafeCompleter for synchronous or asynchronous values.
+// Example:
+//
+// Unlike Completer, SafeCompleter can be used to manage both sync and async
+// values, and in a safe functional manner.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 

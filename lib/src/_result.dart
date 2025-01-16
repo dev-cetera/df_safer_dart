@@ -44,9 +44,9 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   Result<R> map<R extends Object>(R Function(T value) mapper);
 
-  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
-    TOption Function(T value) onOk,
-    TOption Function(Object error) onErr,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Ok<T> ok) onOk,
+    ResolvableOption<T> Function(Err<T> err) onErr,
   );
 
   Result<dynamic> and<R extends Object>(Result<R> other);
@@ -119,11 +119,20 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
-    TOption Function(T value) onOk,
-    TOption Function(Object error) onErr,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Ok<T> ok) onOk,
+    ResolvableOption<T> Function(Err<T> err) onErr,
   ) {
-    return onOk(value);
+    try {
+      return onOk(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [Ok<T>, fold],
+          error: e,
+        ),
+      );
+    }
   }
 
   @override
@@ -146,6 +155,7 @@ class Ok<T extends Object> extends Result<T> {
   String toString() => '${Ok<T>}($value)';
 
   @override
+  @pragma('vm:prefer-inline')
   Result<R> cast<R extends Object>() {
     final value = unwrap();
     if (value is R) {
@@ -217,11 +227,20 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  TOption fold<R extends Object, TOption extends Option<Result<R>>>(
-    TOption Function(T value) onOk,
-    TOption Function(Object error) onErr,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Ok<T> ok) onOk,
+    ResolvableOption<T> Function(Err<T> err) onErr,
   ) {
-    return onErr(error);
+    try {
+      return onErr(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [Err<T>, fold],
+          error: e,
+        ),
+      );
+    }
   }
 
   @protected

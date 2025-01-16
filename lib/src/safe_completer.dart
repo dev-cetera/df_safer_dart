@@ -56,7 +56,7 @@ class SafeCompleter<T extends Object> {
   Resolvable<T> get resolvable {
     return Resolvable.unsafe(
       // ignore: invalid_use_of_visible_for_testing_member
-      () => _value.fold((e) => Some(e), () => Some(_completer.future)).some().unwrap().unwrap(),
+      () => _value.isSome() ? _value.unwrap() : _completer.future,
     );
   }
 

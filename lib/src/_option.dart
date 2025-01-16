@@ -52,14 +52,14 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   Result<T> asResult();
 
-  TOption fold<R extends Object, TOption extends Option<R>>(
-    TOption Function(T value) onSome,
-    TOption Function() onNone,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Some<T> some) onSome,
+    ResolvableOption<T> Function(None<T> none) onNone,
   );
 
   Option<(T, R)> and<R extends Object>(Option<R> other);
 
-  Option<dynamic> or<R extends Object>(Option<R> other);
+  Option<Object> or<R extends Object>(Option<R> other);
 
   Result<Option<R>> cast<R extends Object>();
 }
@@ -126,11 +126,20 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  TOption fold<R extends Object, TOption extends Option<R>>(
-    TOption Function(T value) onSome,
-    TOption Function() onNone,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Some<T> some) onSome,
+    ResolvableOption<T> Function(None<T> none) onNone,
   ) {
-    return onSome(value);
+    try {
+      return onSome(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [Some<T>, fold],
+          error: e,
+        ),
+      );
+    }
   }
 
   @override
@@ -145,7 +154,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or<R extends Object>(Option<R> other) => this;
+  Option<Object> or<R extends Object>(Option<R> other) => this;
 
   @pragma('vm:prefer-inline')
   None<T> toNone() => const None();
@@ -239,11 +248,20 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  TOption fold<R extends Object, TOption extends Option<R>>(
-    TOption Function(T value) onSome,
-    TOption Function() onNone,
+  ResolvableOption<T> fold<R extends Object>(
+    ResolvableOption<T> Function(Some<T> some) onSome,
+    ResolvableOption<T> Function(None<T> none) onNone,
   ) {
-    return onNone();
+    try {
+      return onNone(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [None<T>, fold],
+          error: e,
+        ),
+      );
+    }
   }
 
   @override
@@ -252,7 +270,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<dynamic> or<R extends Object>(Option<R> other) => other;
+  Option<Object> or<R extends Object>(Option<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')

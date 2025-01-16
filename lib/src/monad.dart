@@ -14,9 +14,9 @@ import 'package:meta/meta.dart';
 
 import 'dart:async' show FutureOr;
 
-part 'option.dart';
-part 'result.dart';
-part 'resolvable.dart';
+part '_option.dart';
+part '_result.dart';
+part '_resolvable.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -86,3 +86,6 @@ sealed class Monad<T extends Object> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef ResolvableOption<T extends Object> = Resolvable<Option<T>>;
+
+typedef SyncSome<T extends Object> = Sync<Some<T>>;
+//typedef SyncNone<T extends Object> = Sync<None<T>>;

@@ -1,5 +1,9 @@
-// Example: Using Resolvable and Result for safer error handling without try-catch
-// blocks. Explicit error handling is enforced, providing compile-time safety.
+// Example:
+//
+// Using Resolvable and Result for safer error handling without try-catch
+// blocks.
+//
+// Explicit error handling is enforced, providing compile-time safety.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 
@@ -8,7 +12,7 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   // Fetch the IP address and handle both success and error results.
-  fetchIpAddress().thenMap(
+  fetchIpAddress().mapB(
     (result) => result.ifOk((e) {
       // ignore: invalid_use_of_visible_for_testing_member
       print('IP address: ${result.unwrap()}');

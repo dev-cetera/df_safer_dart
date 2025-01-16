@@ -60,26 +60,48 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  T unwrapSyncValue() => unwrapSync().unwrapValue();
+  T unwrapSyncValue() => unwrapSync().value.unwrap();
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<T> unwrapAsyncValue() => unwrapAsync().unwrapValue();
+  Future<T> unwrapAsyncValue() => unwrapAsync().value.then((e) => e.unwrap());
 
   Resolvable<T> ifSync(void Function(Sync<T> sync) callback);
 
   Resolvable<T> ifAsync(void Function(Async<T> async) callback);
 
-  Resolvable<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete);
-
   Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
-  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
-    TOption Function(Result<T> value) onSync,
-    TOption Function(Future<Result<T>> value) onAsync,
+  Resolvable<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper);
+
+  Resolvable<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper);
+
+  ResolvableOption<R> fold<R extends Object>(
+    ResolvableOption<R> Function(Sync<T> sync) onSync,
+    ResolvableOption<R> Function(Async<T> async) onAsync,
   );
 
   Async<T> toAsync();
+
+  Resolvable<R> cast<R extends Object>() {
+    if (isSync()) {
+      return Sync.unsafe(() {
+        final okOrErr = (sync().unwrap().value).cast<R>();
+        if (okOrErr.isErr()) {
+          throw okOrErr;
+        }
+        return okOrErr.unwrap();
+      });
+    } else {
+      return Async.unsafe(() async {
+        final okOrErr = (await async().unwrap().value).cast<R>();
+        if (okOrErr.isErr()) {
+          throw okOrErr;
+        }
+        return okOrErr.unwrap();
+      });
+    }
+  }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -115,11 +137,6 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   // ignore: invalid_use_of_visible_for_testing_member
   Option<Err<T>> err() => value.err();
-
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  T unwrapValue() => ok().unwrap().unwrap();
 
   @override
   @pragma('vm:prefer-inline')
@@ -157,23 +174,38 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Sync<T> ifAsync(void Function(Async<T> async) callback) => this;
 
   @override
-  @pragma('vm:prefer-inline')
-  Sync<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete) {
-    return Sync(onComplete(value));
-  }
-
-  @override
-  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
-    TOption Function(Result<T> value) onSync,
-    TOption Function(Future<Result<T>> value) onAsync,
+  ResolvableOption<R> fold<R extends Object>(
+    ResolvableOption<R> Function(Sync<T> sync) onSync,
+    ResolvableOption<R> Function(Async<T> async) onAsync,
   ) {
-    return onSync(value);
+    try {
+      return onSync(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [Sync<T>, fold],
+          error: e,
+        ),
+      );
+    }
   }
 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(R Function(T value) mapper) {
     return Sync(value.map((e) => mapper(e)));
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper) {
+    return Sync(mapper(value));
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper) {
+    return Resolvable.unsafe(() => mapper(value.unwrap()));
   }
 
   @override
@@ -215,11 +247,6 @@ final class Async<T extends Object> extends Resolvable<T> {
   // ignore: invalid_use_of_visible_for_testing_member
   Future<Option<Err<T>>> err() => value.then((e) => e.err());
 
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Future<T> unwrapValue() => ok().then((e) => e.unwrap().unwrap());
-
   @override
   @pragma('vm:prefer-inline')
   bool isSync() => false;
@@ -257,13 +284,37 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> thenMap<R extends Object>(Result<R> Function(Result<T> value) onComplete) {
+  ResolvableOption<R> fold<R extends Object>(
+    ResolvableOption<R> Function(Sync<T> sync) onSync,
+    ResolvableOption<R> Function(Async<T> async) onAsync,
+  ) {
+    try {
+      return onAsync(this);
+    } catch (e) {
+      return SyncSome(
+        Err(
+          stack: [Async<T>, fold],
+          error: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  @override
+  Async<R> map<R extends Object>(R Function(T value) mapper) {
+    return Async(value.then((e) => e.map(mapper)));
+  }
+
+  @override
+  Async<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper) {
     return Async.unsafe(() async {
       final a = await value;
       if (a.isErr()) {
         throw a;
       }
-      final b = onComplete(a);
+      final b = mapper(a);
       if (b.isErr()) {
         throw b;
       }
@@ -273,18 +324,8 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  TOption fold<R extends Object, TOption extends Option<Resolvable<R>>>(
-    TOption Function(Result<T> value) onSync,
-    TOption Function(Future<Result<T>> value) onAsync,
-  ) {
-    return onAsync(value);
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  @override
-  Async<R> map<R extends Object>(R Function(T value) mapper) {
-    return Async(value.then((e) => e.map(mapper)));
+  Async<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper) {
+    return Async.unsafe(() async => mapper((await value).unwrap()));
   }
 
   @override
