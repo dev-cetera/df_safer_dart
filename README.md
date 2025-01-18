@@ -46,7 +46,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() async {
-  fetchIpAddress().mapB(
+  fetchIpAddress().flatMap(
     (result) => result.ifOk((e) {
       print('IP address: ${result.unwrap()}');
     }).ifErr((e) {
@@ -71,7 +71,6 @@ Async<String> fetchIpAddress() {
     },
   );
 }
-
 ```
 
 ---
