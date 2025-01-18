@@ -1,10 +1,14 @@
 # Changelog
 
+## [0.4.1]
+
+- Released @ 1/2025 (UTC)
+- docs: Update readme
+
 ## [0.4.0]
 
 - Released @ 1/2025 (UTC)
 - breaking: Imrove methods for better chaining and simplify
-- docs: Update readme
 
 ## [0.3.0]
 
