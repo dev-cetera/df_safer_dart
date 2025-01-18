@@ -99,13 +99,9 @@ extension UnwrapOnResolvableOptionX<T extends Object> on ResolvableOption<T> {
   T unwrapSync() => sync().unwrap().value.unwrap().unwrap();
 
   @pragma('vm:prefer-inline')
-  Future<T> unwrapAsync() =>
-      async().unwrap().value.then((e) => e.unwrap().unwrap());
+  Future<T> unwrapAsync() => async().unwrap().value.then((e) => e.unwrap().unwrap());
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef ResolvableOption<T extends Object> = Resolvable<Option<T>>;
-
-typedef SyncSome<T extends Object> = Sync<Some<T>>;
-//typedef SyncNone<T extends Object> = Sync<None<T>>;
