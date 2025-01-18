@@ -52,9 +52,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
-  Resolvable<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper);
+  Resolvable<R> flatMap<R extends Object>(
+      Result<R> Function(Result<T> value) mapper,,,);
 
-  Resolvable<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper);
+  Resolvable<R> mapFutureOr<R extends Object>(
+      FutureOr<R> Function(T value) mapper,,,);
 
   Resolvable<Object> fold(
     Resolvable<Object>? Function(Sync<T> sync) onSync,
@@ -177,13 +179,15 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper) {
+  Sync<R> flatMap<R extends Object>(
+      Result<R> Function(Result<T> value) mapper,,,) {
     return Sync(mapper(value));
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper) {
+  Resolvable<R> mapFutureOr<R extends Object>(
+      FutureOr<R> Function(T value) mapper,,,) {
     return Resolvable.unsafe(() => mapper(value.unwrap()));
   }
 
@@ -298,7 +302,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   }
 
   @override
-  Async<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper) {
+  Async<R> flatMap<R extends Object>(
+      Result<R> Function(Result<T> value) mapper,,,) {
     return Async.unsafe(() async {
       final a = await value;
       if (a.isErr()) {

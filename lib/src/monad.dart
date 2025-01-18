@@ -99,7 +99,8 @@ extension UnwrapOnResolvableOptionX<T extends Object> on ResolvableOption<T> {
   T unwrapSync() => sync().unwrap().value.unwrap().unwrap();
 
   @pragma('vm:prefer-inline')
-  Future<T> unwrapAsync() => async().unwrap().value.then((e) => e.unwrap().unwrap());
+  Future<T> unwrapAsync() =>
+      async().unwrap().value.then((e) => e.unwrap().unwrap());
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

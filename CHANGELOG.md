@@ -1,8 +1,13 @@
 # Changelog
 
+## [0.4.0]
+
+- Released @ 1/2025 (UTC)
+- breaking: Imrove methods for better chaining and simplify
+
 ## [0.3.0]
 
-- Released @ 16/2025 (UTC)
+- Released @ 1/2025 (UTC)
 - breaking: Improve integration of monads
 
 ## [0.2.0]

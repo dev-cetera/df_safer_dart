@@ -32,12 +32,15 @@ void _check<R extends Object>(ResolvableOption<R> src) {
     src.ifOk((e) {
       final src = e.value;
       print('Ok!');
-      src.ifSome((e) {
-        final src = e.value;
-        print('Some: $src!');
-      }).unwrap().ifNone(() {
-        print('None!');
-      });
+      src
+          .ifSome((e) {
+            final src = e.value;
+            print('Some: $src!');
+          })
+          .unwrap()
+          .ifNone(() {
+            print('None!');
+          });
     }).ifErr((e) {
       final src = e.error;
       print('Error: $src!');

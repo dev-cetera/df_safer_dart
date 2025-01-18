@@ -7,14 +7,14 @@
 // void main() async {
 //   final string = const Sync(Ok('Hello World!'));
 //   final string1 = stringMapper(string);
-//   
+//
 //   print(string1.unwrapSyncValue());
 
 //   final futureString = Resolvable.unsafe(
 //     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
 //   );
 //   final futureString1 = stringMapper(futureString);
-//   
+//
 //   print(await futureString1.unwrapAsyncValue());
 // }
 

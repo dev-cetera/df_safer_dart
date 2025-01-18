@@ -38,7 +38,8 @@ Async<String> fetchIpAddress() {
   // objects as it is the standard and will help with debugging.
   return Async.unsafe(
     () async {
-      final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+      final response =
+          await http.get(Uri.parse('https://api.ipify.org?format=json'));
       // Throw an Err if the status code is not 200. Any other exceptions within
       // Resolvable.wrap will be caught and wrapped in an Err.
       if (response.statusCode != 200) {
