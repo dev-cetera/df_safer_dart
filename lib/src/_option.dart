@@ -29,21 +29,19 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   bool isNone();
 
-  @visibleForTesting
   Result<Some<T>> some();
 
-  @visibleForTesting
   Result<None<T>> none();
 
-  Option<T> ifSome(void Function(Some<T> some) callback);
+  Result<Option<T>> ifSome(void Function(Some<T> some) callback);
 
-  Option<T> ifNone(void Function() callback);
+  Result<Option<T>> ifNone(void Function() callback);
 
-  @visibleForTesting
   T unwrap();
 
   T unwrapOr(T fallback);
 
+  @pragma('vm:prefer-inline')
   T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
 
   Option<R> map<R extends Object>(R Function(T value) mapper);
@@ -52,12 +50,12 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   Result<T> asResult();
 
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Some<T> some) onSome,
-    ResolvableOption<T> Function(None<T> none) onNone,
+  Result<Option<Object>> fold(
+    Option<Object>? Function(Some<T> some) onSome,
+    Option<Object>? Function(None<T> none) onNone,
   );
 
-  Option<(T, R)> and<R extends Object>(Option<R> other);
+  (Option<T>, Option<R>) and<R extends Object>(Option<R> other);
 
   Option<Object> or<R extends Object>(Option<R> other);
 
@@ -86,22 +84,29 @@ final class Some<T extends Object> extends Option<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<None<T>> none() {
+  Err<None<T>> none() {
     return const Err(
-      stack: [Some, 'some'],
-      error: 'Cannot get None from Some.',
+      stack: ['Some', 'some'],
+      error: 'Called none() on Some.',
     );
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifNone(void Function() callback) => this;
+  Ok<Some<T>> ifNone(void Function() callback) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifSome(void Function(Some<T> some) callback) {
-    callback(this);
-    return this;
+  Result<Option<T>> ifSome(void Function(Some<T> some) callback) {
+    try {
+      callback(this);
+      return Ok(this);
+    } catch (e) {
+      return Err(
+        stack: ['Some', 'ifSome'],
+        error: e,
+      );
+    }
   }
 
   @override
@@ -126,29 +131,27 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Some<T> some) onSome,
-    ResolvableOption<T> Function(None<T> none) onNone,
+  Result<Option<Object>> fold(
+    Option<Object>? Function(Some<T> some) onSome,
+    Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
-      return onSome(this);
+      return Ok(onSome(this) ?? this);
     } catch (e) {
-      return SyncSome(
-        Err(
-          stack: [Some, 'fold'],
-          error: e,
-        ),
+      return Err(
+        stack: ['Some', 'fold'],
+        error: e,
       );
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, R)> and<R extends Object>(Option<R> other) {
+  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) {
     if (other.isSome()) {
-      return Some((value, other.unwrap()));
+      return (this, other);
     } else {
-      return const None();
+      return (const None(), const None());
     }
   }
 
@@ -170,8 +173,8 @@ final class Some<T extends Object> extends Option<T> {
       return Ok(Option.fromNullable(value));
     } else {
       return Err(
-        stack: [Some, 'cast'],
-        error: 'Cannot cast ${value.runtimeType} to $R',
+        stack: ['Some', 'cast'],
+        error: 'Tried casting ${value.runtimeType} to $R',
       );
     }
   }
@@ -195,21 +198,28 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   Result<Some<T>> some() {
     return const Err(
-      stack: [None, 'some'],
-      error: 'Cannot get Some from a None.',
+      stack: ['None', 'some'],
+      error: 'Called some() on None.',
     );
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifNone(void Function() callback) {
-    callback();
-    return this;
+  Result<Option<T>> ifNone(void Function() callback) {
+    try {
+      callback();
+      return Ok(this);
+    } catch (e) {
+      return Err(
+        stack: ['None', 'ifNone'],
+        error: e,
+      );
+    }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> ifSome(void Function(Some<T> some) callback) => this;
+  Ok<None<T>> ifSome(void Function(Some<T> some) callback) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -221,8 +231,8 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   T unwrap() {
     throw const Err(
-      stack: [None, 'unwrap'],
-      error: 'Cannot unwrap a None.',
+      stack: ['None', 'unwrap'],
+      error: 'Called unwrap() on None.',
     );
   }
 
@@ -238,8 +248,8 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   Result<T> asResult() {
     return const Err(
-      stack: [None, 'asResult'],
-      error: 'Cannot convert a None to a Result.',
+      stack: ['None', 'asResult'],
+      error: 'Tried converting None to Result.',
     );
   }
 
@@ -249,25 +259,23 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Some<T> some) onSome,
-    ResolvableOption<T> Function(None<T> none) onNone,
+  Result<Option<Object>> fold(
+    Option<Object>? Function(Some<T> some) onSome,
+    Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
-      return onNone(this);
+      return Ok(onNone(this) ?? this);
     } catch (e) {
-      return SyncSome(
-        Err(
-          stack: [None, 'fold'],
-          error: e,
-        ),
+      throw Err(
+        stack: ['Option', 'fold'],
+        error: e,
       );
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<(T, R)> and<R extends Object>(Option<R> other) => const None();
+  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) => (const None(), const None());
 
   @override
   @pragma('vm:prefer-inline')

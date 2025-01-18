@@ -16,7 +16,7 @@ Dart’s traditional error-handling approach depends on null checks, try-catch b
 
 Aiming to address these challenges, this package offers safer alternatives and more predictable mechanisms.
 
-While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like Future, FutureOr, try-catch, and nullable types may be more appropriate.
+While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like Future, FutureOr, try-catch, and nullable types may be more appropriate.
 
 This package introduces three core monads —- `Result`, `Option`, and `Resolvable` -- that work seamlessly together:
 
@@ -61,7 +61,7 @@ Async<String> fetchIpAddress() {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
       if (response.statusCode != 200) {
         throw const Err(
-          stack: [fetchIpAddress],
+          stack: ['fetchIpAddress'],
           error: 'Failed to fetch IP address',
         );
       }

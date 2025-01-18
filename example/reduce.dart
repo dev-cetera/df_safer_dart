@@ -35,7 +35,7 @@ void _check<R extends Object>(ResolvableOption<R> src) {
       src.ifSome((e) {
         final src = e.value;
         print('Some: $src!');
-      }).ifNone(() {
+      }).unwrap().ifNone(() {
         print('None!');
       });
     }).ifErr((e) {

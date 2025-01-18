@@ -35,8 +35,8 @@ class SafeCompleter<T extends Object> {
     if (isCompleted) {
       return const Sync(
         Err(
-          stack: [SafeCompleter, 'resolve'],
-          error: 'Cannot complete an already completed SafeCompleter.',
+          stack: ['SafeCompleter', 'resolve'],
+          error: 'Tried completing a completed SafeCompleter.',
         ),
       );
     }
@@ -55,7 +55,6 @@ class SafeCompleter<T extends Object> {
   @pragma('vm:prefer-inline')
   Resolvable<T> get resolvable {
     return Resolvable.unsafe(
-      // ignore: invalid_use_of_visible_for_testing_member
       () => _value.isSome() ? _value.unwrap() : _completer.future,
     );
   }

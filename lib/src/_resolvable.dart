@@ -31,7 +31,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } catch (e) {
       return Sync(
         Err<T>(
-          stack: [Sync, 'Sync.unsafe'],
+          stack: ['Sync', 'Sync.unsafe'],
           error: e,
         ),
       );
@@ -42,29 +42,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   bool isAsync();
 
-  @visibleForTesting
   Result<Sync<T>> sync();
 
-  @visibleForTesting
   Result<Async<T>> async();
-
-  // @visibleForTesting
-  // @pragma('vm:prefer-inline')
-  // // ignore: invalid_use_of_visible_for_testing_member
-  // Sync<T> unwrapSync() => sync().unwrap();
-
-  // @visibleForTesting
-  // @pragma('vm:prefer-inline')
-  // // ignore: invalid_use_of_visible_for_testing_member
-  // Async<T> unwrapAsync() => async().unwrap();
-
-  // @visibleForTesting
-  // @pragma('vm:prefer-inline')
-  // T unwrapSyncValue() => unwrapSync().value.unwrap();
-
-  // @visibleForTesting
-  // @pragma('vm:prefer-inline')
-  // Future<T> unwrapAsyncValue() => unwrapAsync().value.then((e) => e.unwrap());
 
   Resolvable<T> ifSync(void Function(Sync<T> sync) callback);
 
@@ -72,13 +52,13 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Resolvable<R> map<R extends Object>(R Function(T value) mapper);
 
-  Resolvable<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper);
+  Resolvable<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper);
 
-  Resolvable<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper);
+  Resolvable<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper);
 
-  ResolvableOption<R> fold<R extends Object>(
-    ResolvableOption<R> Function(Sync<T> sync) onSync,
-    ResolvableOption<R> Function(Async<T> async) onAsync,
+  Resolvable<Object> fold(
+    Resolvable<Object>? Function(Sync<T> sync) onSync,
+    Resolvable<Object>? Function(Async<T> async) onAsync,
   );
 
   Async<T> toAsync();
@@ -121,7 +101,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     } catch (e) {
       return Sync(
         Err<T>(
-          stack: [Sync, 'Sync.unsafe'],
+          stack: ['Sync', 'Sync.unsafe'],
           error: e,
         ),
       );
@@ -130,13 +110,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @protected
   @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Option<Ok<T>> ok() => value.ok();
+  Result<T> ok() => value.ok();
 
   @protected
   @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Option<Err<T>> err() => value.err();
+  Err<T> err() => value.err();
 
   @override
   @pragma('vm:prefer-inline')
@@ -148,16 +126,16 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Sync<T>> sync() => Ok(this);
+  Ok<Sync<T>> sync() => Ok(this);
 
   @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Async<T>> async() {
+  Err<Async<T>> async() {
     return const Err(
-      stack: [Sync, 'sync'],
-      error: 'Cannot get Async from Sync.',
+      stack: ['Sync', 'sync'],
+      error: 'Called async() on Sync.',
     );
   }
 
@@ -175,16 +153,16 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Sync<T> ifAsync(void Function(Async<T> async) callback) => this;
 
   @override
-  ResolvableOption<R> fold<R extends Object>(
-    ResolvableOption<R> Function(Sync<T> sync) onSync,
-    ResolvableOption<R> Function(Async<T> async) onAsync,
+  Resolvable<Object> fold(
+    Resolvable<Object>? Function(Sync<T> sync) onSync,
+    Resolvable<Object>? Function(Async<T> async) onAsync,
   ) {
     try {
-      return onSync(this);
+      return onSync(this) ?? this;
     } catch (e) {
-      return SyncSome(
+      return Sync(
         Err(
-          stack: [Sync, 'fold'],
+          stack: ['Sync', 'fold'],
           error: e,
         ),
       );
@@ -199,13 +177,13 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper) {
+  Sync<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper) {
     return Sync(mapper(value));
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper) {
+  Resolvable<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper) {
     return Resolvable.unsafe(() => mapper(value.unwrap()));
   }
 
@@ -231,7 +209,7 @@ final class Async<T extends Object> extends Resolvable<T> {
         return e.castErr<T>();
       } catch (e) {
         return Err<T>(
-          stack: [Async, 'Async.unsafe'],
+          stack: ['Async', 'Async.unsafe'],
           error: e,
         );
       }
@@ -240,13 +218,11 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Future<Option<Ok<T>>> ok() => value.then((e) => e.ok());
+  Future<Result<T>> ok() => value.then((e) => e.ok());
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  // ignore: invalid_use_of_visible_for_testing_member
-  Future<Option<Err<T>>> err() => value.then((e) => e.err());
+  Future<Result<T>> err() => value.then((e) => e.err());
 
   @override
   @pragma('vm:prefer-inline')
@@ -261,8 +237,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Result<Sync<T>> sync() {
     return const Err(
-      stack: [Async, 'sync'],
-      error: 'Cannot get Sync from Async.',
+      stack: ['Async', 'sync'],
+      error: 'Called sync() on Async.',
     );
   }
 
@@ -279,23 +255,36 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<T> ifAsync(void Function(Async<T> async) callback) {
-    callback(this);
-    return this;
+    try {
+      callback(this);
+      return this;
+    } catch (e) {
+      return Async(
+        Future.value(
+          Err(
+            stack: ['Async', 'ifAsync'],
+            error: e,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  ResolvableOption<R> fold<R extends Object>(
-    ResolvableOption<R> Function(Sync<T> sync) onSync,
-    ResolvableOption<R> Function(Async<T> async) onAsync,
+  Resolvable<Object> fold(
+    Resolvable<Object>? Function(Sync<T> sync) onSync,
+    Resolvable<Object>? Function(Async<T> async) onAsync,
   ) {
     try {
-      return onAsync(this);
+      return onAsync(this) ?? this;
     } catch (e) {
-      return SyncSome(
-        Err(
-          stack: [Async, 'fold'],
-          error: e,
+      return Async(
+        Future.value(
+          Err(
+            stack: ['Async', 'fold'],
+            error: e,
+          ),
         ),
       );
     }
@@ -309,7 +298,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   }
 
   @override
-  Async<R> mapB<R extends Object>(Result<R> Function(Result<T> value) mapper) {
+  Async<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper) {
     return Async.unsafe(() async {
       final a = await value;
       if (a.isErr()) {
@@ -325,7 +314,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> mapC<R extends Object>(FutureOr<R> Function(T value) mapper) {
+  Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper) {
     return Async.unsafe(() async => mapper((await value).unwrap()));
   }
 

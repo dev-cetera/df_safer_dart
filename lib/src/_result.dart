@@ -17,24 +17,20 @@ part of 'monad.dart';
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
-  // ignore: invalid_use_of_visible_for_testing_member
-  Option<T> get asOption => isOk() ? Some(ok().unwrap().value) : const None();
+  Option<T> get asOption => isOk() ? Some(ok().unwrap()) : const None();
 
   bool isOk();
 
   bool isErr();
 
-  @visibleForTesting
-  Option<Ok<T>> ok();
+  Result<T> ok();
 
-  @visibleForTesting
-  Option<Err<T>> err();
+  Err<T> err();
 
   Result<T> ifOk(void Function(Ok<T> ok) callback);
 
   Result<T> ifErr(void Function(Err<T> err) callback);
 
-  @visibleForTesting
   T unwrap();
 
   T unwrapOr(T fallback);
@@ -44,14 +40,14 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   Result<R> map<R extends Object>(R Function(T value) mapper);
 
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Ok<T> ok) onOk,
-    ResolvableOption<T> Function(Err<T> err) onErr,
+  Result<Object> fold(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
   );
 
-  Result<dynamic> and<R extends Object>(Result<R> other);
+  (Option<T>, Option<R>) and<R extends Object>(Result<R> other);
 
-  Result<dynamic> or<R extends Object>(Result<R> other);
+  Result<Object> or<R extends Object>(Result<R> other);
 
   Result<R> cast<R extends Object>();
 
@@ -59,15 +55,13 @@ sealed class Result<T extends Object> extends Monad<T> {
     if (result.isOk()) {
       final innerResult = result.unwrap();
       if (innerResult.isOk()) {
-        // ignore: invalid_use_of_visible_for_testing_member
-        return innerResult.ok().unwrap();
+        return innerResult.ok();
       } else {
-        // ignore: invalid_use_of_visible_for_testing_member
-        return innerResult.err().unwrap().castErr();
+        return innerResult.err();
       }
     }
-    // ignore: invalid_use_of_visible_for_testing_member
-    return result.err().unwrap().castErr();
+
+    return result.err().castErr();
   }
 }
 
@@ -87,18 +81,30 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Ok<T>> ok() => Some(this);
+  Ok<T> ok() => this;
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  None<Err<T>> err() => const None();
+  Err<T> err() {
+    return Err(
+      stack: ['Ok', 'err'],
+      error: 'Called err() on Ok.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
   Result<T> ifOk(void Function(Ok<T> ok) callback) {
-    callback(this);
-    return this;
+    try {
+      callback(this);
+      return this;
+    } catch (e) {
+      return Err(
+        stack: ['Ok', 'ifOk'],
+        error: e,
+      );
+    }
   }
 
   @override
@@ -119,36 +125,33 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Ok<T> ok) onOk,
-    ResolvableOption<T> Function(Err<T> err) onErr,
+  Result<Object> fold(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
   ) {
     try {
-      return onOk(this);
+      return onOk(this) ?? this;
     } catch (e) {
-      return SyncSome(
-        Err(
-          stack: [Ok, 'fold'],
-          error: e,
-        ),
+      return Err(
+        stack: ['Ok', 'fold'],
+        error: e,
       );
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R extends Object>(Result<R> other) {
+  (Option<T>, Option<R>) and<R extends Object>(Result<R> other) {
     if (other.isOk()) {
-      return Ok((value, other.unwrap()));
+      return (Some(this.unwrap()), Some(other.unwrap()));
     } else {
-      // ignore: invalid_use_of_visible_for_testing_member
-      return other.err().unwrap();
+      return (const None(), const None());
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or<R extends Object>(Result<R> other) => this;
+  Result<Object> or<R extends Object>(Result<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -162,7 +165,7 @@ class Ok<T extends Object> extends Result<T> {
       return Result.combine(Ok(Ok(value)));
     } else {
       return Err(
-        stack: [Err, 'cast'],
+        stack: ['Err', 'cast'],
         error: 'Cannot cast ${value.runtimeType} to $R',
       );
     }
@@ -190,11 +193,16 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  None<Ok<T>> ok() => const None();
+  Err<T> ok() {
+    return Err(
+      stack: ['Ok', 'ok'],
+      error: 'Called ok() on Err.',
+    );
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Err<T>> err() => Some(this);
+  Err<T> err() => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -213,8 +221,8 @@ class Err<T extends Object> extends Result<T> {
   @pragma('vm:prefer-inline')
   T unwrap() {
     throw const Err(
-      stack: [Err, 'unwrap'],
-      error: 'Cannot unwrap an Err.',
+      stack: ['Err', 'unwrap'],
+      error: 'Called unwrap() on Err.',
     );
   }
 
@@ -228,18 +236,16 @@ class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  ResolvableOption<T> fold<R extends Object>(
-    ResolvableOption<T> Function(Ok<T> ok) onOk,
-    ResolvableOption<T> Function(Err<T> err) onErr,
+  Result<Object> fold(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
   ) {
     try {
-      return onErr(this);
+      return onErr(this) ?? this;
     } catch (e) {
-      return SyncSome(
-        Err(
-          stack: [Err, 'fold'],
-          error: e,
-        ),
+      return Err(
+        stack: ['Err', 'fold'],
+        error: e,
       );
     }
   }
@@ -247,11 +253,13 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> and<R extends Object>(Result<R> other) => err().unwrap();
+  (Option<T>, Option<R>) and<R extends Object>(Result<R> other) {
+    return (const None(), const None());
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<dynamic> or<R extends Object>(Result<R> other) => other;
+  Result<Object> or<R extends Object>(Result<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')

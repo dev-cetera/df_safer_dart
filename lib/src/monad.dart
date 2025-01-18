@@ -77,8 +77,8 @@ sealed class Monad<T extends Object> {
   @pragma('vm:prefer-inline')
   Err _castError<R extends Object>() {
     return Err(
-      stack: [Monad, 'reduce'],
-      error: 'Failed to cast $T to $R.',
+      stack: ['Monad', 'reduce'],
+      error: 'Tried casting $T to $R.',
     );
   }
 }

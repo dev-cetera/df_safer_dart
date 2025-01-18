@@ -12,9 +12,8 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   // Fetch the IP address and handle both success and error results.
-  fetchIpAddress().mapB(
+  fetchIpAddress().flatMap(
     (result) => result.ifOk((e) {
-      // ignore: invalid_use_of_visible_for_testing_member
       print('IP address: ${result.unwrap()}');
     }).ifErr((e) {
       print('Error: $e');
@@ -45,7 +44,7 @@ Async<String> fetchIpAddress() {
       if (response.statusCode != 200) {
         throw const Err(
           // The stack will be printed when the error is thrown.
-          stack: [fetchIpAddress],
+          stack: ['fetchIpAddress'],
           error: 'Failed to fetch IP address',
         );
       }

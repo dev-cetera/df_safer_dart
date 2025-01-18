@@ -79,7 +79,7 @@ class Sequential {
     FutureOr<Option> Function(Option previous) function,
   ) {
     _isEmpty = false;
-    _current = _current.mapC(function).map((e) {
+    _current = _current.mapFutureOr(function).map((e) {
       _isEmpty = true;
       return e;
     });

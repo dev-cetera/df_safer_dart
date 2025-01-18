@@ -11,16 +11,16 @@
 ##.title~
 
 name: df_safer_dart
-description: A package inspired by functional programming designed to enhance the structure, safety, and debuggability of your applications.
-version: 0.3.0
-repository: https://github.com/dev_cetera/dart_package_template
+description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
+version: 0.4.0
+repository: https://github.com/dev-cetera/dart_package_template
 funding:
   - https://www.buymeacoffee.com/dev_cetera
 topics:
   - rust
   - error-handling
   - functional-programming
-  - async-programming
+  - debugging
   - monads
 
 ## -----------------------------------------------------------------------------
