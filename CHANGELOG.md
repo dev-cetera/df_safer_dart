@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.3]
+
+- Released @ 1/2025 (UTC)
+- feat: Add useful typedefs ValueOrNone and ValueOrErr
+
 ## [0.4.2]
 
 - Released @ 1/2025 (UTC)
