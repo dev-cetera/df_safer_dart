@@ -27,6 +27,9 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   Err<T> err();
 
+  @pragma('vm:prefer-inline')
+  Result<T> result() => this;
+
   Result<T> ifOk(void Function(Ok<T> ok) callback);
 
   Result<T> ifErr(void Function(Err<T> err) callback);
@@ -121,8 +124,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')

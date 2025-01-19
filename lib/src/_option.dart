@@ -33,6 +33,9 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   Result<None<T>> none();
 
+  @pragma('vm:prefer-inline')
+  Option<T> option() => this;
+
   Result<Option<T>> ifSome(void Function(Some<T> some) callback);
 
   Result<Option<T>> ifNone(void Function() callback);
@@ -119,13 +122,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Option<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -277,8 +278,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) =>
-      (const None(), const None());
+  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) => (const None(), const None());
 
   @override
   @pragma('vm:prefer-inline')

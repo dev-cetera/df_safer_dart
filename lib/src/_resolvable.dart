@@ -46,6 +46,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Result<Async<T>> async();
 
+  @pragma('vm:prefer-inline')
+  Resolvable<T> resolvable() => this;
+
   Resolvable<T> ifSync(void Function(Sync<T> sync) callback);
 
   Resolvable<T> ifAsync(void Function(Async<T> async) callback);
