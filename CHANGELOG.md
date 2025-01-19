@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.2]
+
+- Released @ 1/2025 (UTC)
+- chore: Add option(), resolvable() and result() methods for casting
+
 ## [0.4.1]
 
 - Released @ 1/2025 (UTC)

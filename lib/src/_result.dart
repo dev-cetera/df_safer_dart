@@ -124,7 +124,8 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
