@@ -48,10 +48,12 @@ void _check<R extends Object>(ResolvableOption<R> src) {
   }
 
   src.ifAsync((e) async {
+    // ignore: invalid_use_of_visible_for_testing_member
     final src = await e.value;
     internal(src);
     print('Async!');
   }).ifSync((e) {
+    // ignore: invalid_use_of_visible_for_testing_member
     final src = e.value;
     internal(src);
   });

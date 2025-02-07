@@ -40,17 +40,23 @@ class SafeCompleter<T extends Object> {
         ),
       );
     }
-    return value.map((e) {
-      _value = Some(e);
-      _completer.complete(e);
-      return e;
+    return value.flatMap((e) {
+      if (e.isOk()) {
+        final a = e.unwrap();
+        _value = Some(a);
+        _completer.complete(a);
+        return e;
+      } else {
+        final err = e.err();
+        _completer.completeError(err);
+        return err;
+      }
     });
   }
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) =>
-      resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')

@@ -17,6 +17,7 @@ void main() async {
     ..add(f4)
     ..add(f5);
   print(sequential.isEmpty);
+  // ignore: invalid_use_of_visible_for_testing_member
   await sequential.last.value;
   print(sequential.isEmpty);
 }

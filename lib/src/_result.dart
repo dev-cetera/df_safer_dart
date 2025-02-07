@@ -17,7 +17,7 @@ part of 'monad.dart';
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
-  Option<T> get asOption => isOk() ? Some(ok().unwrap()) : const None();
+  Option<T> asOption() => isOk() ? Some(ok().unwrap()) : const None();
 
   bool isOk();
 
@@ -30,23 +30,33 @@ sealed class Result<T extends Object> extends Monad<T> {
   @pragma('vm:prefer-inline')
   Result<T> result() => this;
 
-  Result<T> ifOk(void Function(Ok<T> ok) callback);
+  Result<T> ifOk(void Function(Ok<T> ok) unsafe);
 
-  Result<T> ifErr(void Function(Err<T> err) callback);
+  Result<T> ifErr(void Function(Err<T> err) unsafe);
 
   T unwrap();
 
   T unwrapOr(T fallback);
 
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
+  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+
+  @visibleForTesting
+  T? orNull();
 
   Result<R> map<R extends Object>(R Function(T value) mapper);
+
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback);
 
   Result<Object> fold(
     Result<Object>? Function(Ok<T> ok) onOk,
     Result<Object>? Function(Err<T> err) onErr,
   );
+
+  R when<R extends Object>({
+    required R Function(T value) onOkUnsafe,
+    required R Function(Err<T> err) onErrUnsafe,
+  });
 
   (Option<T>, Option<R>) and<R extends Object>(Result<R> other);
 
@@ -70,7 +80,7 @@ sealed class Result<T extends Object> extends Monad<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class Ok<T extends Object> extends Result<T> {
+final class Ok<T extends Object> extends Result<T> {
   final T value;
   const Ok(this.value) : super._();
 
@@ -98,9 +108,9 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(Ok<T> ok) callback) {
+  Result<T> ifOk(void Function(Ok<T> ok) unsafe) {
     try {
-      callback(this);
+      unsafe(this);
       return this;
     } catch (e) {
       return Err(
@@ -112,20 +122,30 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Err<T> err) callback) => this;
+  Ok<T> ifErr(void Function(Err<T> err) unsafe) => this;
 
   @override
   @pragma('vm:prefer-inline')
   T unwrap() => value;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => value;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  T? orNull() => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+
+  @protected
+  @override
+  @pragma('vm:prefer-inline')
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -143,6 +163,15 @@ class Ok<T extends Object> extends Result<T> {
     }
   }
 
+  @protected
+  @override
+  R when<R extends Object>({
+    required R Function(T value) onOkUnsafe,
+    required R Function(Err<T> err) onErrUnsafe,
+  }) {
+    return onOkUnsafe(this.value);
+  }
+
   @override
   @pragma('vm:prefer-inline')
   (Option<T>, Option<R>) and<R extends Object>(Result<R> other) {
@@ -155,7 +184,7 @@ class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Object> or<R extends Object>(Result<R> other) => this;
+  Ok<Object> or<R extends Object>(Result<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -178,7 +207,7 @@ class Ok<T extends Object> extends Result<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class Err<T extends Object> extends Result<T> {
+final class Err<T extends Object> extends Result<T> {
   final List<Object> stack;
   final Object error;
   const Err({
@@ -208,18 +237,18 @@ class Err<T extends Object> extends Result<T> {
   @pragma('vm:prefer-inline')
   Err<T> err() => this;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(Ok<T> ok) callback) => this;
+  Err<T> ifOk(void Function(Ok<T> ok) unsafe) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(void Function(Err<T> err) callback) {
-    callback(this);
+  Err<T> ifErr(void Function(Err<T> err) unsafe) {
+    unsafe(this);
     return this;
   }
 
-  @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
@@ -230,13 +259,24 @@ class Err<T extends Object> extends Result<T> {
     );
   }
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => fallback;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => castErr<R>();
+  T? orNull() => null;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<R> map<R extends Object>(R Function(T value) mapper) => castErr<R>();
+
+  @protected
+  @override
+  @pragma('vm:prefer-inline')
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => fallback;
 
   @override
   @pragma('vm:prefer-inline')
@@ -256,8 +296,17 @@ class Err<T extends Object> extends Result<T> {
 
   @protected
   @override
+  R when<R extends Object>({
+    required R Function(T value) onOkUnsafe,
+    required R Function(Err<T> err) onErrUnsafe,
+  }) {
+    return onErrUnsafe(this);
+  }
+
+  @protected
+  @override
   @pragma('vm:prefer-inline')
-  (Option<T>, Option<R>) and<R extends Object>(Result<R> other) {
+  (None<T>, None<R>) and<R extends Object>(Result<R> other) {
     return (const None(), const None());
   }
 
@@ -272,7 +321,7 @@ class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<R> cast<R extends Object>() => castErr();
+  Err<R> cast<R extends Object>() => castErr();
 
   @pragma('vm:prefer-inline')
   Err<R> castErr<R extends Object>() => Err(stack: stack, error: error);

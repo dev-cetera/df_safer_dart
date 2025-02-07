@@ -24,16 +24,14 @@ class Lazy<T extends Object> {
   Option<Resolvable<T>> currentInstance = const None();
 
   /// A constructor function that creates instances of type [T].
-  final TConstructor<T> _constructor;
+  final LazyConstructor<T> _constructor;
 
   Lazy(this._constructor);
 
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    return (currentInstance.isNone()
-            ? currentInstance = Some(_constructor())
-            : currentInstance)
+    return (currentInstance.isNone() ? currentInstance = Some(_constructor()) : currentInstance)
         .unwrap();
   }
 
@@ -49,4 +47,4 @@ class Lazy<T extends Object> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef TConstructor<T extends Object> = Resolvable<T> Function();
+typedef LazyConstructor<T extends Object> = Resolvable<T> Function();

@@ -36,18 +36,23 @@ sealed class Option<T extends Object> extends Monad<T> {
   @pragma('vm:prefer-inline')
   Option<T> option() => this;
 
-  Result<Option<T>> ifSome(void Function(Some<T> some) callback);
+  Result<Option<T>> ifSome(void Function(Some<T> some) unsafe);
 
-  Result<Option<T>> ifNone(void Function() callback);
+  Result<Option<T>> ifNone(void Function() unsafe);
 
   T unwrap();
 
   T unwrapOr(T fallback);
 
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() fallback) => unwrapOr(fallback());
+  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+
+  @visibleForTesting
+  T? orNull();
 
   Option<R> map<R extends Object>(R Function(T value) mapper);
+
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback);
 
   Option<T> filter(bool Function(T value) test);
 
@@ -57,6 +62,11 @@ sealed class Option<T extends Object> extends Monad<T> {
     Option<Object>? Function(Some<T> some) onSome,
     Option<Object>? Function(None<T> none) onNone,
   );
+
+  R when<R extends Object>({
+    required R Function(T value) onSomeUnsafe,
+    required R Function() onNoneUnsafe,
+  });
 
   (Option<T>, Option<R>) and<R extends Object>(Option<R> other);
 
@@ -96,13 +106,13 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Some<T>> ifNone(void Function() callback) => Ok(this);
+  Ok<Some<T>> ifNone(void Function() unsafe) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Option<T>> ifSome(void Function(Some<T> some) callback) {
+  Result<Some<T>> ifSome(void Function(Some<T> some) unsafe) {
     try {
-      callback(this);
+      unsafe(this);
       return Ok(this);
     } catch (e) {
       return Err(
@@ -116,23 +126,32 @@ final class Some<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   T unwrap() => value;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => value;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  T? orNull() => value;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+
+  @protected
+  @override
+  @pragma('vm:prefer-inline')
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> asResult() => Ok<T>(value);
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<T> asResult() => Ok<T>(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -150,6 +169,15 @@ final class Some<T extends Object> extends Option<T> {
     }
   }
 
+  @protected
+  @override
+  R when<R extends Object>({
+    required R Function(T value) onSomeUnsafe,
+    required R Function() onNoneUnsafe,
+  }) {
+    return onSomeUnsafe(this.value);
+  }
+
   @override
   @pragma('vm:prefer-inline')
   (Option<T>, Option<R>) and<R extends Object>(Option<R> other) {
@@ -162,7 +190,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<Object> or<R extends Object>(Option<R> other) => this;
+  Some<Object> or<R extends Object>(Option<R> other) => this;
 
   @pragma('vm:prefer-inline')
   None<T> toNone() => const None();
@@ -201,7 +229,7 @@ final class None<T extends Object> extends Option<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Result<Some<T>> some() {
+  Err<Some<T>> some() {
     return const Err(
       stack: ['None', 'some'],
       error: 'Called some() on None.',
@@ -210,9 +238,9 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Option<T>> ifNone(void Function() callback) {
+  Result<None<T>> ifNone(void Function() unsafe) {
     try {
-      callback();
+      unsafe();
       return Ok(this);
     } catch (e) {
       return Err(
@@ -224,13 +252,12 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> ifSome(void Function(Some<T> some) callback) => Ok(this);
+  Ok<None<T>> ifSome(void Function(Some<T> some) unsafe) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
   Ok<None<T>> none() => Ok(this);
 
-  @nonVirtual
   @protected
   @override
   @pragma('vm:prefer-inline')
@@ -241,17 +268,28 @@ final class None<T extends Object> extends Option<T> {
     );
   }
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => fallback;
 
+  @protected
   @override
   @pragma('vm:prefer-inline')
-  Option<R> map<R extends Object>(R Function(T value) mapper) => None<R>();
+  T? orNull() => null;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> asResult() {
+  None<R> map<R extends Object>(R Function(T value) mapper) => None<R>();
+
+  @protected
+  @override
+  @pragma('vm:prefer-inline')
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => fallback;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<T> asResult() {
     return const Err(
       stack: ['None', 'asResult'],
       error: 'Tried converting None to Result.',
@@ -260,7 +298,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => const None();
+  None<T> filter(bool Function(T value) test) => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -278,10 +316,18 @@ final class None<T extends Object> extends Option<T> {
     }
   }
 
+  @protected
+  @override
+  R when<R extends Object>({
+    required R Function(T value) onSomeUnsafe,
+    required R Function() onNoneUnsafe,
+  }) {
+    return onNoneUnsafe();
+  }
+
   @override
   @pragma('vm:prefer-inline')
-  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) =>
-      (const None(), const None());
+  (None<T>, None<R>) and<R extends Object>(Option<R> other) => (const None(), const None());
 
   @override
   @pragma('vm:prefer-inline')
@@ -293,5 +339,5 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Option<R>> cast<R extends Object>() => const Ok(None());
+  Ok<None<R>> cast<R extends Object>() => const Ok(None());
 }
