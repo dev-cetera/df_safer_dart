@@ -57,9 +57,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Resolvable<R> map<R extends Object>(R Function(T value) unsafe);
 
-  Resolvable<R> flatMap<R extends Object>(Result<R> Function(Result<T> value) mapper);
+  Resolvable<R> flatMap<R extends Object>(
+      Result<R> Function(Result<T> value) mapper,);
 
-  Resolvable<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) unsafe);
+  Resolvable<R> mapFutureOr<R extends Object>(
+      FutureOr<R> Function(T value) unsafe,);
 
   Resolvable<Object> fold(
     Resolvable<Object>? Function(Sync<T> sync) onSync,
