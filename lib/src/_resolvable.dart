@@ -58,10 +58,12 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   Resolvable<R> map<R extends Object>(R Function(T value) unsafe);
 
   Resolvable<R> flatMap<R extends Object>(
-      Result<R> Function(Result<T> value) mapper,);
+    Result<R> Function(Result<T> value) mapper,
+  );
 
   Resolvable<R> mapFutureOr<R extends Object>(
-      FutureOr<R> Function(T value) unsafe,);
+    FutureOr<R> Function(T value) unsafe,
+  );
 
   Resolvable<Object> fold(
     Resolvable<Object>? Function(Sync<T> sync) onSync,
@@ -72,6 +74,8 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     required R Function(T value) onOkUnsafe,
     required R Function(Err<T> err) onErrUnsafe,
   });
+
+  FutureOr<Sync<T>> toSync();
 
   Async<T> toAsync();
 
@@ -229,6 +233,10 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Sync<T> toSync() => this;
+
+  @override
+  @pragma('vm:prefer-inline')
   Async<T> toAsync() => Async(Future.value(value));
 
   @override
@@ -380,6 +388,21 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) unsafe) {
     return Async.unsafe(() async => unsafe((await value).unwrap()));
+  }
+
+  @override
+  Future<Sync<T>> toSync() async {
+    try {
+      final resolved = await value;
+      return Sync(resolved);
+    } catch (e) {
+      return Sync(
+        Err(
+          stack: ['Async', 'toSync'],
+          error: e,
+        ),
+      );
+    }
   }
 
   @protected
