@@ -116,7 +116,7 @@ class _VersionSection {
 
   void addUpdate(String update) {
     updates.add(update);
-    releasedAt = DateTime.now().toUtc();
+    //releasedAt = DateTime.now().toUtc();
   }
 
   //
