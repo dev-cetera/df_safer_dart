@@ -4,7 +4,6 @@
 
 - Released @ 2/2025 (UTC)
 - feat: Added new merge method to Monads
-- test: Test
 
 ## [0.5.1]
 
