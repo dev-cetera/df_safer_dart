@@ -9,8 +9,3 @@
 
 - Released @ 1/2025 (UTC)
 - chore: Add toSync method to Resolvable
-
-## [0.5.0]
-
-- Released @ 12/2024 (UTC)
-- chore: Blah!
