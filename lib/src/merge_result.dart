@@ -49,7 +49,8 @@ extension MergeResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
   Result<T> _merge4() => _merge3()._merge2();
 }
 
-extension MergeResult5<T extends Object> on Result<Result<Result<Result<Result<T>>>>> {
+extension MergeResult5<T extends Object>
+    on Result<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> merge() => _merge5();
 
@@ -57,7 +58,8 @@ extension MergeResult5<T extends Object> on Result<Result<Result<Result<Result<T
   Result<T> _merge5() => _merge4()._merge2();
 }
 
-extension MergeResult6<T extends Object> on Result<Result<Result<Result<Result<Result<T>>>>>> {
+extension MergeResult6<T extends Object>
+    on Result<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> merge() => _merge6();
 
@@ -84,7 +86,10 @@ extension MergeResult8<T extends Object>
 }
 
 extension MergeResult9<T extends Object>
-    on Result<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
+    on
+        Result<
+          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Result<T> merge() => _merge9();
 

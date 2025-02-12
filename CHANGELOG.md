@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.0]
+
+- Released @ 2/2025 (UTC)
+- breaking: Rename Sequantial to SafeSequantial and improve
+
 ## [0.5.3]
 
 - Released @ 2/2025 (UTC)

@@ -36,7 +36,8 @@ extension MergeResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   }
 }
 
-extension MergeResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable<T>>> {
+extension MergeResolvable3<T extends Object>
+    on Resolvable<Resolvable<Resolvable<T>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge3();
 
@@ -44,7 +45,8 @@ extension MergeResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable
   Resolvable<T> _merge3() => _merge2()._merge2();
 }
 
-extension MergeResolvable4<T extends Object> on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
+extension MergeResolvable4<T extends Object>
+    on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge4();
 
@@ -62,7 +64,10 @@ extension MergeResolvable5<T extends Object>
 }
 
 extension MergeResolvable6<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>> {
+    on
+        Resolvable<
+          Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge6();
 
@@ -71,7 +76,12 @@ extension MergeResolvable6<T extends Object>
 }
 
 extension MergeResolvable7<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>> {
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge7();
 
@@ -79,8 +89,15 @@ extension MergeResolvable7<T extends Object>
   Resolvable<T> _merge7() => _merge6()._merge2();
 }
 
-extension MergeResolvable8<T extends Object> on Resolvable<
-    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>> {
+extension MergeResolvable8<T extends Object>
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<
+              Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge8();
 
@@ -88,9 +105,17 @@ extension MergeResolvable8<T extends Object> on Resolvable<
   Resolvable<T> _merge8() => _merge7()._merge2();
 }
 
-extension MergeResolvable9<T extends Object> on Resolvable<
-    Resolvable<
-        Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>>> {
+extension MergeResolvable9<T extends Object>
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<
+              Resolvable<
+                Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+              >
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge9();
 

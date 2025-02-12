@@ -40,7 +40,7 @@ class SafeCompleter<T extends Object> {
         ),
       );
     }
-    
+
     return value.flatMap((e) {
       if (e.isOk()) {
         final a = e.unwrap();
@@ -57,7 +57,8 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> complete(FutureOr<T> value) =>
+      resolve(Resolvable.unsafe(() => value));
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
   @pragma('vm:prefer-inline')
