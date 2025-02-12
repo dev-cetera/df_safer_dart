@@ -38,9 +38,7 @@ class Sequential {
 
   /// Creates an [Sequential] with an optional [buffer] for throttling
   /// execution.
-  Sequential({
-    Duration? buffer,
-  }) : _buffer = buffer;
+  Sequential({Duration? buffer}) : _buffer = buffer;
 
   /// Adds a [function] to the queue that processes the previous value.
   /// Applies an optional [buffer] duration to throttle the execution.

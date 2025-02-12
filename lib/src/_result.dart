@@ -100,10 +100,7 @@ final class Ok<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> err() {
-    return Err(
-      stack: ['Ok', 'err'],
-      error: 'Called err() on Ok.',
-    );
+    return Err(stack: ['Ok', 'err'], error: 'Called err() on Ok.');
   }
 
   @override
@@ -113,10 +110,7 @@ final class Ok<T extends Object> extends Result<T> {
       unsafe(this);
       return this;
     } catch (e) {
-      return Err(
-        stack: ['Ok', 'ifOk'],
-        error: e,
-      );
+      return Err(stack: ['Ok', 'ifOk'], error: e);
     }
   }
 
@@ -158,10 +152,7 @@ final class Ok<T extends Object> extends Result<T> {
     try {
       return onOk(this) ?? this;
     } catch (e) {
-      return Err(
-        stack: ['Ok', 'fold'],
-        error: e,
-      );
+      return Err(stack: ['Ok', 'fold'], error: e);
     }
   }
 
@@ -212,10 +203,7 @@ final class Ok<T extends Object> extends Result<T> {
 final class Err<T extends Object> extends Result<T> {
   final List<Object> stack;
   final Object error;
-  const Err({
-    required this.stack,
-    required this.error,
-  }) : super._();
+  const Err({required this.stack, required this.error}) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -229,10 +217,7 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> ok() {
-    return Err(
-      stack: ['Ok', 'ok'],
-      error: 'Called ok() on Err.',
-    );
+    return Err(stack: ['Ok', 'ok'], error: 'Called ok() on Err.');
   }
 
   @override
@@ -255,10 +240,7 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw const Err(
-      stack: ['Err', 'unwrap'],
-      error: 'Called unwrap() on Err.',
-    );
+    throw const Err(stack: ['Err', 'unwrap'], error: 'Called unwrap() on Err.');
   }
 
   @protected
@@ -289,10 +271,7 @@ final class Err<T extends Object> extends Result<T> {
     try {
       return onErr(this) ?? this;
     } catch (e) {
-      return Err(
-        stack: ['Err', 'fold'],
-        error: e,
-      );
+      return Err(stack: ['Err', 'fold'], error: e);
     }
   }
 

@@ -31,12 +31,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } on Err catch (e) {
       return Sync(e.castErr<T>());
     } catch (e) {
-      return Sync(
-        Err<T>(
-          stack: ['Sync', 'Sync.unsafe'],
-          error: e,
-        ),
-      );
+      return Sync(Err<T>(stack: ['Sync', 'Sync.unsafe'], error: e));
     }
   }
 
@@ -133,12 +128,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     } on Err catch (e) {
       return Sync(e.castErr<T>());
     } catch (e) {
-      return Sync(
-        Err<T>(
-          stack: ['Sync', 'Sync.unsafe'],
-          error: e,
-        ),
-      );
+      return Sync(Err<T>(stack: ['Sync', 'Sync.unsafe'], error: e));
     }
   }
 
@@ -173,10 +163,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Async<T>> async() {
-    return const Err(
-      stack: ['Sync', 'sync'],
-      error: 'Called async() on Sync.',
-    );
+    return const Err(stack: ['Sync', 'sync'], error: 'Called async() on Sync.');
   }
 
   @protected
@@ -187,9 +174,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (e) {
-      return Sync(
-        Err(stack: ['Sync', 'ifSync'], error: e),
-      );
+      return Sync(Err(stack: ['Sync', 'ifSync'], error: e));
     }
   }
 
@@ -206,12 +191,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return onSync(this) ?? this;
     } catch (e) {
-      return Sync(
-        Err(
-          stack: ['Sync', 'fold'],
-          error: e,
-        ),
-      );
+      return Sync(Err(stack: ['Sync', 'fold'], error: e));
     }
   }
 
@@ -227,10 +207,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     required R Function(T value) onOkUnsafe,
     required R Function(Err<T> err) onErrUnsafe,
   }) {
-    return value.when(
-      onOkUnsafe: onOkUnsafe,
-      onErrUnsafe: onErrUnsafe,
-    );
+    return value.when(onOkUnsafe: onOkUnsafe, onErrUnsafe: onErrUnsafe);
   }
 
   @override
@@ -279,10 +256,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       } on Err catch (e) {
         return e.castErr<T>();
       } catch (e) {
-        return Err<T>(
-          stack: ['Async', 'Async.unsafe'],
-          error: e,
-        );
+        return Err<T>(stack: ['Async', 'Async.unsafe'], error: e);
       }
     }());
   }
@@ -337,14 +311,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (e) {
-      return Async(
-        Future.value(
-          Err(
-            stack: ['Async', 'ifAsync'],
-            error: e,
-          ),
-        ),
-      );
+      return Async(Future.value(Err(stack: ['Async', 'ifAsync'], error: e)));
     }
   }
 
@@ -357,14 +324,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     try {
       return onAsync(this) ?? this;
     } catch (e) {
-      return Async(
-        Future.value(
-          Err(
-            stack: ['Async', 'fold'],
-            error: e,
-          ),
-        ),
-      );
+      return Async(Future.value(Err(stack: ['Async', 'fold'], error: e)));
     }
   }
 
@@ -382,10 +342,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     required R Function(Err<T> err) onErrUnsafe,
   }) {
     return value.then(
-      (e) => e.when(
-        onOkUnsafe: onOkUnsafe,
-        onErrUnsafe: onErrUnsafe,
-      ),
+      (e) => e.when(onOkUnsafe: onOkUnsafe, onErrUnsafe: onErrUnsafe),
     );
   }
 
@@ -418,12 +375,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       final resolved = await value;
       return Sync(resolved);
     } catch (e) {
-      return Sync(
-        Err(
-          stack: ['Async', 'toSync'],
-          error: e,
-        ),
-      );
+      return Sync(Err(stack: ['Async', 'toSync'], error: e));
     }
   }
 

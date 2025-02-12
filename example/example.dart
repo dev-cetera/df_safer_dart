@@ -13,11 +13,13 @@ import 'package:http/http.dart' as http;
 void main() async {
   // Fetch the IP address and handle both success and error results.
   fetchIpAddress().flatMap(
-    (result) => result.ifOk((e) {
-      print('IP address: ${result.unwrap()}');
-    }).ifErr((e) {
-      print('Error: $e');
-    }),
+    (result) => result
+        .ifOk((e) {
+          print('IP address: ${result.unwrap()}');
+        })
+        .ifErr((e) {
+          print('Error: $e');
+        }),
   );
 }
 
@@ -36,22 +38,21 @@ Async<String> fetchIpAddress() {
   //
   // 3. You can throw any Objects within unsafe, but prefer throwing Err
   // objects as it is the standard and will help with debugging.
-  return Async.unsafe(
-    () async {
-      final response =
-          await http.get(Uri.parse('https://api.ipify.org?format=json'));
-      // Throw an Err if the status code is not 200. Any other exceptions within
-      // Resolvable.wrap will be caught and wrapped in an Err.
-      if (response.statusCode != 200) {
-        throw const Err(
-          // The stack will be printed when the error is thrown.
-          stack: ['fetchIpAddress'],
-          error: 'Failed to fetch IP address',
-        );
-      }
-      final data = jsonDecode(response.body);
-      final ip = data['ip'] as String;
-      return ip;
-    },
-  );
+  return Async.unsafe(() async {
+    final response = await http.get(
+      Uri.parse('https://api.ipify.org?format=json'),
+    );
+    // Throw an Err if the status code is not 200. Any other exceptions within
+    // Resolvable.wrap will be caught and wrapped in an Err.
+    if (response.statusCode != 200) {
+      throw const Err(
+        // The stack will be printed when the error is thrown.
+        stack: ['fetchIpAddress'],
+        error: 'Failed to fetch IP address',
+      );
+    }
+    final data = jsonDecode(response.body);
+    final ip = data['ip'] as String;
+    return ip;
+  });
 }

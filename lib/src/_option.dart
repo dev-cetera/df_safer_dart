@@ -98,10 +98,7 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<None<T>> none() {
-    return const Err(
-      stack: ['Some', 'some'],
-      error: 'Called none() on Some.',
-    );
+    return const Err(stack: ['Some', 'some'], error: 'Called none() on Some.');
   }
 
   @override
@@ -115,10 +112,7 @@ final class Some<T extends Object> extends Option<T> {
       unsafe(this);
       return Ok(this);
     } catch (e) {
-      return Err(
-        stack: ['Some', 'ifSome'],
-        error: e,
-      );
+      return Err(stack: ['Some', 'ifSome'], error: e);
     }
   }
 
@@ -165,10 +159,7 @@ final class Some<T extends Object> extends Option<T> {
     try {
       return Ok(onSome(this) ?? this);
     } catch (e) {
-      return Err(
-        stack: ['Some', 'fold'],
-        error: e,
-      );
+      return Err(stack: ['Some', 'fold'], error: e);
     }
   }
 
@@ -233,10 +224,7 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Some<T>> some() {
-    return const Err(
-      stack: ['None', 'some'],
-      error: 'Called some() on None.',
-    );
+    return const Err(stack: ['None', 'some'], error: 'Called some() on None.');
   }
 
   @override
@@ -246,10 +234,7 @@ final class None<T extends Object> extends Option<T> {
       unsafe();
       return Ok(this);
     } catch (e) {
-      return Err(
-        stack: ['None', 'ifNone'],
-        error: e,
-      );
+      return Err(stack: ['None', 'ifNone'], error: e);
     }
   }
 
@@ -312,10 +297,7 @@ final class None<T extends Object> extends Option<T> {
     try {
       return Ok(onNone(this) ?? this);
     } catch (e) {
-      throw Err(
-        stack: ['Option', 'fold'],
-        error: e,
-      );
+      throw Err(stack: ['Option', 'fold'], error: e);
     }
   }
 
@@ -330,8 +312,10 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  (None<T>, None<R>) and<R extends Object>(Option<R> other) =>
-      (const None(), const None());
+  (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
+    const None(),
+    const None(),
+  );
 
   @override
   @pragma('vm:prefer-inline')
