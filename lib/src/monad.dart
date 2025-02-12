@@ -10,9 +10,9 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'package:meta/meta.dart';
-
 import 'dart:async' show FutureOr;
+import 'package:meta/meta.dart';
+import 'resolvable_option.dart';
 
 part '_option.dart';
 part '_result.dart';
@@ -79,27 +79,3 @@ sealed class Monad<T extends Object> {
     return Err(stack: ['Monad', 'reduce'], error: 'Tried casting $T to $R.');
   }
 }
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-extension UnwrapOnResolvableOptionX<T extends Object> on ResolvableOption<T> {
-  @pragma('vm:prefer-inline')
-  FutureOr<T> unwrap() {
-    if (isSync()) {
-      return unwrapSync();
-    } else {
-      return unwrapAsync();
-    }
-  }
-
-  @pragma('vm:prefer-inline')
-  T unwrapSync() => sync().unwrap().value.unwrap().unwrap();
-
-  @pragma('vm:prefer-inline')
-  Future<T> unwrapAsync() =>
-      async().unwrap().value.then((e) => e.unwrap().unwrap());
-}
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-typedef ResolvableOption<T extends Object> = Resolvable<Option<T>>;
