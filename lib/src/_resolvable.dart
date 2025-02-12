@@ -48,6 +48,20 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Result<Async<T>> async();
 
+  FutureOr<T> unwrap() {
+    if (isSync()) {
+      return unwrapSync().value.unwrap();
+    } else {
+      return unwrapAsync().value.then((e) => e.unwrap());
+    }
+  }
+
+  @pragma('vm:prefer-inline')
+  Sync<T> unwrapSync() => sync().unwrap();
+
+  @pragma('vm:prefer-inline')
+  Async<T> unwrapAsync() => async().unwrap();
+
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() => this;
 
@@ -127,6 +141,10 @@ final class Sync<T extends Object> extends Resolvable<T> {
       );
     }
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => unwrapSync().value.unwrap();
 
   @protected
   @pragma('vm:prefer-inline')
@@ -268,6 +286,10 @@ final class Async<T extends Object> extends Resolvable<T> {
       }
     }());
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Future<T> unwrap() => unwrapAsync().unwrap();
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
