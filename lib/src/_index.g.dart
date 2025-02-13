@@ -7,11 +7,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-export './safe_completer.dart';
 export './result_option.dart';
 export './monad.dart';
 export './typedefs.dart';
 export './merge_option.dart';
+export './safe_finisher.dart';
 export './option_result.dart';
 export './lazy.dart';
 export './merge_resolvable.dart';

@@ -19,9 +19,9 @@ import 'monad.dart';
 /// A utility class for managing completion of both synchronous and asynchronous
 /// values.
 ///
-/// [SafeCompleter] is similar to a [Completer], but it handles both synchronous
+/// [SafeFinisher] is similar to a [Completer], but it handles both synchronous
 /// and asynchronous results seamlessly.
-class SafeCompleter<T extends Object> {
+class SafeFinisher<T extends Object> {
   //
   //
   //
@@ -57,10 +57,9 @@ class SafeCompleter<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) =>
-      resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
 
-  /// Checks if the value has been set or if the [SafeCompleter] is completed.
+  /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')
   Resolvable<T> get resolvable {
     return Resolvable.unsafe(
@@ -68,7 +67,7 @@ class SafeCompleter<T extends Object> {
     );
   }
 
-  /// Checks if the value has been set or if the [SafeCompleter] is completed.
+  /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')
   bool get isCompleted => _completer.isCompleted || _value.isSome();
 }
