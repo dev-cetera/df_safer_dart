@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.1]
+
+- Released @ 2/2025 (UTC)
+- feat: Add SyncOk and AsyncOk classes for easy constuction
+
 ## [0.7.0]
 
 - Released @ 2/2025 (UTC)
