@@ -20,7 +20,7 @@ typedef SyncOption<T extends Object> = Sync<Option<T>>;
 
 extension SyncOptionX<T extends Object> on SyncOption<T> {
   @pragma('vm:prefer-inline')
-  Result<T> asResult() => value.map((e) => e.asResult()).merge();
+  Result<T> toResult() => value.map((e) => e.asResult()).merge();
 
   OptionSync<T> swap() {
     if (value.isErr()) {

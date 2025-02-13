@@ -18,7 +18,7 @@ typedef OptionResult<T extends Object> = Option<Result<T>>;
 
 extension OptionResultX<T extends Object> on OptionResult<T> {
   @pragma('vm:prefer-inline')
-  Option<T> asOption() => unwrap().asOption();
+  Option<T> unwrapOption() => unwrap().asOption();
 
   ResultOption<T> swap() {
     if (isNone()) {

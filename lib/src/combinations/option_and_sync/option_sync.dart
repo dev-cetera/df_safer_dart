@@ -17,11 +17,11 @@ import '/df_safer_dart.dart';
 typedef OptionSync<T extends Object> = Option<Sync<T>>;
 
 extension OptionSyncX<T extends Object> on OptionSync<T> {
-  Result<T> asResult() {
+  Result<T> toResult() {
     if (isNone()) {
       return const Err(
-        stack: ['OptionSyncX', 'asResult'],
-        error: 'Called asResult() on None.',
+        stack: ['OptionSyncX', 'unwrapResult'],
+        error: 'Called unwrapResult() on None.',
       );
     }
     // ignore: invalid_use_of_visible_for_testing_member
