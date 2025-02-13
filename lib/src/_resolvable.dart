@@ -241,6 +241,12 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+final class SyncOk<T extends Object> extends Sync<T> {
+  SyncOk(T value) : super(Ok(value));
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 final class Async<T extends Object> extends Resolvable<T> {
   @visibleForTesting
   @override
@@ -387,4 +393,10 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Future<T?> orNull() => value.then((e) => e.orNull());
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+final class AsyncOk<T extends Object> extends Async<T> {
+  AsyncOk(Future<T> value) : super(value.then((e) => Ok(e)));
 }
