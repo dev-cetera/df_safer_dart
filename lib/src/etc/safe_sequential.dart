@@ -67,8 +67,11 @@ class SafeSequential {
     Duration? buffer,
   }) {
     ResolvableOption<T> fn(ResultOption previous) => Resolvable.unsafe(() {
-      final temp = unsafe(previous);
-      return temp.then((e) => e ?? const None());
+          final temp = unsafe(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
         });
     return addSafe<T>(fn, buffer: buffer);
   }
@@ -102,18 +105,16 @@ class SafeSequential {
     // ignore: invalid_use_of_visible_for_testing_member
     final value = _current.value;
     if (value is Future<Result<Option<Object>>>) {
-      _current =
-          Async.unsafe(() async {
-            final temp = function(await value);
-            if (temp == null) {
-              return _current;
-            }
-            _isEmpty = true;
-            return temp;
-          }).merge();
+      _current = Async.unsafe(() async {
+        final temp = function(await value);
+        if (temp == null) {
+          return _current;
+        }
+        _isEmpty = true;
+        return temp;
+      }).merge();
     } else {
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -129,5 +130,4 @@ class SafeSequential {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef TAddFunction<T extends Object> =
-    TFutureOrOption<T> Function(ResultOption previous);
+typedef TAddFunction<T extends Object> = TFutureOrOption<T> Function(ResultOption previous);
