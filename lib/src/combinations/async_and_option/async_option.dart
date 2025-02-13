@@ -10,6 +10,14 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-typedef ValueOrNone<T> = (T? value, bool hasValue);
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 
-typedef ValueOrErr<T, E> = (T? value, E? err);
+import '/df_safer_dart.dart';
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+typedef AsyncOption<T extends Object> = Async<Option<T>>;
+
+extension AsyncOptionX<T extends Object> on AsyncOption<T> {
+  // TODO: Implement this!
+}

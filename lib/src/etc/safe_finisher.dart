@@ -12,7 +12,7 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import 'monad.dart';
+import '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

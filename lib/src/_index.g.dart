@@ -7,14 +7,17 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-export './result_option.dart';
-export './monad.dart';
-export './typedefs.dart';
-export './merge_option.dart';
-export './safe_finisher.dart';
-export './option_result.dart';
-export './lazy.dart';
-export './merge_resolvable.dart';
-export './safe_sequential.dart';
-export './resolvable_option.dart';
-export './merge_result.dart';
+export './combinations/option_and_result/result_option.dart';
+export './combinations/option_and_result/option_result.dart';
+export './combinations/option_and_resolvable/option_resolvable.dart';
+export './combinations/option_and_resolvable/resolvable_option.dart';
+export './combinations/option_and_sync/sync_option.dart';
+export './combinations/option_and_sync/option_sync.dart';
+export './merge/merge_option.dart';
+export './merge/merge_resolvable.dart';
+export './merge/merge_result.dart';
+export './etc/typedefs.dart';
+export './etc/safe_finisher.dart';
+export './etc/lazy.dart';
+export './etc/safe_sequential.dart';
+export './monad/monad.dart';

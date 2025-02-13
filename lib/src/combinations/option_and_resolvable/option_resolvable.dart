@@ -10,12 +10,12 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'monad.dart';
+import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef ResolvableOption<T extends Object> = Resolvable<Option<T>>;
+typedef OptionResolvable<T extends Object> = Option<Resolvable<T>>;
 
-extension ResolvableOptionX<T extends Object> on ResolvableOption<T> {
-  //
+extension OptionResolvableX<T extends Object> on OptionResolvable<T> {
+  // TODO: Implement this!
 }

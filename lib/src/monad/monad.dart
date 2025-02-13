@@ -12,7 +12,8 @@
 
 import 'dart:async' show FutureOr;
 import 'package:meta/meta.dart';
-import 'resolvable_option.dart';
+
+import '/df_safer_dart.dart';
 
 part '_option.dart';
 part '_result.dart';

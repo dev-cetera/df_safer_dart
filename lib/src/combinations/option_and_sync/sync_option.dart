@@ -10,21 +10,26 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'monad.dart';
-import 'result_option.dart';
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
+import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef OptionResult<T extends Object> = Option<Result<T>>;
+typedef SyncOption<T extends Object> = Sync<Option<T>>;
 
-extension OptionResultX<T extends Object> on OptionResult<T> {
+extension SyncOptionX<T extends Object> on SyncOption<T> {
   @pragma('vm:prefer-inline')
-  Option<T> asOption() => unwrap().asOption();
+  Result<T> asResult() => value.map((e) => e.asResult()).merge();
 
-  ResultOption<T> swap() {
-    if (isNone()) {
-      return const Ok(None());
+  OptionSync<T> swap() {
+    if (value.isErr()) {
+      return Some(Sync(value.err().castErr()));
     }
-    return unwrap().map((e) => Some(e));
+    final option = value.unwrap();
+    if (option.isNone()) {
+      return const None();
+    }
+    return Some(SyncOk(option.unwrap()));
   }
 }
