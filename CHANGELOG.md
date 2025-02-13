@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.3]
+
+- Released @ 2/2025 (UTC)
+- chore: Minor refactoring
+
 ## [0.7.2]
 
 - Released @ 2/2025 (UTC)
