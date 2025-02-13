@@ -128,7 +128,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => unwrapSync().value.unwrap();
+  T unwrap() => value.unwrap();
 
   @protected
   @pragma('vm:prefer-inline')
@@ -263,7 +263,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap() => unwrapAsync().unwrap();
+  Future<T> unwrap() => value.then((e) => e.unwrap());
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
