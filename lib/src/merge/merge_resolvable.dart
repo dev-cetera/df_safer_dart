@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 import '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -19,24 +21,35 @@ extension MergeResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   Resolvable<T> merge() => _merge2();
 
   Resolvable<T> _merge2() {
-    return Resolvable.unsafe(() async {
-      // ignore: invalid_use_of_visible_for_testing_member
-      final a = await value;
-      if (a.isErr()) {
-        throw a.cast();
-      }
-      // ignore: invalid_use_of_visible_for_testing_member
-      final b = await a.unwrap().value;
-      if (b.isErr()) {
-        throw b.cast();
-      }
-      return b.unwrap();
-    });
+    if (value is Result<Resolvable<T>>) {
+      return Sync.unsafe(() {
+        final a = value as Result<Resolvable<T>>;
+        if (a.isErr()) {
+          throw a;
+        }
+        final b = a.unwrap().value as Result<T>;
+        if (b.isErr()) {
+          throw b;
+        }
+        return b.unwrap();
+      });
+    } else {
+      return Async.unsafe(() async {
+        final a = await value;
+        if (a.isErr()) {
+          throw a;
+        }
+        final b = await a.unwrap().value;
+        if (b.isErr()) {
+          throw b;
+        }
+        return b.unwrap();
+      });
+    }
   }
 }
 
-extension MergeResolvable3<T extends Object>
-    on Resolvable<Resolvable<Resolvable<T>>> {
+extension MergeResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable<T>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge3();
 
@@ -44,8 +57,7 @@ extension MergeResolvable3<T extends Object>
   Resolvable<T> _merge3() => _merge2()._merge2();
 }
 
-extension MergeResolvable4<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
+extension MergeResolvable4<T extends Object> on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge4();
 
@@ -63,10 +75,7 @@ extension MergeResolvable5<T extends Object>
 }
 
 extension MergeResolvable6<T extends Object>
-    on
-        Resolvable<
-          Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-        > {
+    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge6();
 
@@ -75,12 +84,7 @@ extension MergeResolvable6<T extends Object>
 }
 
 extension MergeResolvable7<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-          >
-        > {
+    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge7();
 
@@ -88,15 +92,8 @@ extension MergeResolvable7<T extends Object>
   Resolvable<T> _merge7() => _merge6()._merge2();
 }
 
-extension MergeResolvable8<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<
-              Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-            >
-          >
-        > {
+extension MergeResolvable8<T extends Object> on Resolvable<
+    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge8();
 
@@ -104,17 +101,9 @@ extension MergeResolvable8<T extends Object>
   Resolvable<T> _merge8() => _merge7()._merge2();
 }
 
-extension MergeResolvable9<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<
-              Resolvable<
-                Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-              >
-            >
-          >
-        > {
+extension MergeResolvable9<T extends Object> on Resolvable<
+    Resolvable<
+        Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> merge() => _merge9();
 
