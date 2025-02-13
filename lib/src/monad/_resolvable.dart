@@ -43,13 +43,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Result<Async<T>> async();
 
-  FutureOr<T> unwrap() {
-    if (isSync()) {
-      return unwrapSync().value.unwrap();
-    } else {
-      return unwrapAsync().value.then((e) => e.unwrap());
-    }
-  }
+  FutureOr<T> unwrap();
 
   @pragma('vm:prefer-inline')
   Sync<T> unwrapSync() => sync().unwrap();
