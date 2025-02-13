@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.2]
+
+- Released @ 2/2025 (UTC)
+- feat: Improve file structure
+
 ## [0.7.1]
 
 - Released @ 2/2025 (UTC)

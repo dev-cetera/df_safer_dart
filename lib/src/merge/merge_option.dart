@@ -48,7 +48,8 @@ extension MergeOption4<T extends Object> on Option<Option<Option<Option<T>>>> {
   Option<T> _merge4() => _merge3()._merge2();
 }
 
-extension MergeOption5<T extends Object> on Option<Option<Option<Option<Option<T>>>>> {
+extension MergeOption5<T extends Object>
+    on Option<Option<Option<Option<Option<T>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> merge() => _merge5();
 
@@ -56,7 +57,8 @@ extension MergeOption5<T extends Object> on Option<Option<Option<Option<Option<T
   Option<T> _merge5() => _merge4()._merge2();
 }
 
-extension MergeOption6<T extends Object> on Option<Option<Option<Option<Option<Option<T>>>>>> {
+extension MergeOption6<T extends Object>
+    on Option<Option<Option<Option<Option<Option<T>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> merge() => _merge6();
 
@@ -83,7 +85,10 @@ extension MergeOption8<T extends Object>
 }
 
 extension MergeOption9<T extends Object>
-    on Option<Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
+    on
+        Option<
+          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Option<T> merge() => _merge9();
 

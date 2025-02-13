@@ -20,10 +20,7 @@ extension OptionSyncX<T extends Object> on OptionSync<T> {
   Result<T> asResult() {
     if (isNone()) {
       return const Err(
-        stack: [
-          'OptionSyncX',
-          'asResult',
-        ],
+        stack: ['OptionSyncX', 'asResult'],
         error: 'Called asResult() on None.',
       );
     }
