@@ -57,7 +57,8 @@ class SafeFinisher<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> complete(FutureOr<T> value) =>
+      resolve(Resolvable.unsafe(() => value));
 
   /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')

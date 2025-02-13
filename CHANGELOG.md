@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.0]
+
+- Released @ 2/2025 (UTC)
+- breaking: Rename SafeCompleter to SafeFinisher
+
 ## [0.6.0]
 
 - Released @ 2/2025 (UTC)
