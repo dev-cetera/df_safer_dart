@@ -134,14 +134,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -207,6 +205,11 @@ final class Err<T extends Object> extends Result<T> {
 
   @pragma('vm:prefer-inline')
   bool isErrorType<E extends Object>() => error is E;
+
+  @pragma('vm:prefer-inline')
+  Result<E> castAndGetError<E extends Object>() => isErrorType<E>()
+      ? Ok(error as E)
+      : Err(stack: ['Err', 'getError'], error: 'Error type is not $E');
 
   @override
   @pragma('vm:prefer-inline')
