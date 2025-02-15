@@ -31,12 +31,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } on Err catch (e) {
       return Sync(e.castErr<T>());
     } catch (e) {
-      return Sync(
-        Err<T>(
-          stack: ['Sync', 'Sync.unsafe'],
-          error: e,
-        ),
-      );
+      return Sync(Err<T>(stack: ['Sync', 'Sync.unsafe'], error: e));
     }
   }
 

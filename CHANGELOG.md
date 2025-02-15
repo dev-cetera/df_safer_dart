@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.7]
+
+- Released @ 2/2025 (UTC)
+- feat: Add isErrorType function
+
 ## [0.7.6]
 
 - Released @ 2/2025 (UTC)
