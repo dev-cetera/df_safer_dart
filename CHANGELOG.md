@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.8]
+
+- Released @ 2/2025 (UTC)
+- feat: Add castAndGetError function
+
 ## [0.7.7]
 
 - Released @ 2/2025 (UTC)
