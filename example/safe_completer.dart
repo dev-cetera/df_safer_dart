@@ -1,9 +1,9 @@
 import 'package:df_safer_dart/src/_index.g.dart';
 
 void main() {
-  final finisher = SafeFinisher<Iterable<num>>();
-  finisher.finish([1, 2, 3]);
+  final finisher = SafeFinisher<List<num>>();
+  finisher.finish([1]);
 
-  final aa = finisher.castOrConvert<List<int>>();
-  aa.resolvable().value;
+  final aa = finisher.trans<List<int>>((e) => e.cast());
+  print(aa.resolvable().value);
 }

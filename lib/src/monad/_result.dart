@@ -61,7 +61,9 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   Result<Object> or<R extends Object>(Result<R> other);
 
-  Result<R> castOrConvert<R extends Object>();
+  Result<R> trans<R extends Object>([
+    R Function(T e)? transformer,
+  ]);
 
   static Result<T> combine<T extends Object>(Result<Result<T>> result) {
     if (result.isOk()) {
@@ -73,7 +75,7 @@ sealed class Result<T extends Object> extends Monad<T> {
       }
     }
 
-    return result.err().castOrConvertErr();
+    return result.err().transErr();
   }
 }
 
@@ -98,9 +100,10 @@ final class Ok<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() {
-    return Err(debugPath: ['Ok', 'err'], error: 'Called err() on Ok.');
-  }
+  Err<T> err() => Err(
+        debugPath: ['Ok', 'err'],
+        error: 'Called err() on Ok.',
+      );
 
   @override
   @pragma('vm:prefer-inline')
@@ -109,7 +112,10 @@ final class Ok<T extends Object> extends Result<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Err(debugPath: ['Ok', 'ifOk'], error: error);
+      return Err(
+        debugPath: ['Ok', 'ifOk'],
+        error: error,
+      );
     }
   }
 
@@ -133,14 +139,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -151,7 +155,10 @@ final class Ok<T extends Object> extends Result<T> {
     try {
       return onOk(this) ?? this;
     } catch (error) {
-      return Err(debugPath: ['Ok', 'fold'], error: error);
+      return Err(
+        debugPath: ['Ok', 'fold'],
+        error: error,
+      );
     }
   }
 
@@ -183,17 +190,17 @@ final class Ok<T extends Object> extends Result<T> {
   String toString() => '${Ok<T>}($value)';
 
   @override
-  Result<R> castOrConvert<R extends Object>() {
-    if (T == R) {
-      return this as Result<R>;
-    }
-    final value = unwrap();
-    if (value is R) {
-      return Result.combine(Ok(Ok(value)));
-    } else {
+  Result<R> trans<R extends Object>([
+    R Function(T e)? transformer,
+  ]) {
+    try {
+      final value0 = unwrap();
+      final value1 = transformer?.call(value0) ?? value0 as R;
+      return Ok(value1);
+    } catch (_) {
       return Err(
-        debugPath: ['Err', 'castOrConvert'],
-        error: 'Cannot convert ${value.runtimeType} to $R',
+        debugPath: ['Ok', 'trans'],
+        error: 'Cannot transform $T to $R.',
       );
     }
   }
@@ -206,17 +213,19 @@ final class Err<T extends Object> extends Result<T> {
   final Object error;
   final StackTrace? stack;
   Err({required this.debugPath, required this.error})
-    : stack = StackTrace.current,
-      super._();
+      : stack = StackTrace.current,
+        super._();
 
   @pragma('vm:prefer-inline')
   bool isErrorType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> castAndGetError<E extends Object>() =>
-      isErrorType<E>()
-          ? Ok(error as E)
-          : Err(debugPath: ['Err', 'getError'], error: 'Error type is not $E!');
+  Result<E> castAndGetError<E extends Object>() => isErrorType<E>()
+      ? Ok(error as E)
+      : Err(
+          debugPath: ['Err', 'getError'],
+          error: 'Error type is not $E!',
+        );
 
   @override
   @pragma('vm:prefer-inline')
@@ -230,7 +239,10 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> ok() {
-    return Err(debugPath: ['Ok', 'ok'], error: 'Called ok() on Err.');
+    return Err(
+      debugPath: ['Ok', 'ok'],
+      error: 'Called ok() on Err.',
+    );
   }
 
   @override
@@ -253,7 +265,10 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(debugPath: ['Err', 'unwrap'], error: 'Called unwrap() on Err.');
+    throw Err(
+      debugPath: ['Err', 'unwrap'],
+      error: 'Called unwrap() on Err.',
+    );
   }
 
   @protected
@@ -268,8 +283,7 @@ final class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Err<R> map<R extends Object>(R Function(T value) mapper) =>
-      castOrConvertErr<R>();
+  Err<R> map<R extends Object>(R Function(T value) mapper) => transErr<R>();
 
   @protected
   @override
@@ -285,7 +299,10 @@ final class Err<T extends Object> extends Result<T> {
     try {
       return onErr(this) ?? this;
     } catch (error) {
-      return Err(debugPath: ['Err', 'fold'], error: error);
+      return Err(
+        debugPath: ['Err', 'fold'],
+        error: error,
+      );
     }
   }
 
@@ -311,19 +328,31 @@ final class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() =>
-      '${Err<T>}(debugPath: [${debugPath.join(', ')}], error: $error, stackTrace: $stack)';
+  String toString() {
+    return '====== ERR =============\n'
+        'Err (${Err<T>}):\n\n'
+        '====== DEBUG PATH ======\n'
+        '${debugPath.join(' → ')}\n\n'
+        '====== ERROR ===========\n'
+        '$error\n\n'
+        '====== STACK ===========\n'
+        '$stack\n\n';
+  }
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<R> castOrConvert<R extends Object>() => castOrConvertErr();
+  Err<R> trans<R extends Object>([
+    R Function(T e)? transformer,
+  ]) {
+    return transErr<R>();
+  }
 
   @pragma('vm:prefer-inline')
-  Err<R> castOrConvertErr<R extends Object>() {
-    if (T == R) {
-      return this as Err<R>;
-    }
-    return Err(debugPath: debugPath, error: error);
+  Err<R> transErr<R extends Object>() {
+    return Err(
+      debugPath: debugPath,
+      error: error,
+    );
   }
 }
