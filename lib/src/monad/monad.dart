@@ -54,8 +54,11 @@ sealed class Monad<T extends Object> {
       }
       try {
         return test.unwrap().map((e) => e as R);
-      } catch (e) {
-        throw _castError<R>();
+      } catch (_) {
+        throw Err<R>(
+          debugPath: ['Monad', '_resolveValue'],
+          error: 'Cannot resolve $T to $R.',
+        );
       }
     });
   }
@@ -68,15 +71,13 @@ sealed class Monad<T extends Object> {
       return Resolvable.unsafe(() {
         try {
           return Some(value as R);
-        } catch (e) {
-          throw _castError<R>();
+        } catch (_) {
+          throw Err<R>(
+            debugPath: ['Monad', '_resolveValue'],
+            error: 'Cannot resolve $T to $R.',
+          );
         }
       });
     }
-  }
-
-  @pragma('vm:prefer-inline')
-  Err _castError<R extends Object>() {
-    return Err(stack: ['Monad', 'reduce'], error: 'Tried casting $T to $R.');
   }
 }

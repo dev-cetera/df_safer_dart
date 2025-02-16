@@ -1,38 +1,9 @@
-// // Example:
-// //
-// // Unlike Completer, SafeCompleter can be used to manage both sync and async
-// // values, and in a safe functional manner.
+import 'package:df_safer_dart/src/_index.g.dart';
 
-// import 'package:df_safer_dart/df_safer_dart.dart';
+void main() {
+  final finisher = SafeFinisher<Iterable<num>>();
+  finisher.finish([1, 2, 3]);
 
-// void main() async {
-//   final safeCompleter1 = SafeCompleter<int>();
-
-//   // Schedule completion of safeCompleter1 after 1 second.
-//   Future.delayed(const Duration(seconds: 1), () {
-//     safeCompleter1.complete(42);
-//   });
-
-//   // Process the value from safeCompleter1.resolvable.
-//   final r1 = safeCompleter1.resolvable;
-//   if (r1.isSync()) {
-//
-//     print('It is sync: ${r1.unwrapSyncValue()}');
-//   } else {
-//
-//     print('It is async: ${await r1.unwrapAsyncValue()}');
-//   }
-
-//   final safeCompleter2 = SafeCompleter<int>();
-//   safeCompleter2.complete(43);
-
-//   // Process the value from safeCompleter2.resolvable.
-//   final r2 = safeCompleter2.resolvable;
-//   if (r2.isSync()) {
-//
-//     print('It is sync: ${r2.unwrapSyncValue()}');
-//   } else {
-//
-//     print('It is async: ${await r2.unwrapAsyncValue()}');
-//   }
-// }
+  final aa = finisher.castOrConvert<List<int>>();
+  aa.resolvable().value;
+}

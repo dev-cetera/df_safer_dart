@@ -61,7 +61,7 @@ Async<String> fetchIpAddress() {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
       if (response.statusCode != 200) {
         throw const Err(
-          stack: ['fetchIpAddress'],
+          debugPath: ['fetchIpAddress'],
           error: 'Failed to fetch IP address',
         );
       }

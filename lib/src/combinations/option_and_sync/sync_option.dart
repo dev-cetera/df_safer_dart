@@ -24,7 +24,7 @@ extension SyncOptionX<T extends Object> on SyncOption<T> {
 
   OptionSync<T> swap() {
     if (value.isErr()) {
-      return Some(Sync(value.err().castErr()));
+      return Some(Sync(value.err().castOrConvertErr()));
     }
     final option = value.unwrap();
     if (option.isNone()) {

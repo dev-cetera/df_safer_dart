@@ -26,22 +26,22 @@ class SafeFinisher<T extends Object> {
   //
   //
 
-  final _completer = Completer<T>();
+  final _completer = Completer<Object>();
 
-  Option<FutureOr<T>> _value = const None();
+  Option<FutureOr<Object>> _value = const None();
 
   /// Completes the operation with the provided [resolvable].
-  Resolvable<T> resolve(Resolvable<T> value) {
+  Resolvable<T> resolve(Resolvable<T> resolvable) {
     if (isCompleted) {
-      return const Sync(
+      return Sync(
         Err(
-          stack: ['SafeCompleter', 'resolve'],
-          error: 'Tried completing a completed SafeCompleter.',
+          debugPath: ['SafeCompleter', 'resolve'],
+          error: 'Cannot resolved a finished SafeCompleter.',
         ),
       );
     }
 
-    return value.flatMap((e) {
+    return resolvable.flatMap((e) {
       if (e.isOk()) {
         final a = e.unwrap();
         _value = Some(a);
@@ -57,18 +57,29 @@ class SafeFinisher<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> complete(FutureOr<T> value) =>
-      resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> finish(FutureOr<T> value) => resolve(Resolvable.unsafe(() => value));
 
   /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')
-  Resolvable<T> get resolvable {
+  Resolvable<T> resolvable() {
     return Resolvable.unsafe(
-      () => _value.isSome() ? _value.unwrap() : _completer.future,
+      () => (_value.isSome() ? _value.unwrap() : _completer.future) as FutureOr<T>,
     );
   }
 
   /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')
   bool get isCompleted => _completer.isCompleted || _value.isSome();
+
+  SafeFinisher<R> castOrConvert<R extends Object>() {
+    if (T == R) {
+      return this as SafeFinisher<R>;
+    }
+    final finisher = SafeFinisher<R>();
+    resolvable().castOrConvert<R>().map((e) {
+      finisher.resolve(SyncOk(e));
+      return e;
+    });
+    return finisher;
+  }
 }

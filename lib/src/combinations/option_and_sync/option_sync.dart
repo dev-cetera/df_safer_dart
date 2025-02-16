@@ -19,8 +19,8 @@ typedef OptionSync<T extends Object> = Option<Sync<T>>;
 extension OptionSyncX<T extends Object> on OptionSync<T> {
   Result<T> toResult() {
     if (isNone()) {
-      return const Err(
-        stack: ['OptionSyncX', 'unwrapResult'],
+      return Err(
+        debugPath: ['OptionSyncX', 'unwrapResult'],
         error: 'Called unwrapResult() on None.',
       );
     }
