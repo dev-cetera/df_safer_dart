@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.1]
+
+- Released @ 2/2025 (UTC)
+- chore: Do some renaming
+
 ## [0.8.0]
 
 - Released @ 2/2025 (UTC)
