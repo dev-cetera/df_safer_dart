@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.0]
+
+- Released @ 2/2025 (UTC)
+- breaking: Improve debugging features
+
 ## [0.7.8]
 
 - Released @ 2/2025 (UTC)
