@@ -231,7 +231,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr({required List<Object> debugPath, required Object error})
-    : super(Err<T>(debugPath: debugPath, error: error));
+      : super(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -318,14 +318,18 @@ final class Async<T extends Object> extends Resolvable<T> {
       return onAsync(this) ?? this;
     } catch (error) {
       return Async(
-        Future.value(Err(debugPath: ['Async', 'fold'], error: error)),
+        Future.value(
+          Err(
+            debugPath: ['Async', 'fold'],
+            error: error,
+          ),
+        ),
       );
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  @override
   Async<R> map<R extends Object>(R Function(T value) unsafe) {
     return Async(value.then((e) => e.map(unsafe)));
   }
@@ -403,5 +407,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr({required List<Object> debugPath, required Object error})
-    : super(Future.value(Err(debugPath: debugPath, error: error)));
+      : super(Future.value(Err(debugPath: debugPath, error: error)));
 }
