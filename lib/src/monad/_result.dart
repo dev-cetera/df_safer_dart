@@ -217,10 +217,10 @@ final class Err<T extends Object> extends Result<T> {
         super._();
 
   @pragma('vm:prefer-inline')
-  bool isErrorType<E extends Object>() => error is E;
+  bool isErrorValueType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> castAndGetError<E extends Object>() => isErrorType<E>()
+  Result<E> transErrorValue<E extends Object>() => isErrorValueType<E>()
       ? Ok(error as E)
       : Err(
           debugPath: ['Err', 'getError'],
