@@ -204,9 +204,13 @@ final class Ok<T extends Object> extends Result<T> {
 final class Err<T extends Object> extends Result<T> {
   final List<Object> debugPath;
   final Object error;
+  final int? statusCode;
   final StackTrace? stack;
-  Err({required this.debugPath, required this.error})
-      : stack = StackTrace.current,
+  Err({
+    required this.debugPath,
+    required this.error,
+    this.statusCode,
+  })  : stack = StackTrace.current,
         super._();
 
   @pragma('vm:prefer-inline')
@@ -321,15 +325,22 @@ final class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  String toString() {
-    return '====== ERR =============\n'
-        'Err (${Err<T>}):\n\n'
-        '====== DEBUG PATH ======\n'
-        '${debugPath.join(' → ')}\n\n'
-        '====== ERROR ===========\n'
-        '$error\n\n'
-        '====== STACK ===========\n'
-        '$stack\n\n';
+  String toString() => toJson().toString();
+
+  Map<String, dynamic> toJson() {
+    final type = T.toString();
+    final debugPath = this.debugPath.map((e) => e.toString());
+    final error = this.error.toString();
+    final stack =
+        this.stack?.toString().split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty) ??
+            const [];
+    return {
+      'type': type,
+      if (debugPath.isNotEmpty) 'debugPath': debugPath,
+      if (error.isNotEmpty) 'error': error,
+      if (statusCode != null) 'statusCode': statusCode,
+      if (stack.isNotEmpty) 'stack': stack,
+    };
   }
 
   @protected
