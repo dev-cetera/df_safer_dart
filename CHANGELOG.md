@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.4]
+
+- Released @ 2/2025 (UTC)
+- chore: Improve Err toString output
+
 ## [0.8.3]
 
 - Released @ 2/2025 (UTC)
