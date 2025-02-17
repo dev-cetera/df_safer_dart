@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.3]
+
+- Released @ 2/2025 (UTC)
+- feat: Add toJson to Err, and an optional statusCode property
+
 ## [0.8.2]
 
 - Released @ 2/2025 (UTC)

@@ -30,12 +30,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } on Err catch (e) {
       return Sync(e.transErr<T>());
     } catch (error) {
-      return Sync(
-        Err<T>(
-          debugPath: ['Sync', 'Sync.unsafe'],
-          error: error,
-        ),
-      );
+      return Sync(Err<T>(debugPath: ['Sync', 'Sync.unsafe'], error: error));
     }
   }
 
@@ -106,12 +101,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     } on Err catch (e) {
       return Sync(e.transErr<T>());
     } catch (error) {
-      return Sync(
-        Err<T>(
-          debugPath: ['Sync', 'Sync.unsafe'],
-          error: error,
-        ),
-      );
+      return Sync(Err<T>(debugPath: ['Sync', 'Sync.unsafe'], error: error));
     }
   }
 
@@ -241,7 +231,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr({required List<Object> debugPath, required Object error})
-      : super(Err<T>(debugPath: debugPath, error: error));
+    : super(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -260,10 +250,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       } on Err catch (e) {
         return e.transErr<T>();
       } catch (error) {
-        return Err<T>(
-          debugPath: ['Async', 'Async.unsafe'],
-          error: error,
-        );
+        return Err<T>(debugPath: ['Async', 'Async.unsafe'], error: error);
       }
     }());
   }
@@ -294,10 +281,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Sync<T>> sync() {
-    return Err(
-      debugPath: ['Async', 'sync'],
-      error: 'Called sync() on Async.',
-    );
+    return Err(debugPath: ['Async', 'sync'], error: 'Called sync() on Async.');
   }
 
   @protected
@@ -319,12 +303,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return this;
     } catch (error) {
       return Async(
-        Future.value(
-          Err(
-            debugPath: ['Async', 'ifAsync'],
-            error: error,
-          ),
-        ),
+        Future.value(Err(debugPath: ['Async', 'ifAsync'], error: error)),
       );
     }
   }
@@ -339,12 +318,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return onAsync(this) ?? this;
     } catch (error) {
       return Async(
-        Future.value(
-          Err(
-            debugPath: ['Async', 'fold'],
-            error: error,
-          ),
-        ),
+        Future.value(Err(debugPath: ['Async', 'fold'], error: error)),
       );
     }
   }
@@ -362,10 +336,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     required R Function(Err<T> err) onErrUnsafe,
   }) {
     return value.then(
-      (e) => e.when(
-        onOkUnsafe: onOkUnsafe,
-        onErrUnsafe: onErrUnsafe,
-      ),
+      (e) => e.when(onOkUnsafe: onOkUnsafe, onErrUnsafe: onErrUnsafe),
     );
   }
 
@@ -388,9 +359,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> mapFutureOr<R extends Object>(
-    FutureOr<R> Function(T value) unsafe,
-  ) {
+  Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) unsafe) {
     return Async.unsafe(() async => unsafe((await value).unwrap()));
   }
 
@@ -400,12 +369,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       final resolved = await value;
       return Sync(resolved);
     } catch (error) {
-      return Sync(
-        Err(
-          debugPath: ['Async', 'toSync'],
-          error: error,
-        ),
-      );
+      return Sync(Err(debugPath: ['Async', 'toSync'], error: error));
     }
   }
 
@@ -438,5 +402,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr({required List<Object> debugPath, required Object error})
-      : super(Future.value(Err(debugPath: debugPath, error: error)));
+    : super(Future.value(Err(debugPath: debugPath, error: error)));
 }

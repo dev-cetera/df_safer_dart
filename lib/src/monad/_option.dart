@@ -111,10 +111,7 @@ final class Some<T extends Object> extends Option<T> {
       unsafe(this);
       return Ok(this);
     } catch (error) {
-      return Err(
-        debugPath: ['Some', 'ifSome'],
-        error: error,
-      );
+      return Err(debugPath: ['Some', 'ifSome'], error: error);
     }
   }
 
@@ -134,16 +131,19 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) =>
+      Some(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -158,10 +158,7 @@ final class Some<T extends Object> extends Option<T> {
     try {
       return Ok(onSome(this) ?? this);
     } catch (error) {
-      return Err(
-        debugPath: ['Some', 'fold'],
-        error: error,
-      );
+      return Err(debugPath: ['Some', 'fold'], error: error);
     }
   }
 
@@ -237,10 +234,7 @@ final class None<T extends Object> extends Option<T> {
       unsafe();
       return Ok(this);
     } catch (error) {
-      return Err(
-        debugPath: ['None', 'ifNone'],
-        error: error,
-      );
+      return Err(debugPath: ['None', 'ifNone'], error: error);
     }
   }
 
@@ -300,10 +294,7 @@ final class None<T extends Object> extends Option<T> {
     try {
       return Ok(onNone(this) ?? this);
     } catch (error) {
-      throw Err(
-        debugPath: ['Option', 'fold'],
-        error: error,
-      );
+      throw Err(debugPath: ['Option', 'fold'], error: error);
     }
   }
 
@@ -319,9 +310,9 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
-        const None(),
-        const None(),
-      );
+    const None(),
+    const None(),
+  );
 
   @override
   @pragma('vm:prefer-inline')
