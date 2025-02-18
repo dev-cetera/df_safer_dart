@@ -77,7 +77,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     required R Function(Err<T> err) onErrUnsafe,
   });
 
-  FutureOr<Sync<T>> toSync();
+  Sync<T> toSync();
 
   Async<T> toAsync();
 
@@ -231,7 +231,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr({required List<Object> debugPath, required Object error})
-    : super(Err<T>(debugPath: debugPath, error: error));
+      : super(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -363,14 +363,14 @@ final class Async<T extends Object> extends Resolvable<T> {
     return Async.unsafe(() async => unsafe((await value).unwrap()));
   }
 
+  @protected
   @override
-  Future<Sync<T>> toSync() async {
-    try {
-      final resolved = await value;
-      return Sync(resolved);
-    } catch (error) {
-      return Sync(Err(debugPath: ['Async', 'toSync'], error: error));
-    }
+  @pragma('vm:prefer-inline')
+  Sync<T> toSync() {
+    throw Err(
+      debugPath: ['Async', 'toSync'],
+      error: 'Called toSync() on Async.',
+    );
   }
 
   @protected
@@ -402,5 +402,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr({required List<Object> debugPath, required Object error})
-    : super(Future.value(Err(debugPath: debugPath, error: error)));
+      : super(Future.value(Err(debugPath: debugPath, error: error)));
 }
