@@ -131,12 +131,14 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -201,16 +203,17 @@ final class Err<T extends Object> extends Result<T> {
   final int? statusCode;
   final StackTrace? stack;
   Err({required this.debugPath, required this.error, this.statusCode})
-      : stack = StackTrace.current,
-        super._();
+    : stack = StackTrace.current,
+      super._();
 
   @pragma('vm:prefer-inline')
   bool isErrorValueType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> transErrorValue<E extends Object>() => isErrorValueType<E>()
-      ? Ok(error as E)
-      : Err(debugPath: ['Err', 'getError'], error: 'Error type is not $E!');
+  Result<E> transErrorValue<E extends Object>() =>
+      isErrorValueType<E>()
+          ? Ok(error as E)
+          : Err(debugPath: ['Err', 'getError'], error: 'Error type is not $E!');
 
   @override
   @pragma('vm:prefer-inline')
@@ -314,8 +317,12 @@ final class Err<T extends Object> extends Result<T> {
     final debugPath = this.debugPath.map((e) => _safeToString(e));
     final error = _safeToString(this.error);
     final stack =
-        this.stack?.toString().split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty) ??
-            const [];
+        this.stack
+            ?.toString()
+            .split('\n')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty) ??
+        const [];
     return {
       'type': type,
       if (debugPath.isNotEmpty) 'debugPath': debugPath,
