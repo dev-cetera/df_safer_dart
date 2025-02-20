@@ -131,19 +131,16 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -205,6 +202,17 @@ final class Some<T extends Object> extends Option<T> {
       );
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Some<T>) return false;
+    return other.value == this.value;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  int get hashCode => Object.hash(Some<T>, this.value);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -310,9 +318,9 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
-    const None(),
-    const None(),
-  );
+        const None(),
+        const None(),
+      );
 
   @override
   @pragma('vm:prefer-inline')
@@ -327,4 +335,14 @@ final class None<T extends Object> extends Option<T> {
   Ok<None<R>> trans<R extends Object>([R Function(T e)? transformer]) {
     return const Ok(None());
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is None<T>;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  int get hashCode => Object.hash(None<T>, T);
 }
