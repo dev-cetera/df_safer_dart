@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.9]
+
+- Released @ 2/2025 (UTC)
+- feat: Implement Equatable
+
 ## [0.8.7]
 
 - Released @ 2/2025 (UTC)
