@@ -204,15 +204,13 @@ final class Some<T extends Object> extends Option<T> {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! Some<T>) return false;
-    return other.value == this.value;
-  }
+  List<Object?> get props => [
+        Some<Object>,
+        this.value,
+      ];
 
   @override
-  @pragma('vm:prefer-inline')
-  int get hashCode => Object.hash(Some<T>, this.value);
+  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -337,12 +335,8 @@ final class None<T extends Object> extends Option<T> {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is None<T>;
-  }
+  List<Object?> get props => [None<T>];
 
   @override
-  @pragma('vm:prefer-inline')
-  int get hashCode => Object.hash(None<T>, T);
+  bool? get stringify => false;
 }

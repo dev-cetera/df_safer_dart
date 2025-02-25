@@ -193,14 +193,10 @@ final class Ok<T extends Object> extends Result<T> {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! Ok<T>) return false;
-    return other.value == this.value;
-  }
+  List<Object?> get props => [Ok<Object>, this.value];
 
   @override
-  int get hashCode => Object.hash(Ok<T>, this.value);
+  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -210,8 +206,11 @@ final class Err<T extends Object> extends Result<T> {
   final Object error;
   final int? statusCode;
   final StackTrace? stack;
-  Err({required this.debugPath, required this.error, this.statusCode})
-      : stack = StackTrace.current,
+  Err({
+    required this.debugPath,
+    required this.error,
+    this.statusCode,
+  })  : stack = StackTrace.current,
         super._();
 
   @pragma('vm:prefer-inline')
@@ -353,14 +352,16 @@ final class Err<T extends Object> extends Result<T> {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! Err<T>) return false;
-    return other. == this.value;
-  }
+  List<Object?> get props => [
+        Err<Object>,
+        ...debugPath,
+        error,
+        statusCode,
+        //stack,
+      ];
 
   @override
-  int get hashCode => Object.hash(Ok<T>, this.value);
+  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

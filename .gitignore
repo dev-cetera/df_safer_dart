@@ -20,6 +20,9 @@
 **/.flutter-plugins-dependencies
 **/pubspec_overrides.yaml
 
+# Only for packages.
+**/pubspec.lock
+
 # Don't support IntelliJ.
 **/*.iml
 **/*.idea/
