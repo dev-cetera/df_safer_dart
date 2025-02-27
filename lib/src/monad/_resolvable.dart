@@ -30,7 +30,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     } on Err catch (e) {
       return Sync.value(e.transErr<T>());
     } catch (error) {
-      return Sync.value(Err<T>(debugPath: ['Resolvable', 'Resolvable'], error: error));
+      return Sync.value(
+        Err<T>(debugPath: ['Resolvable', 'Resolvable'], error: error),
+      );
     }
   }
 
@@ -236,15 +238,8 @@ final class SyncOk<T extends Object> extends Sync<T> {
 }
 
 final class SyncErr<T extends Object> extends Sync<T> {
-  SyncErr.value({
-    required List<Object> debugPath,
-    required Object error,
-  }) : super.value(
-          Err<T>(
-            debugPath: debugPath,
-            error: error,
-          ),
-        );
+  SyncErr.value({required List<Object> debugPath, required Object error})
+    : super.value(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -263,10 +258,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       } on Err catch (e) {
         return e.transErr<T>();
       } catch (error) {
-        return Err<T>(
-          debugPath: ['Async', 'Async'],
-          error: error,
-        );
+        return Err<T>(debugPath: ['Async', 'Async'], error: error);
       }
     }());
   }
@@ -319,12 +311,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return this;
     } catch (error) {
       return Async.value(
-        Future.value(
-          Err(
-            debugPath: ['Async', 'ifAsync'],
-            error: error,
-          ),
-        ),
+        Future.value(Err(debugPath: ['Async', 'ifAsync'], error: error)),
       );
     }
   }
@@ -339,12 +326,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return onAsync(this) ?? this;
     } catch (error) {
       return Async.value(
-        Future.value(
-          Err(
-            debugPath: ['Async', 'fold'],
-            error: error,
-          ),
-        ),
+        Future.value(Err(debugPath: ['Async', 'fold'], error: error)),
       );
     }
   }
@@ -352,11 +334,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<R> map<R extends Object>(R Function(T value) unsafe) {
-    return Async.value(
-      value.then(
-        (e) => e.map(unsafe),
-      ),
-    );
+    return Async.value(value.then((e) => e.map(unsafe)));
   }
 
   @override
@@ -432,5 +410,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr.value({required List<Object> debugPath, required Object error})
-      : super.value(Future.value(Err(debugPath: debugPath, error: error)));
+    : super.value(Future.value(Err(debugPath: debugPath, error: error)));
 }

@@ -13,11 +13,13 @@ import 'package:http/http.dart' as http;
 void main() async {
   // Fetch the IP address and handle both success and error results.
   fetchIpAddress().flatMap(
-    (result) => result.ifOk((e) {
-      print('IP address: ${result.unwrap()}');
-    }).ifErr((e) {
-      print('Error: $e');
-    }),
+    (result) => result
+        .ifOk((e) {
+          print('IP address: ${result.unwrap()}');
+        })
+        .ifErr((e) {
+          print('Error: $e');
+        }),
   );
 }
 

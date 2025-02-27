@@ -49,7 +49,8 @@ extension CombResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   }
 }
 
-extension CombResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable<T>>> {
+extension CombResolvable3<T extends Object>
+    on Resolvable<Resolvable<Resolvable<T>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb3();
 
@@ -57,7 +58,8 @@ extension CombResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable<
   Resolvable<T> comb3() => comb2().comb2();
 }
 
-extension CombResolvable4<T extends Object> on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
+extension CombResolvable4<T extends Object>
+    on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb4();
 
@@ -75,7 +77,10 @@ extension CombResolvable5<T extends Object>
 }
 
 extension CombResolvable6<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>> {
+    on
+        Resolvable<
+          Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb6();
 
@@ -84,7 +89,12 @@ extension CombResolvable6<T extends Object>
 }
 
 extension CombResolvable7<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>> {
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb7();
 
@@ -92,8 +102,15 @@ extension CombResolvable7<T extends Object>
   Resolvable<T> comb7() => comb6().comb2();
 }
 
-extension CombResolvable8<T extends Object> on Resolvable<
-    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>> {
+extension CombResolvable8<T extends Object>
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<
+              Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb8();
 
@@ -101,9 +118,17 @@ extension CombResolvable8<T extends Object> on Resolvable<
   Resolvable<T> comb8() => comb7().comb2();
 }
 
-extension CombResolvable9<T extends Object> on Resolvable<
-    Resolvable<
-        Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>>> {
+extension CombResolvable9<T extends Object>
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<
+              Resolvable<
+                Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+              >
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> comb() => comb9();
 

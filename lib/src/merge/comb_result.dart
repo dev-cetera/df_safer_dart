@@ -48,7 +48,8 @@ extension CombResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
   Result<T> comb4() => comb3().comb2();
 }
 
-extension CombResult5<T extends Object> on Result<Result<Result<Result<Result<T>>>>> {
+extension CombResult5<T extends Object>
+    on Result<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> comb() => comb5();
 
@@ -56,7 +57,8 @@ extension CombResult5<T extends Object> on Result<Result<Result<Result<Result<T>
   Result<T> comb5() => comb4().comb2();
 }
 
-extension CombResult6<T extends Object> on Result<Result<Result<Result<Result<Result<T>>>>>> {
+extension CombResult6<T extends Object>
+    on Result<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> comb() => comb6();
 
@@ -83,7 +85,10 @@ extension CombResult8<T extends Object>
 }
 
 extension CombResult9<T extends Object>
-    on Result<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
+    on
+        Result<
+          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Result<T> comb() => comb9();
 

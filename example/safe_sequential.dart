@@ -12,13 +12,11 @@ void main() async {
   print(sequential.isEmpty);
   sequential
     ..add((previous) => throw 1)
-    ..add(
-      (previous) async {
-        print(previous);
-        await Future<void>.delayed(const Duration(seconds: 1));
-        print(2);
-      },
-    )
+    ..add((previous) async {
+      print(previous);
+      await Future<void>.delayed(const Duration(seconds: 1));
+      print(2);
+    })
     ..add((previous) {
       print(3);
     })

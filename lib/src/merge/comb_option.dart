@@ -48,7 +48,8 @@ extension CombOption4<T extends Object> on Option<Option<Option<Option<T>>>> {
   Option<T> comb4() => comb3().comb2();
 }
 
-extension CombOption5<T extends Object> on Option<Option<Option<Option<Option<T>>>>> {
+extension CombOption5<T extends Object>
+    on Option<Option<Option<Option<Option<T>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> comb() => comb5();
 
@@ -56,7 +57,8 @@ extension CombOption5<T extends Object> on Option<Option<Option<Option<Option<T>
   Option<T> comb5() => comb4().comb2();
 }
 
-extension CombOption6<T extends Object> on Option<Option<Option<Option<Option<Option<T>>>>>> {
+extension CombOption6<T extends Object>
+    on Option<Option<Option<Option<Option<Option<T>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> comb() => comb6();
 
@@ -83,7 +85,10 @@ extension CombOption8<T extends Object>
 }
 
 extension CombOption9<T extends Object>
-    on Option<Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
+    on
+        Option<
+          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Option<T> comb() => comb9();
 
