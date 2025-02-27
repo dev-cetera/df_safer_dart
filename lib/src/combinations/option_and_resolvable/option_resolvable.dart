@@ -14,8 +14,6 @@ import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef OptionResolvable<T extends Object> = Option<Resolvable<T>>;
-
-extension OptionResolvableX<T extends Object> on OptionResolvable<T> {
+extension OptionResolvableX<T extends Object> on Option<Resolvable<T>> {
   // TODO: Implement this!
 }

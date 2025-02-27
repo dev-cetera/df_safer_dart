@@ -56,7 +56,7 @@ void main() async {
 }
 
 Async<String> fetchIpAddress() {
-  return Async.unsafe(
+  return Async(
     () async {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
       if (response.statusCode != 200) {

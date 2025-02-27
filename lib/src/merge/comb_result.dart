@@ -14,11 +14,11 @@ import '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension MergeResult2<T extends Object> on Result<Result<T>> {
+extension CombResult2<T extends Object> on Result<Result<T>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge2();
+  Result<T> comb() => comb2();
 
-  Result<T> _merge2() {
+  Result<T> comb2() {
     if (isErr()) {
       return trans();
     } else {
@@ -32,66 +32,61 @@ extension MergeResult2<T extends Object> on Result<Result<T>> {
   }
 }
 
-extension MergeResult3<T extends Object> on Result<Result<Result<T>>> {
+extension CombResult3<T extends Object> on Result<Result<Result<T>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge3();
+  Result<T> comb() => comb3();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge3() => _merge2()._merge2();
+  Result<T> comb3() => comb2().comb2();
 }
 
-extension MergeResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
+extension CombResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge4();
+  Result<T> comb() => comb4();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge4() => _merge3()._merge2();
+  Result<T> comb4() => comb3().comb2();
 }
 
-extension MergeResult5<T extends Object>
-    on Result<Result<Result<Result<Result<T>>>>> {
+extension CombResult5<T extends Object> on Result<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge5();
+  Result<T> comb() => comb5();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge5() => _merge4()._merge2();
+  Result<T> comb5() => comb4().comb2();
 }
 
-extension MergeResult6<T extends Object>
-    on Result<Result<Result<Result<Result<Result<T>>>>>> {
+extension CombResult6<T extends Object> on Result<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge6();
+  Result<T> comb() => comb6();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge6() => _merge5()._merge2();
+  Result<T> comb6() => comb5().comb2();
 }
 
-extension MergeResult7<T extends Object>
+extension CombResult7<T extends Object>
     on Result<Result<Result<Result<Result<Result<Result<T>>>>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge7();
+  Result<T> comb() => comb7();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge7() => _merge6()._merge2();
+  Result<T> comb7() => comb6().comb2();
 }
 
-extension MergeResult8<T extends Object>
+extension CombResult8<T extends Object>
     on Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge8();
+  Result<T> comb() => comb8();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge8() => _merge7()._merge2();
+  Result<T> comb8() => comb7().comb2();
 }
 
-extension MergeResult9<T extends Object>
-    on
-        Result<
-          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
-        > {
+extension CombResult9<T extends Object>
+    on Result<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Result<T> merge() => _merge9();
+  Result<T> comb() => comb9();
 
   @pragma('vm:prefer-inline')
-  Result<T> _merge9() => _merge8()._merge2();
+  Result<T> comb9() => comb8().comb2();
 }

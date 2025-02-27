@@ -14,9 +14,7 @@ import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef OptionSync<T extends Object> = Option<Sync<T>>;
-
-extension OptionSyncX<T extends Object> on OptionSync<T> {
+extension OptionSyncX<T extends Object> on Option<Sync<T>> {
   Result<T> toResult() {
     if (isNone()) {
       return Err(
@@ -30,9 +28,9 @@ extension OptionSyncX<T extends Object> on OptionSync<T> {
   }
 
   @pragma('vm:prefer-inline')
-  SyncOption<T> swap() {
+  Sync<Option<T>> swap() {
     if (isNone()) {
-      return const Sync(Ok(None()));
+      return const Sync.value(Ok(None()));
     }
     return unwrap().map((e) => Some(e));
   }

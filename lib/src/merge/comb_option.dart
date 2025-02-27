@@ -14,11 +14,11 @@ import '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension MergeOption2<T extends Object> on Option<Option<T>> {
+extension CombOption2<T extends Object> on Option<Option<T>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge2();
+  Option<T> comb() => comb2();
 
-  Option<T> _merge2() {
+  Option<T> comb2() {
     if (isNone()) {
       return const None();
     } else {
@@ -32,66 +32,61 @@ extension MergeOption2<T extends Object> on Option<Option<T>> {
   }
 }
 
-extension MergeOption3<T extends Object> on Option<Option<Option<T>>> {
+extension CombOption3<T extends Object> on Option<Option<Option<T>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge3();
+  Option<T> comb() => comb3();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge3() => _merge2()._merge2();
+  Option<T> comb3() => comb2().comb2();
 }
 
-extension MergeOption4<T extends Object> on Option<Option<Option<Option<T>>>> {
+extension CombOption4<T extends Object> on Option<Option<Option<Option<T>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge4();
+  Option<T> comb() => comb4();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge4() => _merge3()._merge2();
+  Option<T> comb4() => comb3().comb2();
 }
 
-extension MergeOption5<T extends Object>
-    on Option<Option<Option<Option<Option<T>>>>> {
+extension CombOption5<T extends Object> on Option<Option<Option<Option<Option<T>>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge5();
+  Option<T> comb() => comb5();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge5() => _merge4()._merge2();
+  Option<T> comb5() => comb4().comb2();
 }
 
-extension MergeOption6<T extends Object>
-    on Option<Option<Option<Option<Option<Option<T>>>>>> {
+extension CombOption6<T extends Object> on Option<Option<Option<Option<Option<Option<T>>>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge6();
+  Option<T> comb() => comb6();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge6() => _merge5()._merge2();
+  Option<T> comb6() => comb5().comb2();
 }
 
-extension MergeOption7<T extends Object>
+extension CombOption7<T extends Object>
     on Option<Option<Option<Option<Option<Option<Option<T>>>>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge7();
+  Option<T> comb() => comb7();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge7() => _merge6()._merge2();
+  Option<T> comb7() => comb6().comb2();
 }
 
-extension MergeOption8<T extends Object>
+extension CombOption8<T extends Object>
     on Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge8();
+  Option<T> comb() => comb8();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge8() => _merge7()._merge2();
+  Option<T> comb8() => comb7().comb2();
 }
 
-extension MergeOption9<T extends Object>
-    on
-        Option<
-          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
-        > {
+extension CombOption9<T extends Object>
+    on Option<Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Option<T> merge() => _merge9();
+  Option<T> comb() => comb9();
 
   @pragma('vm:prefer-inline')
-  Option<T> _merge9() => _merge8()._merge2();
+  Option<T> comb9() => comb8().comb2();
 }

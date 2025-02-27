@@ -10,7 +10,7 @@
 //
 //   print(string1.unwrapSyncValue());
 
-//   final futureString = Resolvable.unsafe(
+//   final futureString = Resolvable(
 //     () => Future.delayed(const Duration(seconds: 1), () => 'Hello World!'),
 //   );
 //   final futureString1 = stringMapper(futureString);

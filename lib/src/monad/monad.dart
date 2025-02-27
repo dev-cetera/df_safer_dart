@@ -15,8 +15,6 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '/df_safer_dart.dart';
-
 part '_option.dart';
 part '_result.dart';
 part '_resolvable.dart';
@@ -26,7 +24,7 @@ part '_resolvable.dart';
 sealed class Monad<T extends Object> implements Equatable {
   const Monad();
 
-  ResolvableOption<R> reduce<R extends Object>() {
+  Resolvable<Option<R>> reduce<R extends Object>() {
     switch (this) {
       case Sync<T> sync:
         final value = sync.value;
@@ -36,17 +34,17 @@ sealed class Monad<T extends Object> implements Equatable {
       case Some<T> some:
         return _resolveValue(some.value);
       case None<T> _:
-        return const Sync(Ok(None()));
+        return const Sync.value(Ok(None()));
       case Ok<T> ok:
         return _resolveValue(ok.value);
       case Err<T> err:
-        return Sync.unsafe(() => throw err);
+        return Sync(() => throw err);
     }
   }
 
   @pragma('vm:prefer-inline')
-  ResolvableOption<R> _resolveAsync<R extends Object>(Async<T> async) {
-    return Async.unsafe(() async {
+  Resolvable<Option<R>> _resolveAsync<R extends Object>(Async<T> async) {
+    return Async(() async {
       final test = await async.value.then((e) {
         final test = e.reduce();
         return test.value;
@@ -66,11 +64,11 @@ sealed class Monad<T extends Object> implements Equatable {
   }
 
   @pragma('vm:prefer-inline')
-  ResolvableOption<R> _resolveValue<R extends Object>(T value) {
+  Resolvable<Option<R>> _resolveValue<R extends Object>(T value) {
     if (value is Monad) {
       return value.reduce();
     } else {
-      return Resolvable.unsafe(() {
+      return Resolvable(() {
         try {
           return Some(value as R);
         } catch (_) {

@@ -33,7 +33,7 @@ class SafeFinisher<T extends Object> {
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> resolvable) {
     if (isCompleted) {
-      return Sync(
+      return Sync.value(
         Err(
           debugPath: ['SafeCompleter', 'resolve'],
           error: 'Cannot resolved a finished SafeCompleter.',
@@ -57,13 +57,12 @@ class SafeFinisher<T extends Object> {
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
-  Resolvable<T> finish(FutureOr<T> value) =>
-      resolve(Resolvable.unsafe(() => value));
+  Resolvable<T> finish(FutureOr<T> value) => resolve(Resolvable(() => value));
 
   /// Checks if the value has been set or if the [SafeFinisher] is completed.
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() {
-    return Resolvable.unsafe(
+    return Resolvable(
       () => (_value.isSome() ? _value.unwrap() : _completer.future),
     );
   }
@@ -75,7 +74,7 @@ class SafeFinisher<T extends Object> {
   SafeFinisher<R> trans<R extends Object>([R Function(T e)? transformer]) {
     final finisher = SafeFinisher<R>();
     resolvable().map((e) {
-      finisher.resolve(SyncOk<R>(transformer?.call(e) ?? (e as R)));
+      finisher.resolve(SyncOk<R>.value(transformer?.call(e) ?? (e as R)));
       return e;
     });
     return finisher;

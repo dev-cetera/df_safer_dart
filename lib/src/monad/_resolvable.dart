@@ -17,20 +17,20 @@ part of 'monad.dart';
 sealed class Resolvable<T extends Object> extends Monad<T> {
   final FutureOr<Result<T>> value;
 
-  const Resolvable._(this.value);
+  const Resolvable.value(this.value);
 
-  factory Resolvable.unsafe(FutureOr<T> Function() unsafe) {
+  factory Resolvable(FutureOr<T> Function() unsafe) {
     try {
       final result = unsafe();
       if (result is Future<T>) {
-        return Async.unsafe(() => result);
+        return Async(() => result);
       } else {
-        return Sync(Ok(result));
+        return Sync.value(Ok(result));
       }
     } on Err catch (e) {
-      return Sync(e.transErr<T>());
+      return Sync.value(e.transErr<T>());
     } catch (error) {
-      return Sync(Err<T>(debugPath: ['Sync', 'Sync.unsafe'], error: error));
+      return Sync.value(Err<T>(debugPath: ['Resolvable', 'Resolvable'], error: error));
     }
   }
 
@@ -99,15 +99,15 @@ final class Sync<T extends Object> extends Resolvable<T> {
   // ignore: overridden_fields
   final Result<T> value;
 
-  const Sync(this.value) : super._(value);
+  const Sync.value(this.value) : super.value(value);
 
-  factory Sync.unsafe(T Function() unsafe) {
+  factory Sync(T Function() unsafe) {
     try {
-      return Sync(Ok(unsafe()));
+      return Sync.value(Ok(unsafe()));
     } on Err catch (e) {
-      return Sync(e.transErr<T>());
+      return Sync.value(e.transErr<T>());
     } catch (error) {
-      return Sync(Err<T>(debugPath: ['Sync', 'Sync.unsafe'], error: error));
+      return Sync.value(Err<T>(debugPath: ['Sync', 'Sync'], error: error));
     }
   }
 
@@ -153,7 +153,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Sync(Err(debugPath: ['Sync', 'ifSync'], error: error));
+      return Sync.value(Err(debugPath: ['Sync', 'ifSync'], error: error));
     }
   }
 
@@ -170,14 +170,14 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return onSync(this) ?? this;
     } catch (error) {
-      return Sync(Err(debugPath: ['Sync', 'fold'], error: error));
+      return Sync.value(Err(debugPath: ['Sync', 'fold'], error: error));
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(R Function(T value) unsafe) {
-    return Sync.unsafe(() => value.map((e) => unsafe(e)).unwrap());
+    return Sync(() => value.map((e) => unsafe(e)).unwrap());
   }
 
   @override
@@ -194,7 +194,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Sync<R> flatMap<R extends Object>(
     Result<R> Function(Result<T> value) mapper,
   ) {
-    return Sync(mapper(value));
+    return Sync.value(mapper(value));
   }
 
   @override
@@ -202,7 +202,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Resolvable<R> mapFutureOr<R extends Object>(
     FutureOr<R> Function(T value) unsafe,
   ) {
-    return Resolvable.unsafe(() => unsafe(value.unwrap()));
+    return Resolvable(() => unsafe(value.unwrap()));
   }
 
   @override
@@ -211,7 +211,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> toAsync() => Async(Future.value(value));
+  Async<T> toAsync() => Async.value(Future.value(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -219,7 +219,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   Sync<R> trans<R extends Object>([R Function(T e)? transformer]) {
-    return Sync.unsafe(() {
+    return Sync(() {
       final okOrErr = (sync().unwrap().value).trans<R>(transformer);
       if (okOrErr.isErr()) {
         throw okOrErr;
@@ -232,12 +232,19 @@ final class Sync<T extends Object> extends Resolvable<T> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class SyncOk<T extends Object> extends Sync<T> {
-  SyncOk(T value) : super(Ok(value));
+  SyncOk.value(T value) : super.value(Ok(value));
 }
 
 final class SyncErr<T extends Object> extends Sync<T> {
-  SyncErr({required List<Object> debugPath, required Object error})
-    : super(Err<T>(debugPath: debugPath, error: error));
+  SyncErr.value({
+    required List<Object> debugPath,
+    required Object error,
+  }) : super.value(
+          Err<T>(
+            debugPath: debugPath,
+            error: error,
+          ),
+        );
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -247,16 +254,19 @@ final class Async<T extends Object> extends Resolvable<T> {
   // ignore: overridden_fields
   final Future<Result<T>> value;
 
-  const Async(this.value) : super._(value);
+  const Async.value(this.value) : super.value(value);
 
-  factory Async.unsafe(Future<T> Function() unsafe) {
-    return Async(() async {
+  factory Async(Future<T> Function() unsafe) {
+    return Async.value(() async {
       try {
         return Ok<T>(await unsafe());
       } on Err catch (e) {
         return e.transErr<T>();
       } catch (error) {
-        return Err<T>(debugPath: ['Async', 'Async.unsafe'], error: error);
+        return Err<T>(
+          debugPath: ['Async', 'Async'],
+          error: error,
+        );
       }
     }());
   }
@@ -308,8 +318,13 @@ final class Async<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Async(
-        Future.value(Err(debugPath: ['Async', 'ifAsync'], error: error)),
+      return Async.value(
+        Future.value(
+          Err(
+            debugPath: ['Async', 'ifAsync'],
+            error: error,
+          ),
+        ),
       );
     }
   }
@@ -323,8 +338,13 @@ final class Async<T extends Object> extends Resolvable<T> {
     try {
       return onAsync(this) ?? this;
     } catch (error) {
-      return Async(
-        Future.value(Err(debugPath: ['Async', 'fold'], error: error)),
+      return Async.value(
+        Future.value(
+          Err(
+            debugPath: ['Async', 'fold'],
+            error: error,
+          ),
+        ),
       );
     }
   }
@@ -332,7 +352,11 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<R> map<R extends Object>(R Function(T value) unsafe) {
-    return Async(value.then((e) => e.map(unsafe)));
+    return Async.value(
+      value.then(
+        (e) => e.map(unsafe),
+      ),
+    );
   }
 
   @override
@@ -350,7 +374,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   Async<R> flatMap<R extends Object>(
     Result<R> Function(Result<T> value) mapper,
   ) {
-    return Async.unsafe(() async {
+    return Async(() async {
       final a = await value;
       if (a.isErr()) {
         throw a;
@@ -366,7 +390,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) unsafe) {
-    return Async.unsafe(() async => unsafe((await value).unwrap()));
+    return Async(() async => unsafe((await value).unwrap()));
   }
 
   @protected
@@ -390,7 +414,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   Async<R> trans<R extends Object>([R Function(T e)? transformer]) {
-    return Async.unsafe(() async {
+    return Async(() async {
       final okOrErr = (await async().unwrap().value).trans<R>(transformer);
       if (okOrErr.isErr()) {
         throw okOrErr;
@@ -403,10 +427,10 @@ final class Async<T extends Object> extends Resolvable<T> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 final class AsyncOk<T extends Object> extends Async<T> {
-  AsyncOk(Future<T> value) : super(value.then((e) => Ok(e)));
+  AsyncOk.value(Future<T> value) : super.value(value.then((e) => Ok(e)));
 }
 
 final class AsyncErr<T extends Object> extends Async<T> {
-  AsyncErr({required List<Object> debugPath, required Object error})
-    : super(Future.value(Err(debugPath: debugPath, error: error)));
+  AsyncErr.value({required List<Object> debugPath, required Object error})
+      : super.value(Future.value(Err(debugPath: debugPath, error: error)));
 }

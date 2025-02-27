@@ -16,13 +16,13 @@ import '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension MergeResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
+extension CombResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge2();
+  Resolvable<T> comb() => comb2();
 
-  Resolvable<T> _merge2() {
+  Resolvable<T> comb2() {
     if (value is Result<Resolvable<T>>) {
-      return Sync.unsafe(() {
+      return Sync(() {
         final a = value as Result<Resolvable<T>>;
         if (a.isErr()) {
           throw a;
@@ -34,7 +34,7 @@ extension MergeResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
         return b.unwrap();
       });
     } else {
-      return Async.unsafe(() async {
+      return Async(() async {
         final a = await value;
         if (a.isErr()) {
           throw a;
@@ -49,89 +49,64 @@ extension MergeResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   }
 }
 
-extension MergeResolvable3<T extends Object>
-    on Resolvable<Resolvable<Resolvable<T>>> {
+extension CombResolvable3<T extends Object> on Resolvable<Resolvable<Resolvable<T>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge3();
+  Resolvable<T> comb() => comb3();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge3() => _merge2()._merge2();
+  Resolvable<T> comb3() => comb2().comb2();
 }
 
-extension MergeResolvable4<T extends Object>
-    on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
+extension CombResolvable4<T extends Object> on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge4();
+  Resolvable<T> comb() => comb4();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge4() => _merge3()._merge2();
+  Resolvable<T> comb4() => comb3().comb2();
 }
 
-extension MergeResolvable5<T extends Object>
+extension CombResolvable5<T extends Object>
     on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge5();
+  Resolvable<T> comb() => comb5();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge5() => _merge4()._merge2();
+  Resolvable<T> comb5() => comb4().comb2();
 }
 
-extension MergeResolvable6<T extends Object>
-    on
-        Resolvable<
-          Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-        > {
+extension CombResolvable6<T extends Object>
+    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge6();
+  Resolvable<T> comb() => comb6();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge6() => _merge5()._merge2();
+  Resolvable<T> comb6() => comb5().comb2();
 }
 
-extension MergeResolvable7<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-          >
-        > {
+extension CombResolvable7<T extends Object>
+    on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge7();
+  Resolvable<T> comb() => comb7();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge7() => _merge6()._merge2();
+  Resolvable<T> comb7() => comb6().comb2();
 }
 
-extension MergeResolvable8<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<
-              Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-            >
-          >
-        > {
+extension CombResolvable8<T extends Object> on Resolvable<
+    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge8();
+  Resolvable<T> comb() => comb8();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge8() => _merge7()._merge2();
+  Resolvable<T> comb8() => comb7().comb2();
 }
 
-extension MergeResolvable9<T extends Object>
-    on
-        Resolvable<
-          Resolvable<
-            Resolvable<
-              Resolvable<
-                Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
-              >
-            >
-          >
-        > {
+extension CombResolvable9<T extends Object> on Resolvable<
+    Resolvable<
+        Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> merge() => _merge9();
+  Resolvable<T> comb() => comb9();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> _merge9() => _merge8()._merge2();
+  Resolvable<T> comb9() => comb8().comb2();
 }

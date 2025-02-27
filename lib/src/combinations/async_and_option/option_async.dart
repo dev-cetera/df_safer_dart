@@ -14,8 +14,6 @@ import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef OptionAsync<T extends Object> = Option<Async<T>>;
-
-extension OptionAsyncX<T extends Object> on OptionAsync<T> {
+extension OptionAsyncX<T extends Object> on Option<Async<T>> {
   // TODO: Implement this!
 }

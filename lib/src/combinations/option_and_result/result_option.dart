@@ -14,13 +14,11 @@ import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef ResultOption<T extends Object> = Result<Option<T>>;
-
-extension ResultOptionX<T extends Object> on ResultOption<T> {
+extension ResultOptionX<T extends Object> on Result<Option<T>> {
   @pragma('vm:prefer-inline')
   Result<T> unwrapResult() => unwrap().asResult();
 
-  OptionResult<T> swap() {
+  Option<Result<T>> swap() {
     if (isErr()) {
       return const None();
     }

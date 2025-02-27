@@ -13,32 +13,30 @@ import 'package:http/http.dart' as http;
 void main() async {
   // Fetch the IP address and handle both success and error results.
   fetchIpAddress().flatMap(
-    (result) => result
-        .ifOk((e) {
-          print('IP address: ${result.unwrap()}');
-        })
-        .ifErr((e) {
-          print('Error: $e');
-        }),
+    (result) => result.ifOk((e) {
+      print('IP address: ${result.unwrap()}');
+    }).ifErr((e) {
+      print('Error: $e');
+    }),
   );
 }
 
 Async<String> fetchIpAddress() {
-  // Async.unsafe, Sync.unsafe or Resolvable.unsafe can be used to wrap
+  // Async, Sync or Resolvable can be used to wrap
   // potentially throwing code.
   //
   // The only rules here are:
   //
-  // 1. ALWAYS await all asynchronous operations inside Async.unsafe
-  // (or Resolvable.unsafe) to ensure that exceptions are properly caught and
+  // 1. ALWAYS await all asynchronous operations inside Async
+  // (or Resolvable) to ensure that exceptions are properly caught and
   // wrapped in a Result.
   //
-  // 2. Only deal with asynchronous operations in Async.unsafe or
-  // Resolvable.unsafe. Not in Sync.unsafe.
+  // 2. Only deal with asynchronous operations in Async or
+  // Resolvable. Not in Sync.
   //
   // 3. You can throw any Objects within unsafe, but prefer throwing Err
   // objects as it is the standard and will help with debugging.
-  return Async.unsafe(() async {
+  return Async(() async {
     final response = await http.get(
       Uri.parse('https://api.ipify.org?format=json'),
     );
