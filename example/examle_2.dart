@@ -5,7 +5,7 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() async {
-  if (Some('Robert') == Some('Robert')) {
+  if (const Some('Robert') == const Some('Robert')) {
     print('Same!');
   }
 }
