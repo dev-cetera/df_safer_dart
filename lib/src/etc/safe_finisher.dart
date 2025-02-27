@@ -35,8 +35,8 @@ class SafeFinisher<T extends Object> {
     if (isCompleted) {
       return Sync.value(
         Err(
-          debugPath: ['SafeCompleter', 'resolve'],
-          error: 'Cannot resolved a finished SafeCompleter.',
+          debugPath: ['SafeCompleter<$T>', 'resolve'],
+          error: 'Cannot resolved a finished SafeCompleter<$T>.',
         ),
       );
     }

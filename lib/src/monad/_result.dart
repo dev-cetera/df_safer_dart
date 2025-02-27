@@ -85,7 +85,7 @@ final class Ok<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() => Err(debugPath: ['Ok', 'err'], error: 'Called err() on Ok.');
+  Err<T> err() => Err(debugPath: ['Ok<$T>', 'err'], error: 'Called err() on Ok<$T>.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -94,7 +94,7 @@ final class Ok<T extends Object> extends Result<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Err(debugPath: ['Ok', 'ifOk'], error: error);
+      return Err(debugPath: ['Ok<$T>', 'ifOk'], error: error);
     }
   }
 
@@ -118,14 +118,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -136,7 +134,10 @@ final class Ok<T extends Object> extends Result<T> {
     try {
       return onOk(this) ?? this;
     } catch (error) {
-      return Err(debugPath: ['Ok', 'fold'], error: error);
+      return Err(
+        debugPath: ['Ok<$T>', 'fold'],
+        error: error,
+      );
     }
   }
 
@@ -175,14 +176,14 @@ final class Ok<T extends Object> extends Result<T> {
       return Ok(value1);
     } catch (_) {
       return Err(
-        debugPath: ['Ok', 'trans'],
+        debugPath: ['Ok<$T>', 'trans'],
         error: 'Cannot transform $T to $R.',
       );
     }
   }
 
   @override
-  List<Object?> get props => [Ok<Object>, this.value];
+  List<Object?> get props => [this.value];
 
   @override
   bool? get stringify => false;
@@ -196,20 +197,19 @@ final class Err<T extends Object> extends Result<T> {
   final int? statusCode;
   final StackTrace? stack;
   Err({required this.debugPath, required this.error, this.statusCode})
-    : stack = StackTrace.current,
-      super._();
+      : stack = StackTrace.current,
+        super._();
 
   @visibleForTesting
-  Err.test() : this(debugPath: ['Err', 'Err.test'], error: 'Test error!');
+  Err.test() : this(debugPath: ['Err<$T>', 'Err.test'], error: 'Test error!');
 
   @pragma('vm:prefer-inline')
   bool isErrorValueType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> transErrorValue<E extends Object>() =>
-      isErrorValueType<E>()
-          ? Ok(error as E)
-          : Err(debugPath: ['Err', 'getError'], error: 'Error type is not $E!');
+  Result<E> transErrorValue<E extends Object>() => isErrorValueType<E>()
+      ? Ok(error as E)
+      : Err(debugPath: ['Err<$T>', 'getError'], error: 'Error type is not $E!');
 
   @override
   @pragma('vm:prefer-inline')
@@ -223,7 +223,7 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> ok() {
-    return Err(debugPath: ['Ok', 'ok'], error: 'Called ok() on Err.');
+    return Err(debugPath: ['Ok<$T>', 'ok'], error: 'Called ok() on Err<$T>.');
   }
 
   @override
@@ -246,7 +246,7 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(debugPath: ['Err', 'unwrap'], error: 'Called unwrap() on Err.');
+    throw Err(debugPath: ['Err<$T>', 'unwrap'], error: 'Called unwrap() on Err<$T>.');
   }
 
   @protected
@@ -277,7 +277,10 @@ final class Err<T extends Object> extends Result<T> {
     try {
       return onErr(this) ?? this;
     } catch (error) {
-      return Err(debugPath: ['Err', 'fold'], error: error);
+      return Err(
+        debugPath: ['Err<$T>', 'fold'],
+        error: error,
+      );
     }
   }
 
@@ -312,8 +315,8 @@ final class Err<T extends Object> extends Result<T> {
     final type = T.toString();
     final debugPath = this.debugPath.map((e) => _safeToString(e)).toList();
     final error = _safeToString(this.error);
-    final stack =
-        this.stack
+    final stack = this
+            .stack
             ?.toString()
             .split('\n')
             .map((e) => e.trim())
@@ -338,17 +341,15 @@ final class Err<T extends Object> extends Result<T> {
 
   @pragma('vm:prefer-inline')
   Err<R> transErr<R extends Object>() {
-    return Err(debugPath: debugPath, error: error);
+    return Err(
+      debugPath: debugPath,
+      error: error,
+      statusCode: statusCode,
+    );
   }
 
   @override
-  List<Object?> get props => [
-    Err<Object>,
-    ...debugPath,
-    error,
-    statusCode,
-    //stack,
-  ];
+  List<Object?> get props => [...debugPath, error, statusCode];
 
   @override
   bool? get stringify => false;

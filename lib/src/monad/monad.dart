@@ -55,8 +55,8 @@ sealed class Monad<T extends Object> implements Equatable {
       try {
         return test.unwrap().map((e) => e as R);
       } catch (_) {
-        throw Err<R>(
-          debugPath: ['Monad', '_resolveValue'],
+        throw Err(
+          debugPath: ['Monad<$T>', '_resolveValue'],
           error: 'Cannot resolve $T to $R.',
         );
       }
@@ -72,8 +72,8 @@ sealed class Monad<T extends Object> implements Equatable {
         try {
           return Some(value as R);
         } catch (_) {
-          throw Err<R>(
-            debugPath: ['Monad', '_resolveValue'],
+          throw Err(
+            debugPath: ['Monad<$T>', '_resolveValue'],
             error: 'Cannot resolve $T to $R.',
           );
         }

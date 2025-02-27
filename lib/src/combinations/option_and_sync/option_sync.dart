@@ -18,8 +18,8 @@ extension OptionSyncX<T extends Object> on Option<Sync<T>> {
   Result<T> toResult() {
     if (isNone()) {
       return Err(
-        debugPath: ['OptionSyncX', 'unwrapResult'],
-        error: 'Called unwrapResult() on None.',
+        debugPath: ['OptionSyncX<$T>', 'unwrapResult'],
+        error: 'Called unwrapResult() on None<$T>.',
       );
     }
     // ignore: invalid_use_of_visible_for_testing_member
