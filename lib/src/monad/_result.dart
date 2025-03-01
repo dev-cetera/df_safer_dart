@@ -85,7 +85,8 @@ final class Ok<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() => Err(debugPath: ['Ok<$T>', 'err'], error: 'Called err() on Ok<$T>.');
+  Err<T> err() =>
+      Err(debugPath: ['Ok<$T>', 'err'], error: 'Called err() on Ok<$T>.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -118,12 +119,14 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -194,8 +197,8 @@ final class Err<T extends Object> extends Result<T> {
   final int? statusCode;
   final StackTrace? stack;
   Err({required this.debugPath, required this.error, this.statusCode})
-      : stack = StackTrace.current,
-        super._();
+    : stack = StackTrace.current,
+      super._();
 
   @visibleForTesting
   Err.test() : this(debugPath: ['Err<$T>', 'Err.test'], error: 'Test error!');
@@ -204,12 +207,13 @@ final class Err<T extends Object> extends Result<T> {
   bool isErrorValueType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> transErrorValue<E extends Object>() => isErrorValueType<E>()
-      ? Ok(error as E)
-      : Err(
-          debugPath: ['Err<$T>', 'getError'],
-          error: 'Error type is not $E!',
-        );
+  Result<E> transErrorValue<E extends Object>() =>
+      isErrorValueType<E>()
+          ? Ok(error as E)
+          : Err(
+            debugPath: ['Err<$T>', 'getError'],
+            error: 'Error type is not $E!',
+          );
 
   @override
   @pragma('vm:prefer-inline')
@@ -315,8 +319,8 @@ final class Err<T extends Object> extends Result<T> {
     final type = T.toString();
     final debugPath = this.debugPath.map((e) => _safeToString(e)).toList();
     final error = _safeToString(this.error);
-    final stack = this
-            .stack
+    final stack =
+        this.stack
             ?.toString()
             .split('\n')
             .map((e) => e.trim())

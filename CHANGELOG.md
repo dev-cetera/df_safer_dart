@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.0]
+
+- Released @ 3/2025 (UTC)
+- breaking: Rename trans() to transf()
+
 ## [0.9.1]
 
 - Released @ 2/2025 (UTC)

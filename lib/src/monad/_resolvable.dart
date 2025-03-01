@@ -242,7 +242,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-      : super.value(Err<T>(debugPath: debugPath, error: error));
+    : super.value(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -416,5 +416,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr.value({required List<Object> debugPath, required Object error})
-      : super.value(Future.value(Err(debugPath: debugPath, error: error)));
+    : super.value(Future.value(Err(debugPath: debugPath, error: error)));
 }
