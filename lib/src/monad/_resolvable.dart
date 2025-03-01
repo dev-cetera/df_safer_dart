@@ -85,7 +85,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   Future<T?> orNull();
 
-  Resolvable<R> trans<R extends Object>([R Function(T e)? transformer]);
+  Resolvable<R> transf<R extends Object>([R Function(T e)? transformer]);
 
   @override
   List<Object?> get props => [this.value];
@@ -223,9 +223,9 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Future<T?> orNull() async => value.orNull();
 
   @override
-  Sync<R> trans<R extends Object>([R Function(T e)? transformer]) {
+  Sync<R> transf<R extends Object>([R Function(T e)? transformer]) {
     return Sync(() {
-      final okOrErr = value.trans<R>(transformer);
+      final okOrErr = value.transf<R>(transformer);
       if (okOrErr.isErr()) {
         throw okOrErr;
       }
@@ -242,7 +242,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-    : super.value(Err<T>(debugPath: debugPath, error: error));
+      : super.value(Err<T>(debugPath: debugPath, error: error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -397,9 +397,9 @@ final class Async<T extends Object> extends Resolvable<T> {
   Future<T?> orNull() => value.then((e) => e.orNull());
 
   @override
-  Async<R> trans<R extends Object>([R Function(T e)? transformer]) {
+  Async<R> transf<R extends Object>([R Function(T e)? transformer]) {
     return Async(() async {
-      final okOrErr = (await value).trans<R>(transformer);
+      final okOrErr = (await value).transf<R>(transformer);
       if (okOrErr.isErr()) {
         throw okOrErr;
       }
@@ -416,5 +416,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 
 final class AsyncErr<T extends Object> extends Async<T> {
   AsyncErr.value({required List<Object> debugPath, required Object error})
-    : super.value(Future.value(Err(debugPath: debugPath, error: error)));
+      : super.value(Future.value(Err(debugPath: debugPath, error: error)));
 }

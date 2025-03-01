@@ -61,7 +61,7 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   Result<Object> or<R extends Object>(Result<R> other);
 
-  Result<R> trans<R extends Object>([R Function(T e)? transformer]);
+  Result<R> transf<R extends Object>([R Function(T e)? transformer]);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -85,8 +85,7 @@ final class Ok<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() =>
-      Err(debugPath: ['Ok<$T>', 'err'], error: 'Called err() on Ok<$T>.');
+  Err<T> err() => Err(debugPath: ['Ok<$T>', 'err'], error: 'Called err() on Ok<$T>.');
 
   @override
   @pragma('vm:prefer-inline')
@@ -119,14 +118,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -169,14 +166,14 @@ final class Ok<T extends Object> extends Result<T> {
   String toString() => '${Ok<T>}($value)';
 
   @override
-  Result<R> trans<R extends Object>([R Function(T e)? transformer]) {
+  Result<R> transf<R extends Object>([R Function(T e)? transformer]) {
     try {
       final value0 = unwrap();
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(value1);
     } catch (_) {
       return Err(
-        debugPath: ['Ok<$T>', 'trans'],
+        debugPath: ['Ok<$T>', 'transf'],
         error: 'Cannot transform $T to $R.',
       );
     }
@@ -197,8 +194,8 @@ final class Err<T extends Object> extends Result<T> {
   final int? statusCode;
   final StackTrace? stack;
   Err({required this.debugPath, required this.error, this.statusCode})
-    : stack = StackTrace.current,
-      super._();
+      : stack = StackTrace.current,
+        super._();
 
   @visibleForTesting
   Err.test() : this(debugPath: ['Err<$T>', 'Err.test'], error: 'Test error!');
@@ -207,13 +204,12 @@ final class Err<T extends Object> extends Result<T> {
   bool isErrorValueType<E extends Object>() => error is E;
 
   @pragma('vm:prefer-inline')
-  Result<E> transErrorValue<E extends Object>() =>
-      isErrorValueType<E>()
-          ? Ok(error as E)
-          : Err(
-            debugPath: ['Err<$T>', 'getError'],
-            error: 'Error type is not $E!',
-          );
+  Result<E> transErrorValue<E extends Object>() => isErrorValueType<E>()
+      ? Ok(error as E)
+      : Err(
+          debugPath: ['Err<$T>', 'getError'],
+          error: 'Error type is not $E!',
+        );
 
   @override
   @pragma('vm:prefer-inline')
@@ -319,8 +315,8 @@ final class Err<T extends Object> extends Result<T> {
     final type = T.toString();
     final debugPath = this.debugPath.map((e) => _safeToString(e)).toList();
     final error = _safeToString(this.error);
-    final stack =
-        this.stack
+    final stack = this
+            .stack
             ?.toString()
             .split('\n')
             .map((e) => e.trim())
@@ -339,7 +335,7 @@ final class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<R> trans<R extends Object>([R Function(T e)? transformer]) {
+  Err<R> transf<R extends Object>([R Function(T e)? transformer]) {
     return transErr<R>();
   }
 

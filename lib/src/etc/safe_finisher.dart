@@ -71,7 +71,7 @@ class SafeFinisher<T extends Object> {
   @pragma('vm:prefer-inline')
   bool get isCompleted => _completer.isCompleted || _value.isSome();
 
-  SafeFinisher<R> trans<R extends Object>([R Function(T e)? transformer]) {
+  SafeFinisher<R> transf<R extends Object>([R Function(T e)? transformer]) {
     final finisher = SafeFinisher<R>();
     resolvable().map((e) {
       finisher.resolve(SyncOk<R>.value(transformer?.call(e) ?? (e as R)));

@@ -71,7 +71,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   Option<Object> or<R extends Object>(Option<R> other);
 
-  Result<Option<R>> trans<R extends Object>([R Function(T e)? transformer]);
+  Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -134,19 +134,16 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -196,14 +193,14 @@ final class Some<T extends Object> extends Option<T> {
   String toString() => '${Some<T>}($value)';
 
   @override
-  Result<Option<R>> trans<R extends Object>([R Function(T e)? transformer]) {
+  Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]) {
     try {
       final value0 = unwrap();
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(Option.fromNullable(value1));
     } catch (_) {
       return Err(
-        debugPath: ['Some<$T>', 'trans'],
+        debugPath: ['Some<$T>', 'transf'],
         error: 'Cannot transform $T to $R',
       );
     }
@@ -325,9 +322,9 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
-    const None(),
-    const None(),
-  );
+        const None(),
+        const None(),
+      );
 
   @override
   @pragma('vm:prefer-inline')
@@ -339,7 +336,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<R>> trans<R extends Object>([R Function(T e)? transformer]) {
+  Ok<None<R>> transf<R extends Object>([R Function(T e)? transformer]) {
     return const Ok(None());
   }
 

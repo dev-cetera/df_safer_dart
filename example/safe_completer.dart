@@ -5,6 +5,6 @@ void main() {
   print(finisher.resolvable().unwrap());
   finisher.finish([1]);
 
-  final aa = finisher.trans<List<int>>((e) => e.cast());
+  final aa = finisher.transf<List<int>>((e) => e.cast());
   print(aa.resolvable().value);
 }
