@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.1]
+
+- Released @ 3/2025 (UTC)
+- chore: Add NONE const
+
 ## [0.10.0]
 
 - Released @ 3/2025 (UTC)
