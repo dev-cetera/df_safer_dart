@@ -218,6 +218,8 @@ final class Some<T extends Object> extends Option<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+const NONE = None();
+
 final class None<T extends Object> extends Option<T> {
   const None() : super._();
 
@@ -325,9 +327,9 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
-    const None(),
-    const None(),
-  );
+        const None(),
+        const None(),
+      );
 
   @override
   @pragma('vm:prefer-inline')
