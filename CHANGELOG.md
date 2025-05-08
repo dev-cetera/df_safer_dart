@@ -2,8 +2,9 @@
 
 ## [0.10.1]
 
-- Released @ 3/2025 (UTC)
+- Released @ 5/2025 (UTC)
 - chore: Add NONE const
+- fix: Bugfixes
 
 ## [0.10.0]
 
