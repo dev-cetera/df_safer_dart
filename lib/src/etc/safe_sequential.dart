@@ -43,21 +43,25 @@ class SafeSequential {
   /// Adds multiple [unsafe] functions to the queue for sequential execution.
   /// See [add].
   @pragma('vm:prefer-inline')
-  Iterable<Resolvable<Option<T>>> addAll<T extends Object>(
+  List<Resolvable<Option<T>>> addAll<T extends Object>(
     Iterable<TAddFunction<T>> unsafe, {
     Duration? buffer,
   }) {
-    return unsafe.map((e) => add<T>(e, buffer: buffer));
+    return unsafe
+        .map((e) => add<T>(e, buffer: buffer))
+        .toList(); // Must be a list, not an Iterable so that the map function is immediately executed.
   }
 
   /// Adds multiple [functions] to the queue for sequential execution. See
   /// [addSafe].
   @pragma('vm:prefer-inline')
-  Iterable<Resolvable<Option<T>>> addAllSafe<T extends Object>(
+  List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
     Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> functions, {
     Duration? buffer,
   }) {
-    return functions.map((e) => addSafe<T>(e, buffer: buffer));
+    return functions
+        .map((e) => addSafe<T>(e, buffer: buffer))
+        .toList(); // Must be a list, not an Iterable so that the map function is immediately executed.
   }
 
   /// Adds an [unsafe] function to the queue that processes the previous value.
