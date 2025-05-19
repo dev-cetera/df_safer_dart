@@ -9,20 +9,20 @@
 //
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
-import 'package:df_generate_dart_models_core/df_generate_dart_models_core.dart';
+// import 'package:df_generate_dart_models_core/df_generate_dart_models_core.dart';
 
 part '_err_model.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-@GenerateDartModel(
-  fields: {
-    Field(fieldPath: ['type'], fieldType: String, nullable: false),
-    Field(fieldPath: ['debugPath'], fieldType: String, nullable: true),
-    Field(fieldPath: ['error'], fieldType: String, nullable: false),
-    Field(fieldPath: ['statusCode'], fieldType: int, nullable: true),
-    Field(fieldPath: ['stackTrace'], fieldType: List<String>, nullable: true),
-  },
-)
+// @GenerateDartModel(
+//   fields: {
+//     Field(fieldPath: ['type'], fieldType: String, nullable: false),
+//     Field(fieldPath: ['debugPath'], fieldType: String, nullable: true),
+//     Field(fieldPath: ['error'], fieldType: String, nullable: false),
+//     Field(fieldPath: ['statusCode'], fieldType: int, nullable: true),
+//     Field(fieldPath: ['stackTrace'], fieldType: List<String>, nullable: true),
+//   },
+// )
 // ignore: unused_element
 abstract class _ErrModel {}

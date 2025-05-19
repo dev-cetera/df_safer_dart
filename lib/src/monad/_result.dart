@@ -118,14 +118,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -194,8 +192,8 @@ final class Err<T extends Object> extends Result<T> {
   final StackTrace? stackTrace;
 
   Err(this.error, {this.statusCode})
-    : stackTrace = StackTrace.current,
-      super._() {
+      : stackTrace = StackTrace.current,
+        super._() {
     this.debugPath = const Here(3).basepath;
   }
 
@@ -317,8 +315,8 @@ final class Err<T extends Object> extends Result<T> {
   ErrModel toModel() {
     final type = 'Err<${T.toString()}>';
     final error = _safeToString(this.error);
-    final stackTrace =
-        this.stackTrace
+    final stackTrace = this
+            .stackTrace
             ?.toString()
             .split('\n')
             .map((e) => e.trim())
@@ -335,7 +333,16 @@ final class Err<T extends Object> extends Result<T> {
   }
 
   @pragma('vm:prefer-inline')
-  Map<String, dynamic> toJson() => toModel().toJson();
+  Map<String, dynamic> toJson() {
+    final model = toModel();
+    return {
+      'type': model.type,
+      'debugPath': model.debugPath,
+      'error': model.error,
+      'statusCode': model.statusCode,
+      'stackTrace': model.stackTrace,
+    };
+  }
 
   @protected
   @override
