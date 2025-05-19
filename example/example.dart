@@ -13,11 +13,13 @@ import 'package:http/http.dart' as http;
 void main() async {
   // Fetch the IP address and handle both success and error results.
   fetchIpAddress().flatMap(
-    (result) => result.ifOk((e) {
-      print('IP address: ${result.unwrap()}');
-    }).ifErr((e) {
-      print('Error: $e');
-    }),
+    (result) => result
+        .ifOk((e) {
+          print('IP address: ${result.unwrap()}');
+        })
+        .ifErr((e) {
+          print('Error: $e');
+        }),
   );
 }
 
@@ -43,9 +45,7 @@ Async<String> fetchIpAddress() {
     // Throw an Err if the status code is not 200. Any other exceptions within
     // Resolvable.wrap will be caught and wrapped in an Err.
     if (response.statusCode != 200) {
-      throw Err(
-        'Failed to fetch IP address',
-      );
+      throw Err('Failed to fetch IP address');
     }
     final data = jsonDecode(response.body);
     final ip = data['ip'] as String;

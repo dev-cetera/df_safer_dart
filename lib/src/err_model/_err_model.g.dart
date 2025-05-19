@@ -91,9 +91,7 @@ class ErrModel extends Model {
 
   /// Constructs a new instance of [ErrModel],
   /// from the fields of [another] instance. Throws if the conversion fails.
-  factory ErrModel.from(
-    BaseModel another,
-  ) {
+  factory ErrModel.from(BaseModel another) {
     try {
       return fromOrNull(another)!;
     } catch (e) {
@@ -106,17 +104,13 @@ class ErrModel extends Model {
   /// from the fields of [another] instance. Returns `null` if [another] is
   /// `null` or if the conversion fails.
   @pragma('vm:prefer-inline')
-  static ErrModel? fromOrNull(
-    BaseModel? another,
-  ) {
+  static ErrModel? fromOrNull(BaseModel? another) {
     return fromJsonOrNull(another?.toJson())!;
   }
 
   /// Constructs a new instance of [ErrModel],
   /// from the fields of [another] instance. Throws if the conversion fails.
-  factory ErrModel.of(
-    ErrModel another,
-  ) {
+  factory ErrModel.of(ErrModel another) {
     try {
       return ofOrNull(another)!;
     } catch (e) {
@@ -129,18 +123,14 @@ class ErrModel extends Model {
   /// from the fields of [another] instance. Returns `null` if [another] is
   /// `null` or if the conversion fails.
   @pragma('vm:prefer-inline')
-  static ErrModel? ofOrNull(
-    ErrModel? other,
-  ) {
+  static ErrModel? ofOrNull(ErrModel? other) {
     return fromJsonOrNull(other?.toJson());
   }
 
   /// Constructs a new instance of [ErrModel],
   /// from [jsonString], which must be a valid JSON String. Throws if the
   /// conversion fails.
-  factory ErrModel.fromJsonString(
-    String jsonString,
-  ) {
+  factory ErrModel.fromJsonString(String jsonString) {
     try {
       return fromJsonStringOrNull(jsonString)!;
     } catch (e) {
@@ -152,9 +142,7 @@ class ErrModel extends Model {
   /// Constructs a new instance of [ErrModel],
   /// from [jsonString], which must be a valid JSON String. Returns `null` if
   /// [jsonString] is `null` or if the conversion fails.
-  static ErrModel? fromJsonStringOrNull(
-    String? jsonString,
-  ) {
+  static ErrModel? fromJsonStringOrNull(String? jsonString) {
     try {
       if (jsonString!.isNotEmpty) {
         final decoded = letMapOrNull<String, dynamic>(jsonDecode(jsonString));
@@ -170,9 +158,7 @@ class ErrModel extends Model {
   /// Constructs a new instance of [ErrModel],
   /// from [json], which must be a valid JSON object. Throws if the conversion
   /// fails.
-  factory ErrModel.fromJson(
-    Map<String, dynamic>? json,
-  ) {
+  factory ErrModel.fromJson(Map<String, dynamic>? json) {
     try {
       return fromJsonOrNull(json)!;
     } catch (e) {
@@ -184,22 +170,19 @@ class ErrModel extends Model {
   /// Constructs a new instance of [ErrModel],
   /// from [json], which must be a valid JSON object. Returns `null` if
   /// [json] is `null` or if the conversion fails.
-  static ErrModel? fromJsonOrNull(
-    Map<String, dynamic>? json,
-  ) {
+  static ErrModel? fromJsonOrNull(Map<String, dynamic>? json) {
     try {
       final type = json?['type']?.toString().trim().nullIfEmpty;
       final debugPath = json?['debugPath']?.toString().trim().nullIfEmpty;
       final error = json?['error']?.toString().trim().nullIfEmpty;
       final statusCode = letAsOrNull<int>(json?['statusCode']);
-      final stackTrace = letListOrNull<dynamic>(json?['stackTrace'])
-          ?.map(
-            (p0) => p0?.toString().trim().nullIfEmpty,
-          )
-          .nonNulls
-          .nullIfEmpty
-          ?.toList()
-          .unmodifiable;
+      final stackTrace =
+          letListOrNull<dynamic>(json?['stackTrace'])
+              ?.map((p0) => p0?.toString().trim().nullIfEmpty)
+              .nonNulls
+              .nullIfEmpty
+              ?.toList()
+              .unmodifiable;
       return ErrModel(
         type: type,
         debugPath: debugPath,
@@ -215,9 +198,7 @@ class ErrModel extends Model {
   /// Constructs a new instance of [ErrModel],
   /// from the query parameters of [uri]. Throws if the conversion
   /// fails.
-  factory ErrModel.fromUri(
-    Uri? uri,
-  ) {
+  factory ErrModel.fromUri(Uri? uri) {
     try {
       return fromUriOrNull(uri)!;
     } catch (e) {
@@ -229,9 +210,7 @@ class ErrModel extends Model {
   /// Constructs a new instance of [ErrModel],
   /// from the query parameters of [uri]. Returns `null` if [uri] is `null` or
   /// if the conversion fails.
-  static ErrModel? fromUriOrNull(
-    Uri? uri,
-  ) {
+  static ErrModel? fromUriOrNull(Uri? uri) {
     try {
       if (uri != null && uri.path == CLASS_NAME) {
         return ErrModel.fromJson(uri.queryParameters);
@@ -244,21 +223,18 @@ class ErrModel extends Model {
   }
 
   @override
-  Map<String, dynamic> toJson({
-    bool includeNulls = false,
-  }) {
+  Map<String, dynamic> toJson({bool includeNulls = false}) {
     try {
       final type0 = type?.trim().nullIfEmpty;
       final debugPath0 = debugPath?.trim().nullIfEmpty;
       final error0 = error?.trim().nullIfEmpty;
       final statusCode0 = statusCode;
-      final stackTrace0 = stackTrace
-          ?.map(
-            (p0) => p0?.trim().nullIfEmpty,
-          )
-          .nonNulls
-          .nullIfEmpty
-          ?.toList();
+      final stackTrace0 =
+          stackTrace
+              ?.map((p0) => p0?.trim().nullIfEmpty)
+              .nonNulls
+              .nullIfEmpty
+              ?.toList();
       final withNulls = {
         'type': type0,
         'statusCode': statusCode0,
@@ -326,10 +302,7 @@ abstract final class ErrModelFieldNames {
 extension ErrModelX on ErrModel {
   /// Creates a copy of this instance, merging another model's fields into
   /// this model's fields.
-  ErrModel mergeWith(
-    BaseModel? other, {
-    bool deepMerge = false,
-  }) {
+  ErrModel mergeWith(BaseModel? other, {bool deepMerge = false}) {
     final a = toJson();
     final b = other?.toJson() ?? {};
     final data = (deepMerge ? mergeDataDeep(a, b) : {...a, ...b}) as Map;

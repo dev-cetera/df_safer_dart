@@ -28,17 +28,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   }) {
     final result = unsafe();
     if (result is Future<T>) {
-      return Async(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Async(() => result, onError: onError, onFinalize: onFinalize);
     } else {
-      return Sync(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Sync(() => result, onError: onError, onFinalize: onFinalize);
     }
   }
 
@@ -126,9 +118,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
           }
           return onError(error);
         } catch (e) {
-          return Err<T>(
-            e,
-          );
+          return Err<T>(e);
         }
       } finally {
         onFinalize?.call();
@@ -167,9 +157,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Async<T>> async() {
-    return Err(
-      'Called async() on Sync<$T>.',
-    );
+    return Err('Called async() on Sync<$T>.');
   }
 
   @protected
@@ -180,11 +168,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Sync.value(
-        Err(
-          error,
-        ),
-      );
+      return Sync.value(Err(error));
     }
   }
 
@@ -201,11 +185,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return onSync(this) ?? this;
     } catch (error) {
-      return Sync.value(
-        Err(
-          error,
-        ),
-      );
+      return Sync.value(Err(error));
     }
   }
 
@@ -272,7 +252,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-      : super.value(Err<T>(error));
+    : super.value(Err<T>(error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -301,9 +281,7 @@ final class Async<T extends Object> extends Resolvable<T> {
           }
           return onError(error);
         } catch (e) {
-          return Err<T>(
-            e,
-          );
+          return Err<T>(e);
         }
       } finally {
         onFinalize?.call();
@@ -337,9 +315,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Sync<T>> sync() {
-    return Err(
-      'Called sync() on Async<$T>.',
-    );
+    return Err('Called sync() on Async<$T>.');
   }
 
   @protected
@@ -360,9 +336,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Async.value(
-        Future.value(Err(error)),
-      );
+      return Async.value(Future.value(Err(error)));
     }
   }
 
@@ -375,9 +349,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     try {
       return onAsync(this) ?? this;
     } catch (error) {
-      return Async.value(
-        Future.value(Err(error)),
-      );
+      return Async.value(Future.value(Err(error)));
     }
   }
 
@@ -425,9 +397,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Sync<T> toSync() {
-    throw Err(
-      'Called toSync() on Async<$T>.',
-    );
+    throw Err('Called toSync() on Async<$T>.');
   }
 
   @protected

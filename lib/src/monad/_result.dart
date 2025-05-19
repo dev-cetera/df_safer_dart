@@ -118,12 +118,14 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -172,9 +174,7 @@ final class Ok<T extends Object> extends Result<T> {
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(value1);
     } catch (_) {
-      return Err(
-        'Cannot transform $T to $R.',
-      );
+      return Err('Cannot transform $T to $R.');
     }
   }
 
@@ -193,25 +193,18 @@ final class Err<T extends Object> extends Result<T> {
   final int? statusCode;
   final StackTrace? stackTrace;
 
-  Err(
-    this.error, {
-    this.statusCode,
-  })  : stackTrace = StackTrace.current,
-        super._() {
+  Err(this.error, {this.statusCode})
+    : stackTrace = StackTrace.current,
+      super._() {
     this.debugPath = const Here(3).basepath;
   }
 
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
     if (error == null) {
-      return Err(
-        'Error is null!',
-      );
+      return Err('Error is null!');
     }
-    return Err(
-      error,
-      statusCode: model.statusCode,
-    );
+    return Err(error, statusCode: model.statusCode);
   }
 
   @visibleForTesting
@@ -259,9 +252,7 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(
-      'Called unwrap() on Err<$T>.',
-    );
+    throw Err('Called unwrap() on Err<$T>.');
   }
 
   @protected
@@ -326,8 +317,8 @@ final class Err<T extends Object> extends Result<T> {
   ErrModel toModel() {
     final type = 'Err<${T.toString()}>';
     final error = _safeToString(this.error);
-    final stackTrace = this
-            .stackTrace
+    final stackTrace =
+        this.stackTrace
             ?.toString()
             .split('\n')
             .map((e) => e.trim())
@@ -355,10 +346,7 @@ final class Err<T extends Object> extends Result<T> {
 
   @pragma('vm:prefer-inline')
   Err<R> transErr<R extends Object>() {
-    return Err(
-      error,
-      statusCode: statusCode,
-    );
+    return Err(error, statusCode: statusCode);
   }
 
   @override

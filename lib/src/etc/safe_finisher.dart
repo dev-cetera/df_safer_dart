@@ -33,11 +33,7 @@ class SafeFinisher<T extends Object> {
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> resolvable) {
     if (isCompleted) {
-      return Sync.value(
-        Err(
-          'Cannot resolved a finished SafeCompleter<$T>.',
-        ),
-      );
+      return Sync.value(Err('Cannot resolved a finished SafeCompleter<$T>.'));
     }
 
     return resolvable.flatMap((e) {

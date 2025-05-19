@@ -97,9 +97,7 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<None<T>> none() {
-    return Err(
-      'Called none() on Some<$T>.',
-    );
+    return Err('Called none() on Some<$T>.');
   }
 
   @override
@@ -133,16 +131,19 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) =>
+      Some(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -198,9 +199,7 @@ final class Some<T extends Object> extends Option<T> {
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(Option.fromNullable(value1));
     } catch (_) {
-      return Err(
-        'Cannot transform $T to $R',
-      );
+      return Err('Cannot transform $T to $R');
     }
   }
 
@@ -230,9 +229,7 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Some<T>> some() {
-    return Err(
-      'Called some() on None<$T>.',
-    );
+    return Err('Called some() on None<$T>.');
   }
 
   @override
@@ -258,9 +255,7 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err(
-      'Called unwrap() on None<$T>.',
-    );
+    throw Err('Called unwrap() on None<$T>.');
   }
 
   @protected
@@ -285,9 +280,7 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<T> asResult() {
-    return Err(
-      'Cannot convert None<$T> to Result<$T>.',
-    );
+    return Err('Cannot convert None<$T> to Result<$T>.');
   }
 
   @override
@@ -319,9 +312,9 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   (None<T>, None<R>) and<R extends Object>(Option<R> other) => (
-        const None(),
-        const None(),
-      );
+    const None(),
+    const None(),
+  );
 
   @override
   @pragma('vm:prefer-inline')

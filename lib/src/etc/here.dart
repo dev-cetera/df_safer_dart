@@ -55,10 +55,7 @@ final class Here {
     if (frame == null) return null;
     final library = p.basenameWithoutExtension(frame.library);
     final member = frame.member;
-    return [
-      library,
-      if (member != null) member,
-    ].join('/');
+    return [library, if (member != null) member].join('/');
   }
 
   //

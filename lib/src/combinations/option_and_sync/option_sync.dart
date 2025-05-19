@@ -17,9 +17,7 @@ import '/df_safer_dart.dart';
 extension OptionSyncX<T extends Object> on Option<Sync<T>> {
   Result<T> toResult() {
     if (isNone()) {
-      return Err(
-        'Called unwrapResult() on None<$T>.',
-      );
+      return Err('Called unwrapResult() on None<$T>.');
     }
     // ignore: invalid_use_of_visible_for_testing_member
     final result = unwrap().value;
