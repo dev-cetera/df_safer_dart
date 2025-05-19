@@ -9,28 +9,40 @@
 //
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
+import 'package:df_generate_dart_models_core/df_generate_dart_models_core.dart';
 
-import '/df_safer_dart.dart';
+part '_err_model.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension OptionSyncX<T extends Object> on Option<Sync<T>> {
-  Result<T> toResult() {
-    if (isNone()) {
-      return Err(
-        'Called unwrapResult() on None<$T>.',
-      );
-    }
-    // ignore: invalid_use_of_visible_for_testing_member
-    final result = unwrap().value;
-    return result;
-  }
-
-  @pragma('vm:prefer-inline')
-  Sync<Option<T>> swap() {
-    if (isNone()) {
-      return const Sync.value(Ok(None()));
-    }
-    return unwrap().map((e) => Some(e));
-  }
-}
+@GenerateDartModel(
+  fields: {
+    Field(
+      fieldPath: ['type'],
+      fieldType: String,
+      nullable: false,
+    ),
+    Field(
+      fieldPath: ['debugPath'],
+      fieldType: String,
+      nullable: true,
+    ),
+    Field(
+      fieldPath: ['error'],
+      fieldType: String,
+      nullable: false,
+    ),
+    Field(
+      fieldPath: ['statusCode'],
+      fieldType: int,
+      nullable: true,
+    ),
+    Field(
+      fieldPath: ['stackTrace'],
+      fieldType: List<String>,
+      nullable: true,
+    ),
+  },
+)
+// ignore: unused_element
+abstract class _ErrModel {}

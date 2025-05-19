@@ -62,7 +62,7 @@ Async<String> fetchIpAddress() {
       if (response.statusCode != 200) {
         throw const Err(
           debugPath: ['fetchIpAddress'],
-          error: 'Failed to fetch IP address',
+           'Failed to fetch IP address',
         );
       }
       final data = jsonDecode(response.body);

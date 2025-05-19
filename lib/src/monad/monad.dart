@@ -15,6 +15,8 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../df_safer_dart.dart';
+
 part '_option.dart';
 part '_result.dart';
 part '_resolvable.dart';
@@ -56,8 +58,7 @@ sealed class Monad<T extends Object> implements Equatable {
         return test.unwrap().map((e) => e as R);
       } catch (_) {
         throw Err(
-          debugPath: ['Monad<$T>', '_resolveValue'],
-          error: 'Cannot resolve $T to $R.',
+          'Cannot resolve $T to $R.',
         );
       }
     });
@@ -73,8 +74,7 @@ sealed class Monad<T extends Object> implements Equatable {
           return Some(value as R);
         } catch (_) {
           throw Err(
-            debugPath: ['Monad<$T>', '_resolveValue'],
-            error: 'Cannot resolve $T to $R.',
+            'Cannot resolve $T to $R.',
           );
         }
       });

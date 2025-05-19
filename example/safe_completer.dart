@@ -1,4 +1,4 @@
-import 'package:df_safer_dart/src/_index.g.dart';
+import 'package:df_safer_dart/src/_src.g.dart';
 
 void main() {
   final finisher = SafeFinisher<List<num>>();

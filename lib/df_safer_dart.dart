@@ -13,4 +13,4 @@
 /// A package inspired by functional programming designed to enhance the structure, safety, and debuggability of your applications.
 library;
 
-export 'src/_index.g.dart';
+export 'src/_src.g.dart';

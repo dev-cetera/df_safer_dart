@@ -19,46 +19,42 @@ void main() async {
   _check(c);
 
   print('D');
-  final d = Err(error: '!!!', debugPath: []).reduce();
+  final d = Err('!!!').reduce();
   _check(d);
 
   print('E');
-  final e = Ok(Some(Some(Ok(Err(error: '!!!', debugPath: []))))).reduce();
+  final e = Ok(Some(Some(Ok(Err('!!!'))))).reduce();
   _check(e);
 }
 
 void _check<R extends Object>(Resolvable<Option<R>> src) {
   internal(Result<Option<Object>> src) {
-    src
-        .ifOk((e) {
-          final src = e.value;
-          print('Ok!');
-          src
-              .ifSome((e) {
-                final src = e.value;
-                print('Some: $src!');
-              })
-              .unwrap()
-              .ifNone(() {
-                print('None!');
-              });
-        })
-        .ifErr((e) {
-          final src = e.error;
-          print('Error: $src!');
-        });
+    src.ifOk((e) {
+      final src = e.value;
+      print('Ok!');
+      src
+          .ifSome((e) {
+            final src = e.value;
+            print('Some: $src!');
+          })
+          .unwrap()
+          .ifNone(() {
+            print('None!');
+          });
+    }).ifErr((e) {
+      final src = e.error;
+      print('Error: $src!');
+    });
   }
 
-  src
-      .ifAsync((e) async {
-        // ignore: invalid_use_of_visible_for_testing_member
-        final src = await e.value;
-        internal(src);
-        print('Async!');
-      })
-      .ifSync((e) {
-        // ignore: invalid_use_of_visible_for_testing_member
-        final src = e.value;
-        internal(src);
-      });
+  src.ifAsync((e) async {
+    // ignore: invalid_use_of_visible_for_testing_member
+    final src = await e.value;
+    internal(src);
+    print('Async!');
+  }).ifSync((e) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    final src = e.value;
+    internal(src);
+  });
 }

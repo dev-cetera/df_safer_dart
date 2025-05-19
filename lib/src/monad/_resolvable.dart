@@ -12,6 +12,8 @@
 
 part of 'monad.dart';
 
+// TODO: Implement Here!!!
+
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 sealed class Resolvable<T extends Object> extends Monad<T> {
@@ -19,19 +21,23 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   const Resolvable.value(this.value);
 
-  factory Resolvable(FutureOr<T> Function() unsafe) {
-    try {
-      final result = unsafe();
-      if (result is Future<T>) {
-        return Async(() => result);
-      } else {
-        return Sync.value(Ok(result));
-      }
-    } on Err catch (e) {
-      return Sync.value(e.transErr<T>());
-    } catch (error) {
-      return Sync.value(
-        Err<T>(debugPath: ['Resolvable<$T>', 'Resolvable'], error: error),
+  factory Resolvable(
+    FutureOr<T> Function() unsafe, {
+    Err<T> Function(Object? error)? onError,
+    void Function()? onFinalize,
+  }) {
+    final result = unsafe();
+    if (result is Future<T>) {
+      return Async(
+        () => result,
+        onError: onError,
+        onFinalize: onFinalize,
+      );
+    } else {
+      return Sync(
+        () => result,
+        onError: onError,
+        onFinalize: onFinalize,
       );
     }
   }
@@ -103,14 +109,31 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   const Sync.value(this.value) : super.value(value);
 
-  factory Sync(T Function() unsafe) {
-    try {
-      return Sync.value(Ok(unsafe()));
-    } on Err catch (e) {
-      return Sync.value(e.transErr<T>());
-    } catch (error) {
-      return Sync.value(Err<T>(debugPath: ['Sync<$T>', 'Sync'], error: error));
-    }
+  factory Sync(
+    T Function() unsafe, {
+    Err<T> Function(Object? error)? onError,
+    void Function()? onFinalize,
+  }) {
+    return Sync.value(() {
+      try {
+        return Ok(unsafe());
+      } on Err catch (e) {
+        return e.transErr<T>();
+      } catch (error) {
+        try {
+          if (onError == null) {
+            rethrow;
+          }
+          return onError(error);
+        } catch (e) {
+          return Err<T>(
+            e,
+          );
+        }
+      } finally {
+        onFinalize?.call();
+      }
+    }());
   }
 
   @override
@@ -145,8 +168,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Err<Async<T>> async() {
     return Err(
-      debugPath: ['Sync<$T>', 'sync'],
-      error: 'Called async() on Sync<$T>.',
+      'Called async() on Sync<$T>.',
     );
   }
 
@@ -158,7 +180,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
       unsafe(this);
       return this;
     } catch (error) {
-      return Sync.value(Err(debugPath: ['Sync<$T>', 'ifSync'], error: error));
+      return Sync.value(
+        Err(
+          error,
+        ),
+      );
     }
   }
 
@@ -175,7 +201,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return onSync(this) ?? this;
     } catch (error) {
-      return Sync.value(Err(debugPath: ['Sync<$T>', 'fold'], error: error));
+      return Sync.value(
+        Err(
+          error,
+        ),
+      );
     }
   }
 
@@ -242,7 +272,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-    : super.value(Err<T>(debugPath: debugPath, error: error));
+      : super.value(Err<T>(error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -254,14 +284,29 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   const Async.value(this.value) : super.value(value);
 
-  factory Async(Future<T> Function() unsafe) {
+  factory Async(
+    Future<T> Function() unsafe, {
+    Err<T> Function(Object? error)? onError,
+    void Function()? onFinalize,
+  }) {
     return Async.value(() async {
       try {
         return Ok<T>(await unsafe());
       } on Err catch (e) {
         return e.transErr<T>();
       } catch (error) {
-        return Err<T>(debugPath: ['Async<$T>', 'Async'], error: error);
+        try {
+          if (onError == null) {
+            rethrow;
+          }
+          return onError(error);
+        } catch (e) {
+          return Err<T>(
+            e,
+          );
+        }
+      } finally {
+        onFinalize?.call();
       }
     }());
   }
@@ -293,8 +338,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Err<Sync<T>> sync() {
     return Err(
-      debugPath: ['Async<$T>', 'sync'],
-      error: 'Called sync() on Async<$T>.',
+      'Called sync() on Async<$T>.',
     );
   }
 
@@ -317,7 +361,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return this;
     } catch (error) {
       return Async.value(
-        Future.value(Err(debugPath: ['Async<$T>', 'ifAsync'], error: error)),
+        Future.value(Err(error)),
       );
     }
   }
@@ -332,7 +376,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       return onAsync(this) ?? this;
     } catch (error) {
       return Async.value(
-        Future.value(Err(debugPath: ['Async<$T>', 'fold'], error: error)),
+        Future.value(Err(error)),
       );
     }
   }
@@ -382,8 +426,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> toSync() {
     throw Err(
-      debugPath: ['Async<$T>', 'toSync'],
-      error: 'Called toSync() on Async<$T>.',
+      'Called toSync() on Async<$T>.',
     );
   }
 
@@ -415,6 +458,5 @@ final class AsyncOk<T extends Object> extends Async<T> {
 }
 
 final class AsyncErr<T extends Object> extends Async<T> {
-  AsyncErr.value({required List<Object> debugPath, required Object error})
-    : super.value(Future.value(Err(debugPath: debugPath, error: error)));
+  AsyncErr.value(Object error) : super.value(Future.value(Err(error)));
 }
