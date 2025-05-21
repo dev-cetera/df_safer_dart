@@ -395,7 +395,9 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Sync<T> toSync() {
-    throw Err('Called toSync() on Async<$T>.');
+    throw Err<T>(
+      'Called toSync() on Async<$T>.',
+    ).addStackLevel();
   }
 
   @protected

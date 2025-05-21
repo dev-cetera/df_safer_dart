@@ -5,5 +5,6 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() async {
-  print(Err<String>('!!!'));
+  // ignore: invalid_use_of_protected_member
+  print(Err<String>('!!!').unwrap());
 }

@@ -190,11 +190,36 @@ final class Err<T extends Object> extends Result<T> {
   final Object error;
   final int? statusCode;
   final StackTrace? stackTrace;
+  final int _initialStackLevel;
 
-  Err(this.error, {this.statusCode})
-      : stackTrace = StackTrace.current,
+  factory Err(
+    Object error, {
+    int? statusCode,
+  }) {
+    return Err._internal(
+      error,
+      statusCode: statusCode,
+      initialStackLevel: 3,
+    );
+  }
+
+  Err._internal(
+    this.error, {
+    this.statusCode,
+    @visibleForTesting int initialStackLevel = 3,
+  })  : stackTrace = StackTrace.current,
+        _initialStackLevel = initialStackLevel,
         super._() {
-    this.debugPath = const Here(3).basepath;
+    this.debugPath = Here(_initialStackLevel).basepath;
+  }
+
+  @visibleForTesting
+  Err<T> addStackLevel([int delta = 1]) {
+    return Err._internal(
+      error,
+      statusCode: statusCode,
+      initialStackLevel: _initialStackLevel + delta + 1,
+    );
   }
 
   factory Err.fromModel(ErrModel model) {
@@ -206,7 +231,7 @@ final class Err<T extends Object> extends Result<T> {
   }
 
   @visibleForTesting
-  Err.test() : this('Test error!');
+  Err.test() : this._internal('Test error!');
 
   @pragma('vm:prefer-inline')
   bool isErrorValueType<E extends Object>() => error is E;
@@ -250,7 +275,10 @@ final class Err<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   T unwrap() {
-    throw Err('Called unwrap() on Err<$T>.');
+    throw Err<T>(
+      'Called unwrap() on Err<$T>.',
+      statusCode: statusCode,
+    ).addStackLevel();
   }
 
   @protected
@@ -315,20 +343,19 @@ final class Err<T extends Object> extends Result<T> {
   ErrModel toModel() {
     final type = 'Err<${T.toString()}>';
     final error = _safeToString(this.error);
-    final stackTrace = this
-            .stackTrace
-            ?.toString()
-            .split('\n')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList() ??
-        const [];
+    // final stackTrace = this
+    //         .stackTrace
+    //         ?.toString()
+    //         .split('\n')
+    //         .map((e) => e.trim())
+    //         .where((e) => e.isNotEmpty)
+    //         .toList();
     return ErrModel(
       type: type,
       debugPath: debugPath,
       error: error,
       statusCode: statusCode,
-      stackTrace: stackTrace,
+      //stackTrace: stackTrace,
     );
   }
 
@@ -336,11 +363,11 @@ final class Err<T extends Object> extends Result<T> {
   Map<String, dynamic> toJson() {
     final model = toModel();
     return {
-      'type': model.type,
-      'debugPath': model.debugPath,
-      'error': model.error,
-      'statusCode': model.statusCode,
-      'stackTrace': model.stackTrace,
+      if (model.type != null) 'type': model.type,
+      if (model.debugPath != null) 'debugPath': model.debugPath,
+      if (model.error != null) 'error': model.error,
+      if (model.statusCode != null) 'statusCode': model.statusCode,
+      if (model.stackTrace != null) 'stackTrace': model.stackTrace,
     };
   }
 
