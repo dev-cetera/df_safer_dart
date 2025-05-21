@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.11.1]
+
+- Released @ 5/2025 (UTC)
+- chore: Bugfixes
+
 ## [0.11.0]
 
 - Released @ 5/2025 (UTC)

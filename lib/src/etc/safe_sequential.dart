@@ -114,15 +114,14 @@ class SafeSequential {
     // ignore: invalid_use_of_visible_for_testing_member
     final value = _current.value;
     if (value is Future<Result<Option<Object>>>) {
-      _current =
-          Async(() async {
-            final temp = function(await value);
-            if (temp == null) {
-              return _current;
-            }
-            _isEmpty = true;
-            return temp;
-          }).comb();
+      _current = Async(() async {
+        final temp = function(await value);
+        if (temp == null) {
+          return _current;
+        }
+        _isEmpty = true;
+        return temp;
+      }).comb();
     } else {
       _current =
           function(value)?.map((e) {
