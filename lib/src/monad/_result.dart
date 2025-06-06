@@ -17,24 +17,29 @@ part of 'monad.dart';
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
-  Option<T> asOption() => isOk() ? Some(ok().unwrap()) : const None();
+  Some<Result<T>> asSome();
+
+  None<Result<T>> asNone();
+
+  @pragma('vm:prefer-inline')
+  Async<T> asAsync() => Async.value(Future.value(this));
+
+  @pragma('vm:prefer-inline')
+  Sync<T> asSync() => Sync.value(this);
 
   bool isOk();
 
   bool isErr();
 
-  Result<T> ok();
-
-  Err<T> err();
-
-  @pragma('vm:prefer-inline')
-  Result<T> asResult() => this;
-
   Result<T> ifOk(void Function(Ok<T> ok) unsafe);
 
   Result<T> ifErr(void Function(Err<T> err) unsafe);
 
-  T unwrap();
+  Option<Err<T>> err();
+
+  Option<Ok<T>> ok();
+
+  T unwrap({int stackLevel = 1});
 
   T unwrapOr(T fallback);
 
@@ -72,6 +77,14 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Some<Ok<T>> asSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Ok<T>> asNone() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
   bool isOk() => true;
 
   @override
@@ -80,12 +93,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ok() => this;
+  Some<Ok<T>> ok() => Some(this);
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() => Err('Called err() on Ok<$T>.');
+  None<Err<T>> err() => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -104,7 +117,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => value;
+  T unwrap({int stackLevel = 1}) => value;
 
   @protected
   @override
@@ -118,14 +131,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -187,7 +198,7 @@ final class Ok<T extends Object> extends Result<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-final class Err<T extends Object> extends Result<T> {
+final class Err<T extends Object> extends Result<T> implements Exception {
   late final String? debugPath;
   final Object error;
   final int? statusCode;
@@ -202,9 +213,9 @@ final class Err<T extends Object> extends Result<T> {
     this.error, {
     this.statusCode,
     @visibleForTesting int initialStackLevel = 3,
-  }) : stackTrace = StackTrace.current,
-       _initialStackLevel = initialStackLevel,
-       super._() {
+  })  : stackTrace = StackTrace.current,
+        _initialStackLevel = initialStackLevel,
+        super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
@@ -237,6 +248,14 @@ final class Err<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Some<Err<T>> asSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Err<T>> asNone() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
   bool isOk() => false;
 
   @override
@@ -246,13 +265,11 @@ final class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ok() {
-    return Err('Called ok() on Err<$T>.');
-  }
+  None<Ok<T>> ok() => const None();
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> err() => this;
+  Some<Err<T>> err() => Some(this);
 
   @protected
   @override
@@ -269,11 +286,11 @@ final class Err<T extends Object> extends Result<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() {
+  T unwrap({int stackLevel = 1}) {
     throw Err<T>(
       'Called unwrap() on Err<$T>.',
       statusCode: statusCode,
-    ).addStackLevel();
+    ).addStackLevel(stackLevel);
   }
 
   @protected

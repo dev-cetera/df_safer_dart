@@ -10,10 +10,23 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import '/df_safer_dart.dart';
+import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ResolvableOptionX<T extends Object> on Resolvable<Option<T>> {
-  // TODO: Implement this!
+
+
+extension AsyncSomeSwapX<T extends Object> on Async<Some<T>> {
+  @pragma('vm:prefer-inline')
+  Some<Async<T>> swap() => Some(map((e) => e.unwrap()));
+}
+
+extension AsyncNoneSwapX<T extends Object> on Async<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Async<T>> swap() => const None();
+}
+
+extension AsyncOkSwapX<T extends Object> on Async<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Async<T>> swap() => Ok(map((e) => e.unwrap()));
 }

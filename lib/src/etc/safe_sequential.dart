@@ -26,6 +26,7 @@ class SafeSequential {
   final Duration? _buffer;
 
   /// The current value or future in the queue.
+  Resolvable<Option> get current => _current;
   late var _current = Resolvable<Option>(() => const None());
 
   /// Indicates whether the queue is empty or processing.
@@ -56,8 +57,7 @@ class SafeSequential {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    functions, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> functions, {
     Duration? buffer,
   }) {
     return functions
@@ -72,12 +72,12 @@ class SafeSequential {
     Duration? buffer,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
-      final temp = unsafe(previous);
-      if (temp is Option<T>?) {
-        return temp ?? const None();
-      }
-      return temp.then((e) => e ?? const None());
-    });
+          final temp = unsafe(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
+        });
     return addSafe<T>(fn, buffer: buffer);
   }
 
@@ -92,14 +92,12 @@ class SafeSequential {
       return _enqueue<T>(function);
     } else {
       return _enqueue<T>((previous) {
-        return Resolvable(() {
-          return Future.wait<dynamic>([
-            Future.value(function(previous)),
+        return Resolvable(() async {
+          return await Future.wait<dynamic>([
+            Future<Resolvable<Option<T>>?>.value(function(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) => (e.first as Resolvable).transf(
-              (e) => (e as Option).transf((e) => e as T).unwrap(),
-            ),
+            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
           );
         }).comb();
       });
@@ -123,8 +121,7 @@ class SafeSequential {
         return temp;
       }).comb();
     } else {
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -133,13 +130,11 @@ class SafeSequential {
     return _current.transf((e) => e.transf((e) => e as T).unwrap());
   }
 
-  /// Retrieves the last value in the queue without altering the queue.
-  Resolvable<None<Object>> get last =>
-      add((_) => null).map((_) => const None());
+  /// Retrieves the last value in the queue.
+  Resolvable<None> get last => add((_) => null).map((_) => const None());
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef TAddFunction<T extends Object> =
-    TFutureOrOption<T> Function(Result<Option> previous);
+typedef TAddFunction<T extends Object> = TFutureOrOption<T> Function(Result<Option> previous);

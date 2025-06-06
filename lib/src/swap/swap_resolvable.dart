@@ -10,10 +10,28 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import '/df_safer_dart.dart';
+import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ResultResolvableX<T extends Object> on Result<Resolvable<T>> {
-  // TODO: Implement this!
+extension ResolvableSomeSwapX<T extends Object> on Resolvable<Some<T>> {
+  @pragma('vm:prefer-inline')
+  Some<Resolvable<T>> swap() {
+    if (this is Sync<Some<T>>) {
+      return (this as Sync<Some<T>>).swap();
+    }
+    return (this as Async<Some<T>>).swap();
+  }
+}
+
+extension ResolvableNoneSwapX<T extends Object> on Resolvable<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Resolvable<T>> swap() => const None();
+}
+
+extension ResolvableOkSwapX<T extends Object> on Resolvable<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Resolvable<T>> swap() {
+    return Ok(map((e) => e.unwrap()));
+  }
 }

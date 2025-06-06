@@ -55,7 +55,7 @@ sealed class Monad<T extends Object> implements Equatable {
         throw test;
       }
       try {
-        return test.unwrap().map((e) => e as R);
+        return test.unwrap().transf<R>().unwrap();
       } catch (_) {
         throw Err<T>('Cannot resolve $T to $R.');
       }

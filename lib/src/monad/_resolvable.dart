@@ -32,9 +32,21 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     }
   }
 
+  Resolvable<T> asAsync();
+
+  Some<Resolvable<T>> asSome();
+
+  None<Resolvable<T>> asNone();
+
+  Ok<Resolvable<T>> asOk();
+
   bool isSync();
 
   bool isAsync();
+
+  Resolvable<T> ifSync(void Function(Sync<T> sync) unsafe);
+
+  Resolvable<T> ifAsync(void Function(Async<T> async) unsafe);
 
   Result<Sync<T>> sync();
 
@@ -47,13 +59,6 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @pragma('vm:prefer-inline')
   Async<T> unwrapAsync() => async().unwrap();
-
-  @pragma('vm:prefer-inline')
-  Resolvable<T> resolvable() => this;
-
-  Resolvable<T> ifSync(void Function(Sync<T> sync) unsafe);
-
-  Resolvable<T> ifAsync(void Function(Async<T> async) unsafe);
 
   Resolvable<R> map<R extends Object>(R Function(T value) unsafe);
 
@@ -130,11 +135,27 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @protected
   @pragma('vm:prefer-inline')
-  Result<T> ok() => value.ok();
+  Option<Ok<T>> ok() => value.ok();
 
   @protected
   @pragma('vm:prefer-inline')
-  Err<T> err() => value.err();
+  Option<Err<T>> err() => value.err();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<T> asAsync() => Async.value(Future.value(value));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Sync<T>> asSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Sync<T>> asNone() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Sync<T>> asOk() => Ok(this);
 
   @protected
   @override
@@ -250,7 +271,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-    : super.value(Err<T>(error));
+      : super.value(Err<T>(error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -293,11 +314,27 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<Result<T>> ok() => value.then((e) => e.ok());
+  Future<Option<Ok<T>>> ok() => value.then((e) => e.ok());
 
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Future<Err<T>> err() => value.then((e) => e.err());
+  Future<Option<Err<T>>> err() => value.then((e) => e.err());
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<T> asAsync() => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Async<T>> asSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Async<T>> asNone() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Async<T>> asOk() => Ok(this);
 
   @protected
   @override

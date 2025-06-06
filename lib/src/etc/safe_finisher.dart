@@ -30,10 +30,24 @@ class SafeFinisher<T extends Object> {
 
   Option<FutureOr<T>> _value = const None();
 
+  bool _isResolving = false;
+
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> resolvable) {
+    if (_isResolving) {
+      return Sync.value(
+        Err(
+          'SafeFinisher<$T> is already resolving!',
+        ),
+      );
+    }
+    _isResolving = true;
     if (isCompleted) {
-      return Sync.value(Err('Cannot resolved a finished SafeCompleter<$T>.'));
+      return Sync.value(
+        Err(
+          'SafeFinisher<$T> is already completed!',
+        ),
+      );
     }
 
     return resolvable.flatMap((e) {
@@ -43,7 +57,7 @@ class SafeFinisher<T extends Object> {
         _completer.complete(a);
         return e;
       } else {
-        final err = e.err();
+        final err = e.err().unwrap();
         _completer.completeError(err);
         return err;
       }
@@ -69,7 +83,16 @@ class SafeFinisher<T extends Object> {
   SafeFinisher<R> transf<R extends Object>([R Function(T e)? transformer]) {
     final finisher = SafeFinisher<R>();
     resolvable().map((e) {
-      finisher.resolve(SyncOk<R>.value(transformer?.call(e) ?? (e as R)));
+      try {
+        final result = transformer != null ? transformer(e) : (e as R);
+        finisher.resolve(SyncOk<R>.value(result));
+      } catch (e) {
+        finisher.resolve(
+          Sync.value(
+            Err('Failed to transform type $T to $R.'),
+          ),
+        );
+      }
       return e;
     });
     return finisher;

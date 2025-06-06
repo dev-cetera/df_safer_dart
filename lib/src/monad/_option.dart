@@ -25,6 +25,14 @@ sealed class Option<T extends Object> extends Monad<T> {
     }
   }
 
+  Ok<Option<T>> asOk();
+
+  @pragma('vm:prefer-inline')
+  Async<Option<T>> asAsync() => Async.value(Future.value(Ok(this)));
+
+  @pragma('vm:prefer-inline')
+  Sync<Option<T>> asSync() => Sync.value(Ok(this));
+
   bool isSome();
 
   bool isNone();
@@ -33,14 +41,11 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   Result<None<T>> none();
 
-  @pragma('vm:prefer-inline')
-  Option<T> option() => this;
-
   Result<Option<T>> ifSome(void Function(Some<T> some) unsafe);
 
   Result<Option<T>> ifNone(void Function() unsafe);
 
-  T unwrap();
+  T unwrap({int stackLevel = 1});
 
   T unwrapOr(T fallback);
 
@@ -54,8 +59,6 @@ sealed class Option<T extends Object> extends Monad<T> {
   R mapOr<R extends Object>(R Function(T value) unsafe, R fallback);
 
   Option<T> filter(bool Function(T value) test);
-
-  Result<T> asResult();
 
   Result<Option<Object>> fold(
     Option<Object>? Function(Some<T> some) onSome,
@@ -80,6 +83,10 @@ final class Some<T extends Object> extends Option<T> {
   final T value;
 
   const Some(this.value) : super._();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Some<T>> asOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -117,7 +124,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => value;
+  T unwrap({int stackLevel = 1}) => value;
 
   @protected
   @override
@@ -131,23 +138,16 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<T> asResult() => Ok<T>(value);
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -219,6 +219,10 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Ok<None<T>> asOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
   bool isSome() => false;
 
   @override
@@ -254,8 +258,10 @@ final class None<T extends Object> extends Option<T> {
   @protected
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() {
-    throw Err<T>('Called unwrap() on None<$T>.').addStackLevel();
+  T unwrap({int stackLevel = 1}) {
+    throw Err<T>(
+      'Called unwrap() on None<$T>.',
+    ).addStackLevel(stackLevel);
   }
 
   @protected
@@ -276,12 +282,6 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => fallback;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<T> asResult() {
-    return Err('Cannot convert None<$T> to Result<$T>.');
-  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -311,8 +311,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  (None<T>, None<R>) and<R extends Object>(Option<R> other) =>
-      (const None(), const None());
+  (None<T>, None<R>) and<R extends Object>(Option<R> other) => (const None(), const None());
 
   @override
   @pragma('vm:prefer-inline')
