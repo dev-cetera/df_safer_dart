@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.12.0]
+
+- Released @ 6/2025 (UTC)
+- chore: Add more functions to handle monads and fix some issues
+
 ## [0.11.1]
 
 - Released @ 5/2025 (UTC)

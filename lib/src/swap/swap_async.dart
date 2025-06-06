@@ -14,8 +14,6 @@ import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-
-
 extension AsyncSomeSwapX<T extends Object> on Async<Some<T>> {
   @pragma('vm:prefer-inline')
   Some<Async<T>> swap() => Some(map((e) => e.unwrap()));

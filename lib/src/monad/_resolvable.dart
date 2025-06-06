@@ -271,7 +271,7 @@ final class SyncOk<T extends Object> extends Sync<T> {
 
 final class SyncErr<T extends Object> extends Sync<T> {
   SyncErr.value({required List<Object> debugPath, required Object error})
-      : super.value(Err<T>(error));
+    : super.value(Err<T>(error));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

@@ -131,12 +131,14 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
+      unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -213,9 +215,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     this.error, {
     this.statusCode,
     @visibleForTesting int initialStackLevel = 3,
-  })  : stackTrace = StackTrace.current,
-        _initialStackLevel = initialStackLevel,
-        super._() {
+  }) : stackTrace = StackTrace.current,
+       _initialStackLevel = initialStackLevel,
+       super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
