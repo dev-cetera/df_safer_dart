@@ -17,6 +17,8 @@ part of 'monad.dart';
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
+  Result<T> addStackLevel([int delta = 1]);
+
   Some<Result<T>> asSome();
 
   None<Result<T>> asNone();
@@ -77,6 +79,10 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Ok<T> addStackLevel([int delta = 1]) => this;
+
+  @override
+  @pragma('vm:prefer-inline')
   Some<Ok<T>> asSome() => Some(this);
 
   @override
@@ -131,14 +137,12 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @protected
   @override
   @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => unsafe(value);
 
   @override
   @pragma('vm:prefer-inline')
@@ -215,13 +219,13 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     this.error, {
     this.statusCode,
     @visibleForTesting int initialStackLevel = 3,
-  }) : stackTrace = StackTrace.current,
-       _initialStackLevel = initialStackLevel,
-       super._() {
+  })  : stackTrace = StackTrace.current,
+        _initialStackLevel = initialStackLevel,
+        super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
-  @visibleForTesting
+  @override
   Err<T> addStackLevel([int delta = 1]) {
     return Err._internal(
       error,
