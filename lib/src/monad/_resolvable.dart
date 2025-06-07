@@ -32,7 +32,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     }
   }
 
-  Resolvable<T> asAsync();
+  Async<T> asAsync();
 
   Some<Resolvable<T>> asSome();
 
