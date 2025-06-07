@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.12.1]
+
+- Released @ 6/2025 (UTC)
+- update: Update addStackLevel
+
 ## [0.12.0]
 
 - Released @ 6/2025 (UTC)
