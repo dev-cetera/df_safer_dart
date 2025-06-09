@@ -24,18 +24,22 @@ This package introduces three core monads —- `Result`, `Option`, and `Resolvab
 
   - `Ok<T>`: A success value of type T.
   - `Err`: A failure value containing details about the error.
-    This monad eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
+
+`Result` eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
 
 - `Option<T>`: Represents a value that may or may not be present. It will either be:
 
   - `Some<T>`: A present value of type T.
   - `None<T>`: The absence of a value.
-    This monad eliminates null values and forces the developer to explicitly handle the "absent" case, preventing NullPointerExceptions.
+
+`Option` eliminates null values and forces the developer to explicitly handle the "absent" case, preventing NullPointerExceptions.
 
 - `Resolvable<T>`: A powerful wrapper that unifies synchronous and asynchronous operations. It will either be:
+
   - `Sync<T>`: For immediate, failable operations.
   - `Async<T>`: For time-based, failable operations.
-    This monad provides a consistent API for chaining operations, regardless of whether they are synchronous or asynchronous.
+
+`Resolvable` provides a consistent API for chaining operations, regardless of whether they are synchronous or asynchronous.
 
 These monads form the foundation for more predictable, expressive, and maintainable error handling in Dart.
 
