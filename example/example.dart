@@ -34,35 +34,37 @@ Async<Option<String>> getUserNotificationSound(int userId) {
         (json) => parseJson(json).unwrap(),
       )
       // 3. This is the key monadic pattern for safely accessing nested data.
-      .map((data) =>
-          // a. Start with the top-level data as `Some`.
-          Some(data)
-              // b. `flatMap` safely accesses the `config` key.
-              //    If `config` is missing or not a Map, `letAsOrNone`
-              //    returns `None`, and the rest of the chain is skipped.
-              .flatMap((d) => letAsOrNone<Map>(d['config']))
-              // c. Chain another `flatMap` to access `notifications`.
-              .flatMap((config) => letAsOrNone<Map>(config['notifications']))
-              // d. Finally, access `sound`.
-              .flatMap(
-                (notifications) => letAsOrNone<String>(notifications['sound']),
-              ));
+      .map(
+        (data) =>
+            // a. Start with the top-level data as `Some`.
+            Some(data)
+                // b. `flatMap` safely accesses the `config` key.
+                //    If `config` is missing or not a Map, `letAsOrNone`
+                //    returns `None`, and the rest of the chain is skipped.
+                .flatMap((d) => letAsOrNone<Map>(d['config']))
+                // c. Chain another `flatMap` to access `notifications`.
+                .flatMap((config) => letAsOrNone<Map>(config['notifications']))
+                // d. Finally, access `sound`.
+                .flatMap(
+                  (notifications) =>
+                      letAsOrNone<String>(notifications['sound']),
+                ),
+      );
 }
 
 /// Async - Use Case: An operation over time that might fail.
 Async<String> fetchUserData(int userId) => Async(() async {
-      await Future.delayed(const Duration(milliseconds: 10));
-      if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
-      if (userId == 2) return '{"config":{"notifications":{}}}';
-      if (userId == 3) return '{"config":{}}';
-      if (userId == 4) return '{"config": "bad_data"}';
-      throw Err('User Not Found');
-    });
+  await Future.delayed(const Duration(milliseconds: 10));
+  if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
+  if (userId == 2) return '{"config":{"notifications":{}}}';
+  if (userId == 3) return '{"config":{}}';
+  if (userId == 4) return '{"config": "bad_data"}';
+  throw Err('User Not Found');
+});
 
 /// Sync - Use Case: An immediate operation that might fail (e.g., parsing).
-Sync<Map<String, dynamic>> parseJson(String json) => Sync(
-      () => json.decodeJson<Map<String, dynamic>>().unwrap(),
-    );
+Sync<Map<String, dynamic>> parseJson(String json) =>
+    Sync(() => json.decodeJson<Map<String, dynamic>>().unwrap());
 
 // -----------------------------------------------------------------------------
 // MAIN EXECUTION (The Pure Monadic Way with `Sequential`)
@@ -89,15 +91,15 @@ void main() {
           // 3. Use `match` to handle the final `Result` (Ok or Err).
           //    This is the final "exit" from the monad for this one operation.
           .match(
-        (successString) {
-          print('User $id -> $successString');
-          return NONE;
-        },
-        (err) {
-          print('User $id -> ${formatResult(err.transf())}');
-          return NONE;
-        },
-      );
+            (successString) {
+              print('User $id -> $successString');
+              return NONE;
+            },
+            (err) {
+              print('User $id -> ${formatResult(err.transf())}');
+              return NONE;
+            },
+          );
     });
   }
 }

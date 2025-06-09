@@ -63,9 +63,7 @@ final class Here {
     final frame = frameOpt.unwrap();
     final library = p.basenameWithoutExtension(frame.library);
     final member = frame.member;
-    return Some(
-      [library, if (member != null) member].join('/'),
-    );
+    return Some([library, if (member != null) member].join('/'));
   }
 
   /// The URI of the file in which the code is located.

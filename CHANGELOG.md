@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.0]
+
+- Released @ 6/2025 (UTC)
+- breaking: Add features and improve documentation
+
 ## [0.12.2]
 
 - Released @ 6/2025 (UTC)

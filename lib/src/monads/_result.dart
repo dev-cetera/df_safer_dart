@@ -74,9 +74,7 @@ sealed class Result<T extends Object> extends Monad<T> {
     if (isOk()) {
       return mapper(unwrap());
     } else {
-      return Err(
-        'Called flatMap() on Err<$T>.',
-      );
+      return Err('Called flatMap() on Err<$T>.');
     }
   }
 
@@ -169,7 +167,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -242,20 +241,13 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   final int _initialStackLevel;
 
   factory Err(Object error, {int? statusCode}) {
-    return Err._internal(
-      error,
-      Option.fromNullable(statusCode),
-      3,
-    );
+    return Err._internal(error, Option.fromNullable(statusCode), 3);
   }
 
-  Err._internal(
-    this.error,
-    this.statusCode,
-    int initialStackLevel,
-  )   : stackTrace = Some(StackTrace.current),
-        _initialStackLevel = initialStackLevel,
-        super._() {
+  Err._internal(this.error, this.statusCode, int initialStackLevel)
+    : stackTrace = Some(StackTrace.current),
+      _initialStackLevel = initialStackLevel,
+      super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
@@ -269,11 +261,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   Err<T> addStackLevel([int delta = 1]) {
-    return Err._internal(
-      error,
-      statusCode,
-      _initialStackLevel + delta + 1,
-    );
+    return Err._internal(error, statusCode, _initialStackLevel + delta + 1);
   }
 
   @override
@@ -376,15 +364,13 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() =>
+      error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(
-      error,
-      statusCode: statusCode.orNull(),
-    );
+    return Err(error, statusCode: statusCode.orNull());
   }
 
   /// Converts this [Err] to an `ErrModel`.

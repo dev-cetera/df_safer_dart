@@ -46,7 +46,8 @@ Option<num> letNumOrNone(dynamic input) {
 
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is num) return Some(rawValue);
-  if (rawValue is String) return Option.fromNullable(num.tryParse(rawValue.trim()));
+  if (rawValue is String)
+    return Option.fromNullable(num.tryParse(rawValue.trim()));
   if (rawValue is bool) return Some(rawValue ? 1 : 0);
 
   return const None();
@@ -84,7 +85,8 @@ Option<Uri> letUriOrNone(dynamic input) {
 
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is Uri) return Some(rawValue);
-  if (rawValue is String) return Option.fromNullable(Uri.tryParse(rawValue.trim()));
+  if (rawValue is String)
+    return Option.fromNullable(Uri.tryParse(rawValue.trim()));
 
   return const None();
 }

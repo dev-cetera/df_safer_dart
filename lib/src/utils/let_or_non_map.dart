@@ -26,7 +26,9 @@ Option<T> _tryJsonDecode<T extends Object>(String s) {
   }
 }
 
-Option<Map<K, V>> letMapOrNone<K extends Object, V extends Object>(dynamic input) {
+Option<Map<K, V>> letMapOrNone<K extends Object, V extends Object>(
+  dynamic input,
+) {
   if (input is Option<Map<K, V>>) return input;
   if (input is Map<K, V>) return Some(input);
   final rawValue = unwrapOptionOrNull(input);

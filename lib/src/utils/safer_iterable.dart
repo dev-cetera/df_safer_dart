@@ -24,7 +24,7 @@ extension SaferIterable<E extends Object> on Iterable<E> {
   Option<E> get singleOrNone {
     final it = iterator;
     if (it.moveNext()) {
-      final E result = it.current;
+      final result = it.current;
       if (!it.moveNext()) {
         return Some(result);
       }

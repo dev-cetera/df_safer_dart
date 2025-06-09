@@ -92,10 +92,7 @@ sealed class Option<T extends Object> extends Monad<T> {
   );
 
   /// Exhaustively handles [Some] and [None] cases, returning a new value.
-  R match<R extends Object>(
-    R Function(T value) onSome,
-    R Function() onNone,
-  );
+  R match<R extends Object>(R Function(T value) onSome, R Function() onNone);
 
   /// Returns this if it's [Some], otherwise returns [other].
   Option<Object> someOr<R extends Object>(Option<R> other);
@@ -166,11 +163,13 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) =>
+      Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -187,10 +186,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(
-    R Function(T value) onSome,
-    R Function() onNone,
-  ) {
+  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
     return onSome(this.value);
   }
 
@@ -305,10 +301,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(
-    R Function(T value) onSome,
-    R Function() onNone,
-  ) {
+  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
     return onNone();
   }
 
