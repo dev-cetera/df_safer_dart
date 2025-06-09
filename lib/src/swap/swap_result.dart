@@ -90,6 +90,6 @@ extension ResultErrSwapX<T extends Object> on Result<Err<T>> {
     if (this is Ok<Err<T>>) {
       return (this as Ok<Err<T>>).unwrap();
     }
-    return (this as Err<Err<T>>).transErr();
+    return (this as Err<Err<T>>).transfErr();
   }
 }

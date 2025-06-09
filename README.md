@@ -20,20 +20,60 @@ While it introduces some boilerplate and incurs a minor performance trade-off du
 
 This package introduces three core monads —- `Result`, `Option`, and `Resolvable` -- that work seamlessly together:
 
-- `Result`: Encapsulates a value that is either `Ok` (success) or `Err` (failure), providing a structured approach to error handling.
-- `Option`: Represents a value that is either `Some` (present) or `None` (absent), ensuring explicit handling of nullable scenarios.
-- `Resolvable`: Unifies asynchronous and synchronous values, creating a consistent interface for both paradigms.
+- `Result<T>`: Represents the outcome of an operation that can fail. It will either be:
+
+  - `Ok<T>`: A success value of type T.
+  - `Err`: A failure value containing details about the error.
+    This monad eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
+
+- `Option<T>`: Represents a value that may or may not be present. It will either be:
+
+  - `Some<T>`: A present value of type T.
+  - `None<T>`: The absence of a value.
+    This monad eliminates null values and forces the developer to explicitly handle the "absent" case, preventing NullPointerExceptions.
+
+- `Resolvable<T>`: A powerful wrapper that unifies synchronous and asynchronous operations. It will either be:
+  - `Sync<T>`: For immediate, failable operations.
+  - `Async<T>`: For time-based, failable operations.
+    This monad provides a consistent API for chaining operations, regardless of whether they are synchronous or asynchronous.
 
 These monads form the foundation for more predictable, expressive, and maintainable error handling in Dart.
 
 Additionally, the package includes two complementary mechanisms:
 
-- `SafeCompleter`: A secure alternative to Dart’s Completer, leveraging the included monads to handle both synchronous and asynchronous values with built-in safety.
-- `Sequential`: A utility for executing synchronous or asynchronous code in guaranteed sequential order, simplifying the management of complex workflows.
+- `Finisher<T>`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable<T>` to listen for the result, maintaining type safety throughout.
+
+- `Sequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
 
 With these tools, the package provides a solid framework for improving the reliability and readability of your Dart applications.
 
 For a full feature set, please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/).
+
+## How We Avoid `null`
+
+Instead of returning `null` when a value might be absent (e.g., a missing key in a map, an empty list), you return an `Option`.
+
+- `Some(value)`: If the value is present.
+- `None()`: If the value is absent.
+
+The type system then forces you to handle both cases using methods like `.match()` or `.flatMap()`, making it impossible to accidentally use a `null` value.
+
+## How We Avoid Direct `Future`
+
+A standard `Future` in Dart can complete with a value or an error. Handling this often requires `await` inside a `try-catch` block. The `Async` monad improves upon this:
+
+- It encapsulates a `Future`.
+- It automatically catches any error the `Future` might throw and converts it into an `Err` state.
+- It allows you to chain subsequent operations using `.map()` without needing to `await` at each step.
+
+This creates clean, linear "pipelines" of asynchronous logic, where you only handle the final `Result` at the very end, rather than managing errors at every step.
+
+## The Rules of `Async`
+
+- **ALWAYS `await` inside the `Async` closure**: When you provide a function to the `Async` constructor, you must `await` any `Future` inside it. This is crucial for the `Async` monad to be able to catch the error if the `Future` fails.
+- **NEVER `await` the `Async` monad itself**: The point is to chain operations using `.map()`. You should only "exit" the monad (e.g., by accessing `.value`) at the end of your program or function.
+
+We definitely need a linter for this!
 
 ## Usage Example
 
@@ -42,15 +82,13 @@ Example of avoiding try-catch blocks in Dart, to produce safer code:
 ```dart
 void main() async {
   // Fetch the IP address and handle both success and error results.
-  fetchIpAddress().flatMap(
-    (result) => result
-        .ifOk((e) {
-          print('IP address: ${result.unwrap()}');
-        })
-        .ifErr((e) {
-          print('Error: $e');
-        }),
-  );
+  fetchIpAddress().match((result) {
+    print('IP address: $result');
+    return NONE; // Returning `null` is deliberately not supported!
+  }, (err) {
+    print(err);
+    return NONE;
+  });
 }
 
 Async<String> fetchIpAddress() {

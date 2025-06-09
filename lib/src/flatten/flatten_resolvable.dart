@@ -12,15 +12,15 @@
 
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
-import '../monad/monad.dart';
+import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension CombResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
+extension FlattenResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb2();
+  Resolvable<T> flatten() => flatten2();
 
-  Resolvable<T> comb2() {
+  Resolvable<T> flatten2() {
     if (value is Result<Resolvable<T>>) {
       return Sync(() {
         final a = value as Result<Resolvable<T>>;
@@ -49,46 +49,46 @@ extension CombResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   }
 }
 
-extension CombResolvable3<T extends Object>
+extension FlattenResolvable3<T extends Object>
     on Resolvable<Resolvable<Resolvable<T>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb3();
+  Resolvable<T> flatten() => flatten3();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb3() => comb2().comb2();
+  Resolvable<T> flatten3() => flatten2().flatten2();
 }
 
-extension CombResolvable4<T extends Object>
+extension FlattenResolvable4<T extends Object>
     on Resolvable<Resolvable<Resolvable<Resolvable<T>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb4();
+  Resolvable<T> flatten() => flatten4();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb4() => comb3().comb2();
+  Resolvable<T> flatten4() => flatten3().flatten2();
 }
 
-extension CombResolvable5<T extends Object>
+extension FlattenResolvable5<T extends Object>
     on Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>> {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb5();
+  Resolvable<T> flatten() => flatten5();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb5() => comb4().comb2();
+  Resolvable<T> flatten5() => flatten4().flatten2();
 }
 
-extension CombResolvable6<T extends Object>
+extension FlattenResolvable6<T extends Object>
     on
         Resolvable<
           Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
         > {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb6();
+  Resolvable<T> flatten() => flatten6();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb6() => comb5().comb2();
+  Resolvable<T> flatten6() => flatten5().flatten2();
 }
 
-extension CombResolvable7<T extends Object>
+extension FlattenResolvable7<T extends Object>
     on
         Resolvable<
           Resolvable<
@@ -96,13 +96,13 @@ extension CombResolvable7<T extends Object>
           >
         > {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb7();
+  Resolvable<T> flatten() => flatten7();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb7() => comb6().comb2();
+  Resolvable<T> flatten7() => flatten6().flatten2();
 }
 
-extension CombResolvable8<T extends Object>
+extension FlattenResolvable8<T extends Object>
     on
         Resolvable<
           Resolvable<
@@ -112,13 +112,13 @@ extension CombResolvable8<T extends Object>
           >
         > {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb8();
+  Resolvable<T> flatten() => flatten8();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb8() => comb7().comb2();
+  Resolvable<T> flatten8() => flatten7().flatten2();
 }
 
-extension CombResolvable9<T extends Object>
+extension FlattenResolvable9<T extends Object>
     on
         Resolvable<
           Resolvable<
@@ -130,8 +130,8 @@ extension CombResolvable9<T extends Object>
           >
         > {
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb() => comb9();
+  Resolvable<T> flatten() => flatten9();
 
   @pragma('vm:prefer-inline')
-  Resolvable<T> comb9() => comb8().comb2();
+  Resolvable<T> flatten9() => flatten8().flatten2();
 }

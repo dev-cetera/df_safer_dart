@@ -14,9 +14,12 @@ part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// A [Monad] that represents either [Some] value or [None], the absense of a
+/// value.
 sealed class Option<T extends Object> extends Monad<T> {
   const Option._();
 
+  /// Creates an [Option] from a nullable value.
   factory Option.fromNullable(T? value) {
     if (value != null) {
       return Some(value);
@@ -25,60 +28,88 @@ sealed class Option<T extends Object> extends Monad<T> {
     }
   }
 
+  /// Returns this [Option] as an [Ok].
   Ok<Option<T>> asOk();
 
+  /// Converts this [Option] to an [Async] monad.
   @pragma('vm:prefer-inline')
   Async<Option<T>> asAsync() => Async.value(Future.value(Ok(this)));
 
+  /// Converts this [Option] to a [Sync] monad.
   @pragma('vm:prefer-inline')
   Sync<Option<T>> asSync() => Sync.value(Ok(this));
 
+  /// Returns `true` if this is a [Some].
   bool isSome();
 
+  /// Returns `true` if this is a [None].
   bool isNone();
 
+  /// Returns a [Result] containing this instance if it's a [Some].
   Result<Some<T>> some();
 
+  /// Returns a [Result] containing this instance if it's a [None].
   Result<None<T>> none();
 
+  /// Performs a side-effect if this is a [Some].
   Result<Option<T>> ifSome(void Function(Some<T> some) unsafe);
 
+  /// Performs a side-effect if this is a [None].
   Result<Option<T>> ifNone(void Function() unsafe);
 
+  /// Returns the contained value. Throws if this is a [None].
   T unwrap({int stackLevel = 1});
 
+  /// Returns the contained value or a provided fallback.
   T unwrapOr(T fallback);
 
+  /// Returns the contained value or computes it from a function.
   @pragma('vm:prefer-inline')
   T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
 
+  /// Returns the contained value or `null`.
   T? orNull();
 
+  /// Maps an `Option<T>` to `Option<R>` by applying the [mapper] function.
   Option<R> map<R extends Object>(R Function(T value) mapper);
 
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback);
+  /// Maps an `Option<T>` to `Option<R>` by applying the [mapper] function.
+  Option<R> flatMap<R extends Object>(Option<R> Function(T value) mapper) {
+    if (isSome()) {
+      return mapper(unwrap());
+    } else {
+      return const None();
+    }
+  }
 
+  /// Returns [None] if the [Option] is [None], or if the predicate returns `false`.
   Option<T> filter(bool Function(T value) test);
 
+  /// Chains [Option] instances by handling [Some] and [None] cases.
   Result<Option<Object>> fold(
     Option<Object>? Function(Some<T> some) onSome,
     Option<Object>? Function(None<T> none) onNone,
   );
 
-  R when<R extends Object>({
-    required R Function(T value) onSomeUnsafe,
-    required R Function() onNoneUnsafe,
-  });
+  /// Exhaustively handles [Some] and [None] cases, returning a new value.
+  R match<R extends Object>(
+    R Function(T value) onSome,
+    R Function() onNone,
+  );
 
-  (Option<T>, Option<R>) and<R extends Object>(Option<R> other);
+  /// Returns this if it's [Some], otherwise returns [other].
+  Option<Object> someOr<R extends Object>(Option<R> other);
 
-  Option<Object> or<R extends Object>(Option<R> other);
+  /// Returns this if it's [None], otherwise returns [other].
+  Option<Object> noneOr<R extends Object>(Option<R> other);
 
+  /// Transforms the [Some] value's type.
   Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]);
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// A [Monad] that represents an [Option] that contains a [value].
 final class Some<T extends Object> extends Option<T> {
   final T value;
 
@@ -100,16 +131,11 @@ final class Some<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   Ok<Some<T>> some() => Ok(this);
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   Err<None<T>> none() {
     return Err('Called none() on Some<$T>.');
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Some<T>> ifNone(void Function() unsafe) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -124,33 +150,27 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Ok<Some<T>> ifNone(void Function() unsafe) => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
   T unwrap({int stackLevel = 1}) => value;
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => value;
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   T? orNull() => value;
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
-
-  @protected
-  @override
-  @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) =>
-      unsafe(value);
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -165,35 +185,22 @@ final class Some<T extends Object> extends Option<T> {
     }
   }
 
-  @protected
   @override
-  R when<R extends Object>({
-    required R Function(T value) onSomeUnsafe,
-    required R Function() onNoneUnsafe,
-  }) {
-    return onSomeUnsafe(this.value);
+  @pragma('vm:prefer-inline')
+  R match<R extends Object>(
+    R Function(T value) onSome,
+    R Function() onNone,
+  ) {
+    return onSome(this.value);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  (Option<T>, Option<R>) and<R extends Object>(Option<R> other) {
-    if (other.isSome()) {
-      return (this, other);
-    } else {
-      return (const None(), const None());
-    }
-  }
+  Some<T> someOr<R extends Object>(Option<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Object> or<R extends Object>(Option<R> other) => this;
-
-  @pragma('vm:prefer-inline')
-  None<T> toNone() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  String toString() => '${Some<T>}($value)';
+  Option<R> noneOr<R extends Object>(Option<R> other) => other;
 
   @override
   Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]) {
@@ -206,17 +213,21 @@ final class Some<T extends Object> extends Option<T> {
     }
   }
 
+  @pragma('vm:prefer-inline')
+  None<T> toNone() => const None();
+
+  @pragma('vm:prefer-inline')
   @override
   List<Object?> get props => [this.value];
 
+  @pragma('vm:prefer-inline')
   @override
   bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-const NONE = None();
-
+/// A [Monad] that represents an [Option] that does not contain a value.
 final class None<T extends Object> extends Option<T> {
   const None() : super._();
 
@@ -232,12 +243,19 @@ final class None<T extends Object> extends Option<T> {
   @pragma('vm:prefer-inline')
   bool isNone() => true;
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   Err<Some<T>> some() {
     return Err('Called some() on None<$T>.');
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<None<T>> none() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<None<T>> ifSome(void Function(Some<T> some) unsafe) => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -252,25 +270,14 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> ifSome(void Function(Some<T> some) unsafe) => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<None<T>> none() => Ok(this);
-
-  @protected
-  @override
-  @pragma('vm:prefer-inline')
   T unwrap({int stackLevel = 1}) {
     throw Err<T>('Called unwrap() on None<$T>.').addStackLevel(stackLevel);
   }
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => fallback;
 
-  @protected
   @override
   @pragma('vm:prefer-inline')
   T? orNull() => null;
@@ -278,11 +285,6 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   None<R> map<R extends Object>(R Function(T value) mapper) => None<R>();
-
-  @protected
-  @override
-  @pragma('vm:prefer-inline')
-  R mapOr<R extends Object>(R Function(T value) unsafe, R fallback) => fallback;
 
   @override
   @pragma('vm:prefer-inline')
@@ -301,27 +303,22 @@ final class None<T extends Object> extends Option<T> {
     }
   }
 
-  @protected
   @override
-  R when<R extends Object>({
-    required R Function(T value) onSomeUnsafe,
-    required R Function() onNoneUnsafe,
-  }) {
-    return onNoneUnsafe();
+  @pragma('vm:prefer-inline')
+  R match<R extends Object>(
+    R Function(T value) onSome,
+    R Function() onNone,
+  ) {
+    return onNone();
   }
 
   @override
   @pragma('vm:prefer-inline')
-  (None<T>, None<R>) and<R extends Object>(Option<R> other) =>
-      (const None(), const None());
+  Option<Object> someOr<R extends Object>(Option<R> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<Object> or<R extends Object>(Option<R> other) => other;
-
-  @override
-  @pragma('vm:prefer-inline')
-  String toString() => '${None<T>}()';
+  None<T> noneOr<R extends Object>(Option<R> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -330,8 +327,21 @@ final class None<T extends Object> extends Option<T> {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   List<Object?> get props => [];
 
   @override
+  @pragma('vm:prefer-inline')
   bool? get stringify => false;
 }
+
+/// A constant instance of [None] for convenience.
+///
+/// This can be used when the type parameter `T` is not important or can be
+/// inferred, avoiding the need to write `const None<SomeType>()`.
+///
+/// Example:
+/// ```dart
+/// Option<int> myOption = NONE; // myOption is None<int>
+///
+const NONE = None<Never>();

@@ -17,13 +17,13 @@ import '/src/_src.g.dart';
 extension SyncAsyncSwapX<T extends Object> on Sync<Async<T>> {
   @pragma('vm:prefer-inline')
   Async<Sync<T>> swap() {
-    return value.when(
-      onOkUnsafe: (innerAsync) => Async(() async {
-        final innerResult = await innerAsync.value;
+    return value.match(
+      (value) => Async(() async {
+        final innerResult = await value.value;
         return Sync.value(innerResult);
       }),
-      onErrUnsafe: (err) {
-        final failedSync = Sync.value(err.transErr<T>());
+      (err) {
+        final failedSync = Sync.value(err.transfErr<T>());
         return Async.value(Future.value(Ok(failedSync)));
       },
     );
@@ -33,21 +33,21 @@ extension SyncAsyncSwapX<T extends Object> on Sync<Async<T>> {
 extension SyncResolvableSwapX<T extends Object> on Sync<Resolvable<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> swap() {
-    return value.when(
-      onOkUnsafe: (resolvable) {
-        if (resolvable.isSync()) {
-          final sync = resolvable.unwrapSync();
+    return value.match(
+      (value) {
+        if (value.isSync()) {
+          final sync = value.unwrapSync();
           return Sync.value(Ok(Sync.value(sync.value)));
         } else {
-          final async = resolvable.unwrapAsync();
+          final async = value.unwrapAsync();
           return Async<Sync<T>>(() async {
             final result = await async.value;
             return Sync.value(result);
           });
         }
       },
-      onErrUnsafe: (err) {
-        final failedSync = Sync.value(err.transErr<T>());
+      (err) {
+        final failedSync = Sync.value(err.transfErr<T>());
         return Sync.value(Ok(failedSync));
       },
     );
@@ -57,12 +57,12 @@ extension SyncResolvableSwapX<T extends Object> on Sync<Resolvable<T>> {
 extension SyncOptionSwapX<T extends Object> on Sync<Option<T>> {
   @pragma('vm:prefer-inline')
   Option<Sync<T>> swap() {
-    return value.when(
-      onOkUnsafe: (option) => option.when(
-        onSomeUnsafe: (value) => Sync.value(Ok(value)).asSome(),
-        onNoneUnsafe: () => const None(),
+    return value.match(
+      (value) => value.match(
+        (value) => Sync.value(Ok(value)).asSome(),
+        () => const None(),
       ),
-      onErrUnsafe: (err) => Sync.value(err.transErr<T>()).asSome(),
+      (err) => Sync.value(err.transfErr<T>()).asSome(),
     );
   }
 }
@@ -80,12 +80,12 @@ extension SyncNoneSwapX<T extends Object> on Sync<None<T>> {
 extension SyncResultSwapX<T extends Object> on Sync<Result<T>> {
   @pragma('vm:prefer-inline')
   Result<Sync<T>> swap() {
-    return value.when(
-      onOkUnsafe: (e) => e.when(
-        onOkUnsafe: (e) => Sync.value(Ok(e)).asOk(),
-        onErrUnsafe: (e) => e.transErr<Sync<T>>(),
+    return value.match(
+      (value) => value.match(
+        (value) => Sync.value(Ok(value)).asOk(),
+        (err) => err.transfErr<Sync<T>>(),
       ),
-      onErrUnsafe: (outerErr) => outerErr.transErr<Sync<T>>(),
+      (err) => err.transfErr<Sync<T>>(),
     );
   }
 }
@@ -97,5 +97,5 @@ extension SyncOkSwapX<T extends Object> on Sync<Ok<T>> {
 
 extension SyncErrSwapX<T extends Object> on Sync<Err<T>> {
   @pragma('vm:prefer-inline')
-  Err<Sync<T>> swap() => value.unwrap().transErr<Sync<T>>();
+  Err<Sync<T>> swap() => value.unwrap().transfErr<Sync<T>>();
 }

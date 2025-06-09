@@ -13,9 +13,8 @@
 import 'dart:async' show FutureOr;
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
-import '../../df_safer_dart.dart';
+import '/df_safer_dart.dart';
 
 part '_option.dart';
 part '_result.dart';
@@ -26,6 +25,7 @@ part '_resolvable.dart';
 sealed class Monad<T extends Object> implements Equatable {
   const Monad();
 
+  /// Reduces the monad to a [Resolvable] of an [Option] of type [R].
   Resolvable<Option<R>> reduce<R extends Object>() {
     switch (this) {
       case Sync<T> sync:

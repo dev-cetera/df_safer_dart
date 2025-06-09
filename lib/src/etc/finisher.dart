@@ -12,25 +12,30 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import '../monad/monad.dart';
+import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+@Deprecated('SafeFinisher got renamed to Finisher.')
+typedef SafeFinisher = Finisher;
 
 /// A utility class for managing completion of both synchronous and asynchronous
 /// values.
 ///
-/// [SafeFinisher] is similar to a [Completer], but it handles both synchronous
+/// [Finisher] is similar to a [Completer], but it handles both synchronous
 /// and asynchronous results seamlessly.
-class SafeFinisher<T extends Object> {
+class Finisher<T extends Object> {
   //
   //
   //
 
   final _completer = Completer<T>();
-
   Option<FutureOr<T>> _value = const None();
-
   bool _isResolving = false;
+
+  //
+  //
+  //
 
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> resolvable) {
@@ -42,7 +47,7 @@ class SafeFinisher<T extends Object> {
       return Sync.value(Err('SafeFinisher<$T> is already completed!'));
     }
 
-    return resolvable.flatMap((e) {
+    return resolvable.resultMap((e) {
       if (e.isOk()) {
         final a = e.unwrap();
         _value = Some(a);
@@ -60,7 +65,8 @@ class SafeFinisher<T extends Object> {
   @pragma('vm:prefer-inline')
   Resolvable<T> finish(FutureOr<T> value) => resolve(Resolvable(() => value));
 
-  /// Checks if the value has been set or if the [SafeFinisher] is completed.
+  /// Returns a [Resolvable] that will complete when this [Finisher] is
+  /// completed.
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() {
     return Resolvable(
@@ -68,16 +74,17 @@ class SafeFinisher<T extends Object> {
     );
   }
 
-  /// Checks if the value has been set or if the [SafeFinisher] is completed.
+  /// Checks if the value has been set or if the [Finisher] is completed.
   @pragma('vm:prefer-inline')
   bool get isCompleted => _completer.isCompleted || _value.isSome();
 
-  SafeFinisher<R> transf<R extends Object>([R Function(T e)? transformer]) {
-    final finisher = SafeFinisher<R>();
+  /// Transforms the type of the value managed by this [Finisher].
+  Finisher<R> transf<R extends Object>([R Function(T e)? transformer]) {
+    final finisher = Finisher<R>();
     resolvable().map((e) {
       try {
         final result = transformer != null ? transformer(e) : (e as R);
-        finisher.resolve(SyncOk<R>.value(result));
+        finisher.resolve(Sync<R>.value(Ok(result)));
       } catch (e) {
         finisher.resolve(Sync.value(Err('Failed to transform type $T to $R.')));
       }

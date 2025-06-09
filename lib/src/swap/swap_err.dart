@@ -16,27 +16,27 @@ import '/src/_src.g.dart';
 
 extension ErrSyncSwapX<T extends Object> on Err<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<Err<T>> swap() => transErr<Err<T>>().asSync();
+  Sync<Err<T>> swap() => transfErr<Err<T>>().asSync();
 }
 
 extension ErrAsyncSwapX<T extends Object> on Err<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<Err<T>> swap() => transErr<Err<T>>().asAsync();
+  Async<Err<T>> swap() => transfErr<Err<T>>().asAsync();
 }
 
 extension ErrResolvableSwapX<T extends Object> on Err<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<Err<T>> swap() => transErr<Err<T>>().asSync();
+  Resolvable<Err<T>> swap() => transfErr<Err<T>>().asSync();
 }
 
 extension ErrOptionSwapX<T extends Object> on Err<Option<T>> {
   @pragma('vm:prefer-inline')
-  Option<Err<T>> swap() => Some(transErr<T>());
+  Option<Err<T>> swap() => Some(transfErr<T>());
 }
 
 extension ErrSomeSwapX<T extends Object> on Err<Some<T>> {
   @pragma('vm:prefer-inline')
-  Some<Err<T>> swap() => Some(transErr<T>());
+  Some<Err<T>> swap() => Some(transfErr<T>());
 }
 
 extension ErrNoneSwapX<T extends Object> on Err<None<T>> {
@@ -46,10 +46,10 @@ extension ErrNoneSwapX<T extends Object> on Err<None<T>> {
 
 extension ErrResultSwapX<T extends Object> on Err<Result<T>> {
   @pragma('vm:prefer-inline')
-  Result<Err<T>> swap() => Ok(transErr<T>());
+  Result<Err<T>> swap() => Ok(transfErr<T>());
 }
 
 extension ErrOkSwapX<T extends Object> on Err<Ok<T>> {
   @pragma('vm:prefer-inline')
-  Ok<Err<T>> swap() => Ok(transErr<T>());
+  Ok<Err<T>> swap() => Ok(transfErr<T>());
 }

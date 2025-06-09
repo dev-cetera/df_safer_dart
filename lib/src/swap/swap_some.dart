@@ -51,5 +51,5 @@ extension SomeOkSwapX<T extends Object> on Some<Ok<T>> {
 
 extension SomeErrSwapX<T extends Object> on Some<Err<T>> {
   @pragma('vm:prefer-inline')
-  Err<Some<T>> swap() => unwrap().transErr<Some<T>>();
+  Err<Some<T>> swap() => unwrap().transfErr<Some<T>>();
 }

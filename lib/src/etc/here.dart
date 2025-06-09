@@ -13,8 +13,15 @@
 import 'package:path/path.dart' as p;
 import 'package:stack_trace/stack_trace.dart';
 
+import '../_src.g.dart';
+
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// A utility class for capturing the current code location (file, line,
+/// column, member).
+///
+/// This is useful for debugging and logging purposes, especially when dealing
+/// with errors or unexpected states.
 final class Here {
   //
   //
@@ -28,11 +35,11 @@ final class Here {
 
   const Here(this.initialStackLevel) : assert(initialStackLevel >= 0);
 
-  //
-  //
-  //
-
-  Frame? call() {
+  /// Returns the [Frame] for the current code location, skipping the initial
+  /// stack levels specified by [initialStackLevel].
+  ///
+  /// Returns `null` if no suitable frame is found.
+  Option<Frame> call() {
     final frames = Trace.current().frames;
     for (var i = initialStackLevel; i < frames.length; i++) {
       final frame = frames[i];
@@ -40,61 +47,74 @@ final class Here {
       final lineNumber = frame.line;
       final columnNumber = frame.column;
       if (lineNumber != null && columnNumber != null) {
-        return frame;
+        return Some(frame);
       }
     }
-    return null;
+    return const None();
   }
 
-  //
-  //
-  //
-
-  String? get basepath {
-    final frame = call();
-    if (frame == null) return null;
+  /// The base path of the code location, typically formatted as
+  /// `library/member`.
+  ///
+  /// This is useful for creating concise identifiers for code locations.
+  Option<String> get basepath {
+    final frameOpt = call();
+    if (frameOpt.isNone()) return const None();
+    final frame = frameOpt.unwrap();
     final library = p.basenameWithoutExtension(frame.library);
     final member = frame.member;
-    return [library, if (member != null) member].join('/');
+    return Some(
+      [library, if (member != null) member].join('/'),
+    );
   }
-
-  //
-  //
-  //
 
   /// The URI of the file in which the code is located.
   ///
   /// This URI will usually have the scheme `dart`, `file`, `http`, or `https`.
-  static Uri? get uri => const Here(2)()?.uri;
+  static Option<Uri> get uri {
+    return const Here(2)().map((e) => e.uri);
+  }
 
   /// The line number on which the code location is located.
   ///
   /// This can be null, indicating that the line number is unknown or
   /// unimportant.
-  static int? get line => const Here(2)()?.line;
+  static Option<int> get line {
+    return const Here(2)().map((e) => Option.fromNullable(e.line)).flatten();
+  }
 
   /// The column number of the code location.
   ///
   /// This can be null, indicating that the column number is unknown or
   /// unimportant.
-  static int? get column => const Here(2)()?.column;
+  static Option<int> get column {
+    return const Here(2)().map((e) => Option.fromNullable(e.column)).flatten();
+  }
 
   /// The name of the member in which the code location occurs.
   ///
   /// Anonymous closures are represented as `<fn>` in this member string.
-  static String? get member => const Here(2)()?.member;
+  static Option<String> get member {
+    return const Here(2)().map((e) => Option.fromNullable(e.member)).flatten();
+  }
 
   /// Returns a human-friendly description of the library that this stack frame
   /// comes from.
   ///
   /// This will usually be the string form of [uri], but a relative URI will be
   /// used if possible. Data URIs will be truncated.
-  static String? get library => const Here(2)()?.library;
+  static Option<String> get library {
+    return const Here(2)().map((e) => e.library);
+  }
 
   /// Returns the name of the package this stack frame comes from, or `null` if
   /// this stack frame doesn't come from a `package:` URL.
-  static String? get package => const Here(2)()?.package;
+  static Option<String> get package {
+    return const Here(2)().map((e) => Option.fromNullable(e.package)).flatten();
+  }
 
   /// A human-friendly description of the code location.
-  static String? get location => const Here(2)()?.location;
+  static Option<String> get location {
+    return const Here(2)().map((e) => e.location);
+  }
 }
