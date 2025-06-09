@@ -18,12 +18,12 @@ Aiming to address these challenges, this package offers safer alternatives and m
 
 While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like Future, FutureOr, try-catch, and nullable types may be more appropriate.
 
-This package introduces three core monads —- `Result`, `Option`, and `Resolvable` -- that work seamlessly together:
+This package introduces three core monads (`Result`, `Option`, and `Resolvable`) that work seamlessly together:
 
 - `Result<T>`: Represents the outcome of an operation that can fail. It will either be:
 
   - `Ok<T>`: A success value of type T.
-  - `Err`: A failure value containing details about the error.
+  - `Err<T>`: A failure value containing details about the error.
 
 `Result` eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
 
