@@ -86,7 +86,8 @@ Option<Uri> letUriOrNone(dynamic input) {
 
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is Uri) return Some(rawValue);
-  if (rawValue is String) return Option.fromNullable(Uri.tryParse(rawValue.trim()));
+  if (rawValue is String)
+    return Option.fromNullable(Uri.tryParse(rawValue.trim()));
 
   return const None();
 }

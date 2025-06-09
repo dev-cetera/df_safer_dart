@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.1]
+
+- Released @ 6/2025 (UTC)
+- docs: Fix readme.md
+
 ## [0.13.0]
 
 - Released @ 6/2025 (UTC)
