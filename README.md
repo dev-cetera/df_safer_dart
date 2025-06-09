@@ -108,8 +108,10 @@ Async<String> fetchIpAddress() {
   // 2. Only deal with asynchronous operations in Async or
   // Resolvable. Not in Sync.
   //
-  // 3. You can throw any Objects within unsafe, but prefer throwing Err
-  // objects as it is the standard and will help with debugging.
+  // 3. You can throw any Objects within the closure, but prefer
+  // throwing Err objects as it is the standard and will help
+  // with debugging. You can also wrap any of your exceptions
+  // with Err.
   return Async(() async {
     final response = await http.get(
       Uri.parse('https://api.ipify.org?format=json'),
