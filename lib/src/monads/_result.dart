@@ -58,12 +58,15 @@ sealed class Result<T extends Object> extends Monad<T> {
   Option<Ok<T>> ok();
 
   /// Returns the contained [Ok] value. Throws an [Err] if this is an [Err].
+  @override
   T unwrap({int stackLevel = 1});
 
   /// Returns the contained [Ok] value or a provided fallback.
+  @override
   T unwrapOr(T fallback);
 
   /// Returns the contained [Ok] value or computes it from a function.
+  @override
   @pragma('vm:prefer-inline')
   T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
 
@@ -71,6 +74,7 @@ sealed class Result<T extends Object> extends Monad<T> {
   T? orNull();
 
   /// Maps a `Result<T, E>` to `Result<R, E>` by applying a function to a contained [Ok] value.
+  @override
   Result<R> map<R extends Object>(R Function(T value) mapper);
 
   /// Maps an `Result<T>` to `Result<R>` by applying the [mapper] function.
@@ -104,6 +108,7 @@ sealed class Result<T extends Object> extends Monad<T> {
   Result<Object> errOr<R extends Object>(Result<R> other);
 
   /// Transforms the [Ok] value's type.
+  @override
   Result<R> transf<R extends Object>([R Function(T e)? transformer]);
 
   @override
@@ -183,7 +188,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOr(T fallback) => value;
+  T unwrapOr(T fallback, {int stackLevel = 1}) => value;
 
   @override
   @pragma('vm:prefer-inline')
@@ -191,8 +196,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -237,9 +241,8 @@ final class Ok<T extends Object> extends Result<T> {
   @override
   Result<R> transf<R extends Object>([R Function(T e)? transformer]) {
     try {
-      final value0 = unwrap();
-      final value1 = transformer?.call(value0) ?? value0 as R;
-      return Ok(value1);
+      final a = unwrap();
+      return Ok(transformer?.call(a) ?? a as R);
     } catch (_) {
       return Err('Cannot transform $T to $R.');
     }
@@ -289,9 +292,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   }
 
   Err._internal(this.error, this.statusCode, int initialStackLevel)
-    : stackTrace = Some(StackTrace.current),
-      _initialStackLevel = initialStackLevel,
-      super._() {
+      : stackTrace = Some(StackTrace.current),
+        _initialStackLevel = initialStackLevel,
+        super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
@@ -428,8 +431,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')

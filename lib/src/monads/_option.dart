@@ -62,19 +62,23 @@ sealed class Option<T extends Object> extends Monad<T> {
   Result<Option<T>> ifNone(void Function() unsafe);
 
   /// Returns the contained value. Throws if this is a [None].
+  @override
   T unwrap({int stackLevel = 1});
 
   /// Returns the contained value or a provided fallback.
+  @override
   T unwrapOr(T fallback);
 
   /// Returns the contained value or computes it from a function.
+  @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+  FutureOr<T> unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
 
   /// Returns the contained value or `null`.
   T? orNull();
 
   /// Maps an `Option<T>` to `Option<R>` by applying the [mapper] function.
+  @override
   Option<R> map<R extends Object>(R Function(T value) mapper);
 
   /// Maps an `Option<T>` to `Option<R>` by applying the [mapper] function.
@@ -105,6 +109,7 @@ sealed class Option<T extends Object> extends Monad<T> {
   Option<Object> noneOr<R extends Object>(Option<R> other);
 
   /// Transforms the [Some] value's type.
+  @override
   Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]);
 
   @override
@@ -187,13 +192,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')

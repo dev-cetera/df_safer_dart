@@ -72,17 +72,26 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   Result<Async<T>> async();
 
   /// Returns the contained [Ok] value, resolving the [Future] if necessary.
-  FutureOr<T> unwrap();
+  @override
+  FutureOr<T> unwrap({int stackLevel = 1});
+
+  @override
+  FutureOr<T> unwrapOr(T fallback);
+
+  @override
+  @pragma('vm:prefer-inline')
+  FutureOr<T> unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
 
   /// Unwraps the [Sync] instance and returns its value. Throws if not [Sync].
   @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync() => sync().unwrap();
+  Sync<T> unwrapSync({int stackLevel = 2}) => sync().unwrap(stackLevel: stackLevel);
 
   /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
   @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync() => async().unwrap();
+  Async<T> unwrapAsync({int stackLevel = 2}) => async().unwrap(stackLevel: stackLevel);
 
   /// Maps the contained [Ok] value to a new value.
+  @override
   Resolvable<R> map<R extends Object>(R Function(T value) unsafe);
 
   /// Chains [Resolvable] computations by applying a function to the inner [Result].
@@ -129,6 +138,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   Resolvable<Object> asyncOr<R extends Object>(Resolvable<R> other);
 
   /// Transforms the contained [Ok] value's type from `T` to `R`.
+  @override
   Resolvable<R> transf<R extends Object>([R Function(T e)? transformer]);
 
   /// Returns the value as an [Ok] if possible or [None] if there's an error.
@@ -255,7 +265,10 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => value.unwrap();
+  T unwrap({int stackLevel = 1}) => value.unwrap(stackLevel: stackLevel);
+
+  @override
+  T unwrapOr(T fallback) => value.unwrapOr(fallback);
 
   @override
   @pragma('vm:prefer-inline')
@@ -458,7 +471,10 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap() => value.then((e) => e.unwrap());
+  Future<T> unwrap({int stackLevel = 1}) => value.then((e) => e.unwrap(stackLevel: stackLevel));
+
+  @override
+  FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
 
   @override
   @pragma('vm:prefer-inline')

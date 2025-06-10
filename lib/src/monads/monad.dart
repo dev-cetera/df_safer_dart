@@ -77,6 +77,17 @@ sealed class Monad<T extends Object> implements Equatable {
     }
   }
 
+  FutureOr<T> unwrap({int stackLevel = 1});
+
+  FutureOr<T> unwrapOr(T fallback);
+
+  @pragma('vm:prefer-inline')
+  FutureOr<T> unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+
+  Monad<R> map<R extends Object>(R Function(T value) mapper);
+
+  Monad transf<R extends Object>([R Function(T e)? transformer]);
+
   Some<Monad<T>> wrapSome();
 
   Ok<Monad<T>> wrapOk();
