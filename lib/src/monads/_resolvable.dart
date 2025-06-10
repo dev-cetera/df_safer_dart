@@ -37,6 +37,10 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     }
   }
 
+  /// Returns this as an [Resolvable].
+  @pragma('vm:prefer-inline')
+  Resolvable<T> asResolvable() => this;
+
   /// Converts this [Resolvable] to an [Async].
   Async<T> asAsync();
 
@@ -126,6 +130,26 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Returns the [Err] if possible or [None] if there is a value.
   FutureOr<Option<Err<T>>> err();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Resolvable<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Resolvable<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Resolvable<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Resolvable<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Resolvable<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -263,7 +287,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(
+  match<R extends Object>(
     R Function(T value) onOk,
     R Function(Err<T> err) onErr,
   ) {
@@ -308,6 +332,26 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Option<Err<T>> err() => value.err();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Sync<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Sync<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Sync<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Sync<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Sync<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -492,4 +536,24 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Future<Option<Err<T>>> err() => value.then((e) => e.err());
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Async<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Async<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Async<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Async<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Async<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 }

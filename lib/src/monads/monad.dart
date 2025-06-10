@@ -76,4 +76,14 @@ sealed class Monad<T extends Object> implements Equatable {
       });
     }
   }
+
+  Some<Monad<T>> wrapSome();
+
+  Ok<Monad<T>> wrapOk();
+
+  Resolvable<Monad<T>> wrapResolvable();
+
+  Sync<Monad<T>> wrapSync();
+
+  Async<Monad<T>> wrapAsync();
 }

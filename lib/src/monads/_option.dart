@@ -28,6 +28,10 @@ sealed class Option<T extends Object> extends Monad<T> {
     }
   }
 
+  /// Returns this as an [Option].
+  @pragma('vm:prefer-inline')
+  Option<T> asOption() => this;
+
   /// Returns this [Option] as an [Ok].
   Ok<Option<T>> asOk();
 
@@ -102,6 +106,26 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Transforms the [Some] value's type.
   Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Option<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Option<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Option<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Option<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Option<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -163,13 +187,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -210,7 +232,27 @@ final class Some<T extends Object> extends Option<T> {
   }
 
   @pragma('vm:prefer-inline')
-  None<T> toNone() => const None();
+  None<T> asNone() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Some<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Some<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Some<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Some<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Some<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 
   @pragma('vm:prefer-inline')
   @override
@@ -321,20 +363,29 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Some<None<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<None<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<None<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<None<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<None<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
   List<Object?> get props => [];
 
   @override
   @pragma('vm:prefer-inline')
   bool? get stringify => false;
 }
-
-/// A constant instance of [None] for convenience.
-///
-/// This can be used when the type parameter `T` is not important or can be
-/// inferred, avoiding the need to write `const None<SomeType>()`.
-///
-/// Example:
-/// ```dart
-/// Option<int> myOption = NONE; // myOption is None<int>
-///
-const NONE = None<Never>();

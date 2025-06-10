@@ -21,6 +21,7 @@ export './etc/here.dart';
 export './etc/sequential.dart';
 export './etc/lazy.dart';
 export './etc/finisher.dart';
+export './utils/helpers.dart';
 export './utils/safer_map.dart';
 export './utils/safer_string.dart';
 export './utils/safer_iterable.dart';

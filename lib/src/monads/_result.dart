@@ -18,6 +18,10 @@ part of 'monad.dart';
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
+  /// Returns this as an [Option].
+  @pragma('vm:prefer-inline')
+  Result<T> asResult() => this;
+
   /// Adds to the stack trace level for debugging [Err] types.
   Result<T> addStackLevel([int delta = 1]);
 
@@ -101,6 +105,26 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   /// Transforms the [Ok] value's type.
   Result<R> transf<R extends Object>([R Function(T e)? transformer]);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Result<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Result<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Result<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Result<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Result<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -167,8 +191,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -223,6 +246,26 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Some<Ok<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Ok<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Ok<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Ok<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Ok<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
   List<Object?> get props => [this.value];
 
   @override
@@ -245,9 +288,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   }
 
   Err._internal(this.error, this.statusCode, int initialStackLevel)
-    : stackTrace = Some(StackTrace.current),
-      _initialStackLevel = initialStackLevel,
-      super._() {
+      : stackTrace = Some(StackTrace.current),
+        _initialStackLevel = initialStackLevel,
+        super._() {
     this.debugPath = Here(_initialStackLevel).basepath;
   }
 
@@ -362,10 +405,29 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     return transfErr<R>();
   }
 
+  @override
+  @pragma('vm:prefer-inline')
+  Some<Err<T>> wrapSome() => Some(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Err<T>> wrapOk() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Err<T>> wrapResolvable() => Resolvable(() => this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<Err<T>> wrapSync() => Sync.value(Ok(this));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Err<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')
