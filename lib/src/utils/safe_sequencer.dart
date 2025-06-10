@@ -16,12 +16,15 @@ import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-@Deprecated('SafeSequential got renamed to Sequential.')
-typedef SafeSequential = Sequential;
+@Deprecated('Renamed to SafeSequencer.')
+typedef SafeSequential = SafeSequencer;
+
+@Deprecated('Renamed to SafeSequencer.')
+typedef Sequential = SafeSequencer;
 
 /// A queue that manages the execution of functions sequentially, allowing for
 /// optional throttling.
-class Sequential {
+class SafeSequencer {
   //
   //
   //
@@ -40,9 +43,9 @@ class Sequential {
   //
   //
 
-  /// Creates an [Sequential] with an optional [buffer] for throttling
+  /// Creates an [SafeSequencer] with an optional [buffer] for throttling
   /// execution.
-  Sequential({Duration? buffer}) : _buffer = buffer;
+  SafeSequencer({Duration? buffer}) : _buffer = buffer;
 
   /// Adds multiple [unsafe] functions to the queue for sequential execution.
   /// See [add].
@@ -60,8 +63,7 @@ class Sequential {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    functions, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> functions, {
     Duration? buffer,
   }) {
     return functions
@@ -76,12 +78,12 @@ class Sequential {
     Duration? buffer,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
-      final temp = unsafe(previous);
-      if (temp is Option<T>?) {
-        return temp ?? const None();
-      }
-      return temp.then((e) => e ?? const None());
-    });
+          final temp = unsafe(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
+        });
     return addSafe<T>(fn, buffer: buffer);
   }
 
@@ -101,9 +103,7 @@ class Sequential {
             Future<Resolvable<Option<T>>?>.value(function(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) =>
-                (e.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>()),
+            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
           );
         }).flatten();
       });
@@ -127,8 +127,7 @@ class Sequential {
         return temp;
       }).flatten();
     } else {
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -144,5 +143,4 @@ class Sequential {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef TAddFunction<T extends Object> =
-    TFutureOrOption<T> Function(Result<Option> previous);
+typedef TAddFunction<T extends Object> = TFutureOrOption<T> Function(Result<Option> previous);
