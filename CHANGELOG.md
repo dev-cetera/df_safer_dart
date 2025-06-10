@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.3]
+
+- Released @ 6/2025 (UTC)
+- chore: Add foldResult to Resolvable
+
 ## [0.13.2]
 
 - Released @ 6/2025 (UTC)
