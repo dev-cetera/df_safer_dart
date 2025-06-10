@@ -59,7 +59,7 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   /// Returns the contained [Ok] value. Throws an [Err] if this is an [Err].
   @override
-  T unwrap({int stackLevel = 1});
+  T unwrap({int delta = 1});
 
   /// Returns the contained [Ok] value or a provided fallback.
   @override
@@ -184,7 +184,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int stackLevel = 1}) => value;
+  T unwrap({int delta = 1}) => value;
 
   @override
   @pragma('vm:prefer-inline')
@@ -196,8 +196,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -282,35 +281,95 @@ final class Ok<T extends Object> extends Result<T> {
 
 /// A [Monad] that represents a [Result] that represents an error.
 final class Err<T extends Object> extends Result<T> implements Exception {
-  late final Option<String> debugPath;
+  //
+  //
+  //
+
+  late final Option<String> location;
   final Object error;
   final Option<int> statusCode;
   final Option<StackTrace> stackTrace;
-  final int _initialStackLevel;
+  final int stackLevel;
 
-  factory Err(Object error, {int? statusCode}) {
-    return Err._internal(error, Option.fromNullable(statusCode), 3);
+  //
+  //
+  //
+
+  @pragma('vm:prefer-inline')
+  factory Err(Object error, {Option<int> statusCode = const None()}) {
+    return Err.verbose(
+      error: error,
+      statusCode: statusCode,
+      stackLevel: 4,
+      location: const None(),
+    );
   }
 
-  Err._internal(this.error, this.statusCode, int initialStackLevel)
-    : stackTrace = Some(StackTrace.current),
-      _initialStackLevel = initialStackLevel,
-      super._() {
-    this.debugPath = Here(_initialStackLevel).basepath;
-  }
+  //
+  //
+  //
 
+  Err.verbose({
+    required this.error,
+    required this.statusCode,
+    required this.stackLevel,
+    required Option<String> location,
+  })  : stackTrace = Some(StackTrace.current),
+        location = location.isSome() ? location : Here(stackLevel).location,
+        assert(
+          () {
+            // If this assert was triggered, it means that you're running your
+            // app in debug mode, debugAssertErr is true or kDebugAssertErr is
+            // true and an Err was somehwere created in your application.
+
+            // We cannot pinpoint the source of this assert message if
+            // stackLevel >= 1.
+            if (stackLevel < 1) {
+              return false;
+            }
+            // If this flag is available, we use it.
+            if (debugAssertErr != null) {
+              return !debugAssertErr!;
+            } else {
+              // Otherwise we use the compile constant.
+              return !kDebugAssertErr;
+            }
+          }(),
+          'Err<$T> created at: ${Here(stackLevel - 1)().match((e) => e.location, () => '???')}',
+        ),
+        super._();
+
+  //
+  //
+  //
+
+  @pragma('vm:prefer-inline')
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
     if (error == null) {
       return Err('Error is null!');
     }
-    return Err(error, statusCode: model.statusCode ?? -1);
+    return Err(error, statusCode: Option.fromNullable(model.statusCode));
   }
 
+  //
+  //
+  //
+
   @override
+  @pragma('vm:prefer-inline')
   Err<T> addStackLevel([int delta = 1]) {
-    return Err._internal(error, statusCode, _initialStackLevel + delta + 1);
+    return Err.verbose(
+      error: error,
+      statusCode: statusCode,
+      stackLevel: stackLevel + delta,
+      location: location,
+    );
   }
+
+  //
+  //
+  //
 
   @override
   @pragma('vm:prefer-inline')
@@ -349,11 +408,13 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int stackLevel = 1}) {
-    throw Err<T>(
-      'Called unwrap() on Err<$T>.',
-      statusCode: statusCode.orNull(),
-    ).addStackLevel(stackLevel);
+  T unwrap({int delta = 1}) {
+    throw Err<T>.verbose(
+      error: 'Called unwrap() on Err<$T>.',
+      statusCode: statusCode,
+      stackLevel: stackLevel + delta,
+      location: location,
+    );
   }
 
   @override
@@ -432,13 +493,17 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(error, statusCode: statusCode.orNull());
+    return Err.verbose(
+      error: error,
+      statusCode: statusCode,
+      stackLevel: stackLevel,
+      location: location,
+    );
   }
 
   /// Converts this [Err] to an `ErrModel`.
@@ -447,7 +512,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final error = _safeToString(this.error);
     return ErrModel(
       type: type,
-      debugPath: debugPath.orNull(),
+      location: location.orNull(),
       error: error,
       statusCode: statusCode.orNull(),
     );
@@ -458,7 +523,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final model = toModel();
     return {
       if (model.type != null) 'type': model.type,
-      if (model.debugPath != null) 'debugPath': model.debugPath,
+      if (model.location != null) 'location': model.location,
       if (model.error != null) 'error': model.error,
       if (model.statusCode != null) 'statusCode': model.statusCode,
       if (model.stackTrace != null) 'stackTrace': model.stackTrace,
@@ -474,7 +539,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  List<Object?> get props => [debugPath, error, statusCode];
+  List<Object?> get props => [error, statusCode];
 
   @override
   @pragma('vm:prefer-inline')

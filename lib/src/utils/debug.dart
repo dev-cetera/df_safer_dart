@@ -10,26 +10,17 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'dart:async';
-
-import '/src/_src.g.dart';
-
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-const NONE = None<Never>();
+/// Add `--define=kDebugAssertErr=true` to your `dart run` command or
+/// `--dart-define=kDebugAssertErr=true` to your `flutter run` command to
+/// asserts when an [Err] is created.
+const kDebugAssertErr = bool.fromEnvironment('kDebugAssertErr', defaultValue: false);
 
-const SYNC_NONE = Sync.value(Ok(None<Never>()));
+/// Set to `true` to trigger asserts when an [Err] is created.
+bool? debugAssertErr;
 
-const Resolvable<None<Never>> RESOLVABLE_NONE = SYNC_NONE;
-
-@pragma('vm:prefer-inline')
-Sync<None<T>> syncNone<T extends Object>() => const Sync.value(Ok(None()));
-
-@pragma('vm:prefer-inline')
-Async<None<T>> asyncNone<T extends Object>() =>
-    Async.value(Future.value(Ok(None<T>())));
-
-@pragma('vm:prefer-inline')
-Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();
-
-typedef TReduced<T extends Object> = Resolvable<Option<T>>;
+/// A constatnt that can be used to check if your app is running in a Dart only
+/// or Flutter environment. It's `true` if `dart.library.ui` is defined and
+/// `false` otherwise.
+const kIsDartLibraryUI = bool.fromEnvironment('dart.library.ui');

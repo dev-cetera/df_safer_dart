@@ -11,7 +11,7 @@
 //.title~
 
 import '../monads/monad.dart';
-import 'helpers.dart';
+import 'typedefs.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

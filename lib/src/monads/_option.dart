@@ -63,7 +63,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Returns the contained value. Throws if this is a [None].
   @override
-  T unwrap({int stackLevel = 1});
+  T unwrap({int delta = 1});
 
   /// Returns the contained value or a provided fallback.
   @override
@@ -180,7 +180,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int stackLevel = 1}) => value;
+  T unwrap({int delta = 1}) => value;
 
   @override
   @pragma('vm:prefer-inline')
@@ -192,13 +192,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -315,8 +313,8 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int stackLevel = 1}) {
-    throw Err<T>('Called unwrap() on None<$T>.').addStackLevel(stackLevel);
+  T unwrap({int delta = 1}) {
+    throw Err<T>('Called unwrap() on None<$T>.').addStackLevel(delta);
   }
 
   @override

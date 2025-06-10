@@ -53,7 +53,7 @@
 ## [0.11.0]
 
 - Released @ 5/2025 (UTC)
-- breaking: Improve Err monad with auto debugPath and conversion to and from data models
+- breaking: Improve Err monad with auto location and conversion to and from data models
 
 ## [0.10.2]
 

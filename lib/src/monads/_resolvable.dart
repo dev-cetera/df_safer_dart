@@ -73,7 +73,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Returns the contained [Ok] value, resolving the [Future] if necessary.
   @override
-  FutureOr<T> unwrap({int stackLevel = 1});
+  FutureOr<T> unwrap({int delta = 1});
 
   @override
   FutureOr<T> unwrapOr(T fallback);
@@ -84,13 +84,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Unwraps the [Sync] instance and returns its value. Throws if not [Sync].
   @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync({int stackLevel = 2}) =>
-      sync().unwrap(stackLevel: stackLevel);
+  Sync<T> unwrapSync({int stackLevel = 2}) => sync().unwrap(delta: stackLevel);
 
   /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
   @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync({int stackLevel = 2}) =>
-      async().unwrap(stackLevel: stackLevel);
+  Async<T> unwrapAsync({int stackLevel = 2}) => async().unwrap(delta: stackLevel);
 
   /// Maps the contained [Ok] value to a new value.
   @override
@@ -267,7 +265,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int stackLevel = 1}) => value.unwrap(stackLevel: stackLevel);
+  T unwrap({int delta = 1}) => value.unwrap(delta: delta);
 
   @override
   T unwrapOr(T fallback) => value.unwrapOr(fallback);
@@ -413,8 +411,8 @@ final class Async<T extends Object> extends Resolvable<T> {
             rethrow;
           }
           return onError(error);
-        } catch (e) {
-          return Err<T>(e);
+        } catch (error) {
+          return Err<T>(error);
         }
       } finally {
         onFinalize?.call();
@@ -473,8 +471,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap({int stackLevel = 1}) =>
-      value.then((e) => e.unwrap(stackLevel: stackLevel));
+  Future<T> unwrap({int delta = 1}) => value.then((e) => e.unwrap(delta: delta));
 
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));

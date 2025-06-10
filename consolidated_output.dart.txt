@@ -2212,7 +2212,7 @@ class ErrModel {
   final String? type;
 
   /// No description provided.
-  final String? debugPath;
+  final String? location;
 
   /// No description provided.
   final String? error;
@@ -2227,7 +2227,7 @@ class ErrModel {
   /// from optional and required parameters.
   const ErrModel({
     required this.type,
-    this.debugPath,
+    this.location,
     required this.error,
     this.statusCode,
     this.stackTrace,
@@ -2236,14 +2236,14 @@ class ErrModel {
   /// Creates a copy of this instance, replacing the specified fields.
   ErrModel copyWith({
     String? type,
-    String? debugPath,
+    String? location,
     String? error,
     int? statusCode,
     List<String>? stackTrace,
   }) {
     return ErrModel(
       type: type ?? this.type,
-      debugPath: debugPath ?? this.debugPath,
+      location: location ?? this.location,
       error: error ?? this.error,
       statusCode: statusCode ?? this.statusCode,
       stackTrace: stackTrace ?? this.stackTrace,
@@ -2253,14 +2253,14 @@ class ErrModel {
   /// Creates a copy of this instance, removing the specified fields.
   ErrModel copyWithout({
     bool type = true,
-    bool debugPath = true,
+    bool location = true,
     bool error = true,
     bool statusCode = true,
     bool stackTrace = true,
   }) {
     return ErrModel(
       type: type ? this.type : null,
-      debugPath: debugPath ? this.debugPath : null,
+      location: location ? this.location : null,
       error: error ? this.error : null,
       statusCode: statusCode ? this.statusCode : null,
       stackTrace: stackTrace ? this.stackTrace : null,
@@ -2273,11 +2273,11 @@ class ErrModel {
   @pragma('vm:prefer-inline')
   String get type$ => type!;
 
-  /// Returns the value of the [debugPath] field.
+  /// Returns the value of the [location] field.
   /// If the field is nullable, the return value may be null; otherwise, it
   /// will always return a non-null value.
   @pragma('vm:prefer-inline')
-  String? get debugPath$ => debugPath;
+  String? get location$ => location;
 
   /// Returns the value of the [error] field.
   /// If the field is nullable, the return value may be null; otherwise, it
@@ -2319,7 +2319,7 @@ class ErrModel {
 // @GenerateDartModel(
 //   fields: {
 //     Field(fieldPath: ['type'], fieldType: String, nullable: false),
-//     Field(fieldPath: ['debugPath'], fieldType: String, nullable: true),
+//     Field(fieldPath: ['location'], fieldType: String, nullable: true),
 //     Field(fieldPath: ['error'], fieldType: String, nullable: false),
 //     Field(fieldPath: ['statusCode'], fieldType: int, nullable: true),
 //     Field(fieldPath: ['stackTrace'], fieldType: List<String>, nullable: true),
@@ -3680,7 +3680,7 @@ final class Ok<T extends Object> extends Result<T> {
 
 /// A [Monad] that represents a [Result] that represents an error.
 final class Err<T extends Object> extends Result<T> implements Exception {
-  late final Option<String> debugPath;
+  late final Option<String> location;
   final Object error;
   final Option<int> statusCode;
   final Option<StackTrace> stackTrace;
@@ -3694,7 +3694,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     : stackTrace = Some(StackTrace.current),
       _initialStackLevel = initialStackLevel,
       super._() {
-    this.debugPath = Here(_initialStackLevel).basepath;
+    this.location = Here(_initialStackLevel).basepath;
   }
 
   factory Err.fromModel(ErrModel model) {
@@ -3845,7 +3845,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final error = _safeToString(this.error);
     return ErrModel(
       type: type,
-      debugPath: debugPath.orNull(),
+      location: location.orNull(),
       error: error,
       statusCode: statusCode.orNull(),
     );
@@ -3856,7 +3856,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final model = toModel();
     return {
       if (model.type != null) 'type': model.type,
-      if (model.debugPath != null) 'debugPath': model.debugPath,
+      if (model.location != null) 'location': model.location,
       if (model.error != null) 'error': model.error,
       if (model.statusCode != null) 'statusCode': model.statusCode,
       if (model.stackTrace != null) 'stackTrace': model.stackTrace,
@@ -3872,7 +3872,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  List<Object?> get props => [debugPath, error, statusCode];
+  List<Object?> get props => [location, error, statusCode];
 
   @override
   @pragma('vm:prefer-inline')
