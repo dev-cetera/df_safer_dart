@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.4]
+
+- Released @ 6/2025 (UTC)
+- feat: Add ToSafeStreamExtension
+
 ## [0.13.3]
 
 - Released @ 6/2025 (UTC)

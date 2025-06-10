@@ -93,7 +93,9 @@ class SafeCompleter<T extends Object> {
         final result = transformer != null ? transformer(e) : (e as R);
         completer.resolve(Sync<R>.value(Ok(result)));
       } catch (e) {
-        completer.resolve(Sync.value(Err('Failed to transform type $T to $R.')));
+        completer.resolve(
+          Sync.value(Err('Failed to transform type $T to $R.')),
+        );
       }
       return e;
     });
