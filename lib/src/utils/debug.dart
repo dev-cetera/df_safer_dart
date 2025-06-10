@@ -15,7 +15,10 @@
 /// Add `--define=kDebugAssertErr=true` to your `dart run` command or
 /// `--dart-define=kDebugAssertErr=true` to your `flutter run` command to
 /// asserts when an [Err] is created.
-const kDebugAssertErr = bool.fromEnvironment('kDebugAssertErr', defaultValue: false);
+const kDebugAssertErr = bool.fromEnvironment(
+  'kDebugAssertErr',
+  defaultValue: false,
+);
 
 /// Set to `true` to trigger asserts when an [Err] is created.
 bool? debugAssertErr;

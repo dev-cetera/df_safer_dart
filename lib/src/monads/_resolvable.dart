@@ -88,7 +88,8 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
   @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync({int stackLevel = 2}) => async().unwrap(delta: stackLevel);
+  Async<T> unwrapAsync({int stackLevel = 2}) =>
+      async().unwrap(delta: stackLevel);
 
   /// Maps the contained [Ok] value to a new value.
   @override
@@ -471,7 +472,8 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap({int delta = 1}) => value.then((e) => e.unwrap(delta: delta));
+  Future<T> unwrap({int delta = 1}) =>
+      value.then((e) => e.unwrap(delta: delta));
 
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));

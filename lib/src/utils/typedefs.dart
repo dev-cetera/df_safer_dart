@@ -26,7 +26,8 @@ const TResolvableNone<Never> RESOLVABLE_NONE = SYNC_NONE;
 Sync<None<T>> syncNone<T extends Object>() => const TSyncNone.value(Ok(None()));
 
 @pragma('vm:prefer-inline')
-Async<None<T>> asyncNone<T extends Object>() => TAsyncNone.value(Future.value(Ok(None<T>())));
+Async<None<T>> asyncNone<T extends Object>() =>
+    TAsyncNone.value(Future.value(Ok(None<T>())));
 
 @pragma('vm:prefer-inline')
 Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();

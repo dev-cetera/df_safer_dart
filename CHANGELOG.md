@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.6]
+
+- Released @ 6/2025 (UTC)
+- chore: Improved Err handling!
+
 ## [0.13.5]
 
 - Released @ 6/2025 (UTC)
