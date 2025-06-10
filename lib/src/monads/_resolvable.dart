@@ -102,6 +102,12 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   );
 
   /// Exhaustively handles [Ok] and [Err] cases, returning a final value.
+  Resolvable<Object> foldResult(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
+  );
+
+  /// Exhaustively handles [Ok] and [Err] cases, returning a final value.
   FutureOr<R> match<R extends Object>(
     R Function(T value) onOk,
     R Function(Err<T> err) onErr,
@@ -287,7 +293,16 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  match<R extends Object>(
+  Sync<Object> foldResult(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
+  ) {
+    return Sync.value(value.fold(onOk, onErr));
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  FutureOr<R> match<R extends Object>(
     R Function(T value) onOk,
     R Function(Err<T> err) onErr,
   ) {
@@ -485,6 +500,15 @@ final class Async<T extends Object> extends Resolvable<T> {
     } catch (error) {
       return Async.value(Future.value(Err(error)));
     }
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Object> foldResult(
+    Result<Object>? Function(Ok<T> ok) onOk,
+    Result<Object>? Function(Err<T> err) onErr,
+  ) {
+    return this..resultMap((e) => e.fold(onOk, onErr));
   }
 
   @override
