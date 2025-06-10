@@ -11,8 +11,9 @@
 //.title~
 
 import 'dart:async' show FutureOr;
-import 'dart:convert';
-import 'package:equatable/equatable.dart';
+import 'dart:convert' show JsonEncoder;
+import 'package:equatable/equatable.dart' show Equatable;
+import 'package:meta/meta.dart' show protected;
 
 import '/df_safer_dart.dart';
 
