@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.5]
+
+- Released @ 6/2025 (UTC)
+- chore: Add smart mapping functions
+
 ## [0.13.4]
 
 - Released @ 6/2025 (UTC)

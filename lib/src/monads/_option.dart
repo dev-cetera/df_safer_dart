@@ -192,11 +192,13 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) =>
+      Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')

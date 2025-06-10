@@ -84,11 +84,13 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Unwraps the [Sync] instance and returns its value. Throws if not [Sync].
   @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync({int stackLevel = 2}) => sync().unwrap(stackLevel: stackLevel);
+  Sync<T> unwrapSync({int stackLevel = 2}) =>
+      sync().unwrap(stackLevel: stackLevel);
 
   /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
   @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync({int stackLevel = 2}) => async().unwrap(stackLevel: stackLevel);
+  Async<T> unwrapAsync({int stackLevel = 2}) =>
+      async().unwrap(stackLevel: stackLevel);
 
   /// Maps the contained [Ok] value to a new value.
   @override
@@ -471,7 +473,8 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap({int stackLevel = 1}) => value.then((e) => e.unwrap(stackLevel: stackLevel));
+  Future<T> unwrap({int stackLevel = 1}) =>
+      value.then((e) => e.unwrap(stackLevel: stackLevel));
 
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
