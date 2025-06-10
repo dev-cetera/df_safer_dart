@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.2]
+
+- Released @ 6/2025 (UTC)
+- feat: Add some helpers
+
 ## [0.13.1]
 
 - Released @ 6/2025 (UTC)
