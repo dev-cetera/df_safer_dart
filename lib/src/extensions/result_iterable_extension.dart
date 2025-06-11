@@ -24,7 +24,8 @@ extension IterableResultExtension<T extends Object> on Iterable<Result<T>> {
   }
 }
 
-extension IterableFutureResultExtension<T extends Object> on Iterable<Future<Result<T>>> {
+extension IterableFutureResultExtension<T extends Object>
+    on Iterable<Future<Result<T>>> {
   Future<Iterable<Ok<T>>> whereOk() {
     return Future.wait(this).then((e) => e.whereOk());
   }
@@ -40,7 +41,8 @@ extension IterableOkExtension<T extends Object> on Iterable<Ok<T>> {
   }
 }
 
-extension FutureIterableOkExtension<T extends Object> on Future<Iterable<Ok<T>>> {
+extension FutureIterableOkExtension<T extends Object>
+    on Future<Iterable<Ok<T>>> {
   Future<Iterable<T>> unwrapAll() {
     return then((e) => e.unwrapAll());
   }
