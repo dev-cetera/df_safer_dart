@@ -73,7 +73,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Returns the contained [Ok] value, resolving the [Future] if necessary.
   @override
-  FutureOr<T> unwrap({int delta = 1});
+  FutureOr<T> unwrap({@visibleForTesting int stackLevel = 0});
 
   @override
   FutureOr<T> unwrapOr(T fallback);
@@ -84,12 +84,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Unwraps the [Sync] instance and returns its value. Throws if not [Sync].
   @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync({int stackLevel = 2}) => sync().unwrap(delta: stackLevel);
+  Sync<T> unwrapSync({int stackLevel = 0}) => sync().unwrap(stackLevel: 1 + stackLevel);
 
   /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
   @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync({int stackLevel = 2}) =>
-      async().unwrap(delta: stackLevel);
+  Async<T> unwrapAsync({int stackLevel = 0}) => async().unwrap(stackLevel: 1 + stackLevel);
 
   /// Maps the contained [Ok] value to a new value.
   @override
@@ -207,7 +206,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
           }
           return onError(error);
         } catch (e) {
-          return Err<T>(e);
+          return Err<T>(e, stackLevel: 6);
         }
       } finally {
         onFinalize?.call();
@@ -266,7 +265,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({int delta = 1}) => value.unwrap(delta: delta);
+  T unwrap({@visibleForTesting int stackLevel = 0}) => value.unwrap(stackLevel: 1 + stackLevel);
 
   @override
   T unwrapOr(T fallback) => value.unwrapOr(fallback);
@@ -413,7 +412,7 @@ final class Async<T extends Object> extends Resolvable<T> {
           }
           return onError(error);
         } catch (error) {
-          return Err<T>(error);
+          return Err<T>(error, stackLevel: 5);
         }
       } finally {
         onFinalize?.call();
@@ -472,8 +471,9 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap({int delta = 1}) =>
-      value.then((e) => e.unwrap(delta: delta));
+  Future<T> unwrap({@visibleForTesting int stackLevel = 0}) {
+    return value.then((e) => e.unwrap(stackLevel: 1 + stackLevel));
+  }
 
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
@@ -541,7 +541,10 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Sync<T> toSync() {
-    throw Err<T>('Called toSync() on Async<$T>.').addStackLevel();
+    throw Err<T>(
+      'Called toSync() on Async<$T>.',
+      stackLevel: 5,
+    );
   }
 
   @override

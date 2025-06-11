@@ -13,7 +13,7 @@
 import 'dart:async' show FutureOr;
 import 'dart:convert' show JsonEncoder;
 import 'package:equatable/equatable.dart' show Equatable;
-import 'package:meta/meta.dart' show protected;
+import 'package:meta/meta.dart' show protected, visibleForTesting;
 
 import '/df_safer_dart.dart';
 
@@ -78,7 +78,7 @@ sealed class Monad<T extends Object> implements Equatable {
     }
   }
 
-  FutureOr<T> unwrap({int delta = 1});
+  FutureOr<T> unwrap({@visibleForTesting int stackLevel = 0});
 
   FutureOr<T> unwrapOr(T fallback);
 
