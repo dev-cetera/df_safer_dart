@@ -189,7 +189,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -312,31 +313,31 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     required this.statusCode,
     required int stackLevel,
     required Option<String> location,
-  })  : stackTrace = Some(StackTrace.current),
-        stackLevel = 4 + stackLevel,
-        location = location.isSome() ? location : Here(stackLevel).location,
-        assert(
-          () {
-            // If this assert was triggered, it means that you're running your
-            // app in debug mode, debugAssertErr is true or kDebugAssertErr is
-            // true and an Err was somehwere created in your application.
+  }) : stackTrace = Some(StackTrace.current),
+       stackLevel = 4 + stackLevel,
+       location = location.isSome() ? location : Here(stackLevel).location,
+       assert(
+         () {
+           // If this assert was triggered, it means that you're running your
+           // app in debug mode, debugAssertErr is true or kDebugAssertErr is
+           // true and an Err was somehwere created in your application.
 
-            // We cannot pinpoint the source of this assert message if
-            // stackLevel >= 1.
-            if (stackLevel < 1) {
-              return false;
-            }
-            // If this flag is available, we use it.
-            if (debugAssertErr != null) {
-              return !debugAssertErr!;
-            } else {
-              // Otherwise we use the compile constant.
-              return !kDebugAssertErr;
-            }
-          }(),
-          'Err<$T> created at: ${Here(stackLevel - 1)().match((e) => e.location, () => '???')}',
-        ),
-        super._();
+           // We cannot pinpoint the source of this assert message if
+           // stackLevel >= 1.
+           if (stackLevel < 1) {
+             return false;
+           }
+           // If this flag is available, we use it.
+           if (debugAssertErr != null) {
+             return !debugAssertErr!;
+           } else {
+             // Otherwise we use the compile constant.
+             return !kDebugAssertErr;
+           }
+         }(),
+         'Err<$T> created at: ${Here(stackLevel - 1)().match((e) => e.location, () => '???')}',
+       ),
+       super._();
 
   //
   //
@@ -348,10 +349,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     if (error == null) {
       return Err('Error is null!');
     }
-    return Err(
-      error,
-      statusCode: model.statusCode,
-    );
+    return Err(error, statusCode: model.statusCode);
   }
 
   //
@@ -397,10 +395,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   @protected
   @pragma('vm:prefer-inline')
   T unwrap({@visibleForTesting int stackLevel = 0}) {
-    throw Err<T>(
-   'Called unwrap() on Err<$T>.',
-      stackLevel: stackLevel,
-    );
+    throw Err<T>('Called unwrap() on Err<$T>.', stackLevel: stackLevel);
   }
 
   @override
@@ -479,7 +474,8 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() =>
+      error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.8]
+
+- Released @ 6/2025 (UTC)
+- fix: Some bugfixes with stackLevel
+
 ## [0.13.7]
 
 - Released @ 6/2025 (UTC)

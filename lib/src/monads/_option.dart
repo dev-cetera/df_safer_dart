@@ -192,11 +192,13 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) =>
+      Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) =>
+      test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -232,10 +234,7 @@ final class Some<T extends Object> extends Option<T> {
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(Option.fromNullable(value1));
     } catch (_) {
-      return Err(
-        'Cannot transform $T to $R',
-        stackLevel: 1,
-      );
+      return Err('Cannot transform $T to $R', stackLevel: 1);
     }
   }
 
@@ -318,10 +317,7 @@ final class None<T extends Object> extends Option<T> {
   @protected
   @pragma('vm:prefer-inline')
   T unwrap({@visibleForTesting int stackLevel = 0}) {
-    throw Err<T>(
-      'Called unwrap() on None<$T>.',
-      stackLevel: stackLevel,
-    );
+    throw Err<T>('Called unwrap() on None<$T>.', stackLevel: stackLevel);
   }
 
   @override
