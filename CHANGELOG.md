@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.9]
+
+- Released @ 6/2025 (UTC)
+- chore: Change return type of SafeSequencer.last method
+
 ## [0.13.8]
 
 - Released @ 6/2025 (UTC)
