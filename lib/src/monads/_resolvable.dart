@@ -137,6 +137,12 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Returns this if it's [Async], otherwise returns [other].
   Resolvable<Object> asyncOr<R extends Object>(Resolvable<R> other);
 
+  /// Returns this if it's [Ok], otherwise returns [other].
+  Resolvable<Object> okOr<R extends Object>(Resolvable<R> other);
+
+  /// Returns this if it's [Err], otherwise returns [other].
+  Resolvable<Object> errOr<R extends Object>(Resolvable<R> other);
+
   /// Transforms the contained [Ok] value's type from `T` to `R`.
   @override
   Resolvable<R> transf<R extends Object>([R Function(T e)? transformer]);
@@ -341,6 +347,24 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Resolvable<R> asyncOr<R extends Object>(Resolvable<R> other) => other;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Object> okOr<R extends Object>(Resolvable<R> other) {
+    if (value.isOk()) {
+      return this;
+    }
+    return other;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Object> errOr<R extends Object>(Resolvable<R> other) {
+    if (value.isErr()) {
+      return this;
+    }
+    return other;
+  }
 
   @override
   Sync<R> transf<R extends Object>([R Function(T e)? transformer]) {
@@ -570,6 +594,30 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<Object> asyncOr<R extends Object>(Resolvable<R> other) => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Object> okOr<R extends Object>(Resolvable<R> other) {
+    return Async(() async {
+      final awaitedValue = await this.value;
+      if (awaitedValue.isOk()) {
+        return awaitedValue;
+      }
+      return other.value;
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Object> errOr<R extends Object>(Resolvable<R> other) {
+    return Async(() async {
+      final awaitedValue = await this.value;
+      if (awaitedValue.isErr()) {
+        return awaitedValue;
+      }
+      return other.value;
+    });
+  }
 
   @override
   @pragma('vm:prefer-inline')
