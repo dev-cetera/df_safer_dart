@@ -63,8 +63,7 @@ class SafeSequencer {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    functions, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> functions, {
     Duration? buffer,
   }) {
     return functions
@@ -79,12 +78,12 @@ class SafeSequencer {
     Duration? buffer,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
-      final temp = unsafe(previous);
-      if (temp is Option<T>?) {
-        return temp ?? const None();
-      }
-      return temp.then((e) => e ?? const None());
-    });
+          final temp = unsafe(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
+        });
     return addSafe<T>(fn, buffer: buffer);
   }
 
@@ -104,9 +103,7 @@ class SafeSequencer {
             Future<Resolvable<Option<T>>?>.value(function(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) =>
-                (e.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>()),
+            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
           );
         }).flatten();
       });
@@ -130,8 +127,7 @@ class SafeSequencer {
         return temp;
       }).flatten();
     } else {
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -141,11 +137,10 @@ class SafeSequencer {
   }
 
   /// Retrieves the last value in the queue.
-  Resolvable<None> get last => add((_) => null).map((_) => const None());
+  Resolvable<Object> get last => addSafe((e) => Sync.value(e));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef TAddFunction<T extends Object> =
-    TFutureOrOption<T> Function(Result<Option> previous);
+typedef TAddFunction<T extends Object> = TFutureOrOption<T> Function(Result<Option> previous);
