@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.10]
+
+- Released @ 6/2025 (UTC)
+- feat: Simplify error handling and add SafeSequencerCallbacks and ToResolvableExtension
+
 ## [0.13.9]
 
 - Released @ 6/2025 (UTC)

@@ -189,7 +189,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -287,12 +288,10 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   //
 
   @protected
-  Err(
-    this.error, {
-    int? statusCode,
-  })  : statusCode = Option.fromNullable(statusCode),
-        stackTrace = Trace.current(),
-        super._();
+  Err(this.error, {int? statusCode})
+    : statusCode = Option.fromNullable(statusCode),
+      stackTrace = Trace.current(),
+      super._();
 
   //
   //
@@ -429,15 +428,13 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() =>
+      error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(
-      error,
-      statusCode: statusCode.orNull(),
-    );
+    return Err(error, statusCode: statusCode.orNull());
   }
 
   /// Converts this [Err] to an `ErrModel`.

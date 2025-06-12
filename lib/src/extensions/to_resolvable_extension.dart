@@ -22,11 +22,7 @@ extension ToResolvableExtension<T extends Object> on FutureOr<T> {
     Err<T> Function(Object?)? onError,
     void Function()? onFinalize,
   }) {
-    return Resolvable(
-      () => this,
-      onError: onError,
-      onFinalize: onFinalize,
-    );
+    return Resolvable(() => this, onError: onError, onFinalize: onFinalize);
   }
 }
 
@@ -40,11 +36,7 @@ extension ToAsyncExtension<T extends Object> on Future<T> {
       !_isSubtype<T, Future<Object>>(),
       'Do not call toAsync on nested futures: $T.',
     );
-    return Async(
-      () => this,
-      onError: onError,
-      onFinalize: onFinalize,
-    );
+    return Async(() => this, onError: onError, onFinalize: onFinalize);
   }
 }
 
@@ -58,11 +50,7 @@ extension ToSync<T extends Object> on T {
       !_isSubtype<T, Future<Object>>(),
       'Do not call toSync on futures: $T.',
     );
-    return Sync(
-      () => this,
-      onError: onError,
-      onFinalize: onFinalize,
-    );
+    return Sync(() => this, onError: onError, onFinalize: onFinalize);
   }
 }
 
