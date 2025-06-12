@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.11]
+
+- Released @ 6/2025 (UTC)
+- feat: Add okOr and errOr to resolvable
+
 ## [0.13.10]
 
 - Released @ 6/2025 (UTC)
