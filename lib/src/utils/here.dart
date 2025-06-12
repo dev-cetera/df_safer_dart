@@ -27,23 +27,22 @@ final class Here {
   //
   //
 
-  final int initialStackLevel;
+  final int level;
 
   //
   //
   //
 
-  const Here(this.initialStackLevel) : assert(initialStackLevel >= 0);
+  const Here(this.level) : assert(level >= 0);
 
   /// Returns the [Frame] for the current code location, skipping the initial
-  /// stack levels specified by [initialStackLevel].
+  /// stack levels specified by [level].
   ///
   /// Returns `null` if no suitable frame is found.
   Option<Frame> call() {
-    final frames = Trace.current().frames;
-    for (var i = initialStackLevel; i < frames.length; i++) {
-      final frame = frames[i];
-
+    final frames = Trace.current(level).frames;
+    for (var n = 0; n < frames.length; n++) {
+      final frame = frames[n];
       final lineNumber = frame.line;
       final columnNumber = frame.column;
       if (lineNumber != null && columnNumber != null) {

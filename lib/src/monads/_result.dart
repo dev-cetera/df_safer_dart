@@ -56,7 +56,7 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   /// Returns the contained [Ok] value. Throws an [Err] if this is an [Err].
   @override
-  T unwrap({@visibleForTesting int stackLevel = 0});
+  T unwrap();
 
   /// Returns the contained [Ok] value or a provided fallback.
   @override
@@ -177,11 +177,11 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({@visibleForTesting int stackLevel = 0}) => value;
+  T unwrap() => value;
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOr(T fallback, {int stackLevel = 1}) => value;
+  T unwrapOr(T fallback) => value;
 
   @override
   @pragma('vm:prefer-inline')
@@ -189,8 +189,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -279,65 +278,21 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   //
   //
 
-  late final Option<String> location;
   final Object error;
   final Option<int> statusCode;
-  final Option<StackTrace> stackTrace;
-  final int stackLevel;
-
-  //
-  //
-  //
-
-  @pragma('vm:prefer-inline')
-  factory Err(
-    Object error, {
-    int? statusCode,
-    @visibleForTesting int stackLevel = 0,
-  }) {
-    return Err.internal(
-      error: error,
-      statusCode: Option.fromNullable(statusCode),
-      stackLevel: stackLevel,
-      location: const None(),
-    );
-  }
+  final Trace stackTrace;
 
   //
   //
   //
 
   @protected
-  Err.internal({
-    required this.error,
-    required this.statusCode,
-    required int stackLevel,
-    required Option<String> location,
-  }) : stackTrace = Some(StackTrace.current),
-       stackLevel = 4 + stackLevel,
-       location = location.isSome() ? location : Here(stackLevel).location,
-       assert(
-         () {
-           // If this assert was triggered, it means that you're running your
-           // app in debug mode, debugAssertErr is true or kDebugAssertErr is
-           // true and an Err was somehwere created in your application.
-
-           // We cannot pinpoint the source of this assert message if
-           // stackLevel >= 1.
-           if (stackLevel < 1) {
-             return false;
-           }
-           // If this flag is available, we use it.
-           if (debugAssertErr != null) {
-             return !debugAssertErr!;
-           } else {
-             // Otherwise we use the compile constant.
-             return !kDebugAssertErr;
-           }
-         }(),
-         'Err<$T> created at: ${Here(stackLevel - 1)().match((e) => e.location, () => '???')}',
-       ),
-       super._();
+  Err(
+    this.error, {
+    int? statusCode,
+  })  : statusCode = Option.fromNullable(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
   //
   //
@@ -394,8 +349,8 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   @override
   @protected
   @pragma('vm:prefer-inline')
-  T unwrap({@visibleForTesting int stackLevel = 0}) {
-    throw Err<T>('Called unwrap() on Err<$T>.', stackLevel: stackLevel);
+  T unwrap() {
+    throw Err<T>('Called unwrap() on Err<$T>.');
   }
 
   @override
@@ -474,17 +429,14 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Checks if the contained [error] matches the type [E].
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
 
   /// Transforms the type [T] without casting [error].
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err.internal(
-      error: error,
-      statusCode: statusCode,
-      stackLevel: stackLevel,
-      location: location,
+    return Err(
+      error,
+      statusCode: statusCode.orNull(),
     );
   }
 
@@ -494,9 +446,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final error = _safeToString(this.error);
     return ErrModel(
       type: type,
-      location: location.orNull(),
       error: error,
       statusCode: statusCode.orNull(),
+      stackTrace: stackTrace.frames.map((e) => e.toString()).toList(),
     );
   }
 
@@ -505,7 +457,6 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final model = toModel();
     return {
       if (model.type != null) 'type': model.type,
-      if (model.location != null) 'location': model.location,
       if (model.error != null) 'error': model.error,
       if (model.statusCode != null) 'statusCode': model.statusCode,
       if (model.stackTrace != null) 'stackTrace': model.stackTrace,

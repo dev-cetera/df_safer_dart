@@ -18,7 +18,6 @@ part '_err_model.g.dart';
 // @GenerateDartModel(
 //   fields: {
 //     Field(fieldPath: ['type'], fieldType: String, nullable: false),
-//     Field(fieldPath: ['location'], fieldType: String, nullable: true),
 //     Field(fieldPath: ['error'], fieldType: String, nullable: false),
 //     Field(fieldPath: ['statusCode'], fieldType: int, nullable: true),
 //     Field(fieldPath: ['stackTrace'], fieldType: List<String>, nullable: true),

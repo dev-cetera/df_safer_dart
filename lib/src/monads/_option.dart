@@ -63,7 +63,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Returns the contained value. Throws if this is a [None].
   @override
-  T unwrap({@visibleForTesting int stackLevel = 0});
+  T unwrap();
 
   /// Returns the contained value or a provided fallback.
   @override
@@ -180,7 +180,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap({@visibleForTesting int stackLevel = 0}) => value;
+  T unwrap() => value;
 
   @override
   @pragma('vm:prefer-inline')
@@ -192,13 +192,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) =>
-      Some(mapper(value));
+  Some<R> map<R extends Object>(R Function(T value) mapper) => Some(mapper(value));
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) test) =>
-      test(value) ? this : const None();
+  Option<T> filter(bool Function(T value) test) => test(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -234,7 +232,7 @@ final class Some<T extends Object> extends Option<T> {
       final value1 = transformer?.call(value0) ?? value0 as R;
       return Ok(Option.fromNullable(value1));
     } catch (_) {
-      return Err('Cannot transform $T to $R', stackLevel: 1);
+      return Err('Cannot transform $T to $R');
     }
   }
 
@@ -316,8 +314,8 @@ final class None<T extends Object> extends Option<T> {
   @override
   @protected
   @pragma('vm:prefer-inline')
-  T unwrap({@visibleForTesting int stackLevel = 0}) {
-    throw Err<T>('Called unwrap() on None<$T>.', stackLevel: stackLevel);
+  T unwrap() {
+    throw Err<T>('Called unwrap() on None<$T>.');
   }
 
   @override

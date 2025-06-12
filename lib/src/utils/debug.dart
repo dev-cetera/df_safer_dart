@@ -10,19 +10,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-/// Add `--define=kDebugAssertErr=true` to your `dart run` command or
-/// `--dart-define=kDebugAssertErr=true` to your `flutter run` command to
-/// asserts when an [Err] is created.
-const kDebugAssertErr = bool.fromEnvironment(
-  'kDebugAssertErr',
-  defaultValue: false,
-);
-
-/// Set to `true` to trigger asserts when an [Err] is created.
-bool? debugAssertErr;
-
 /// A constatnt that can be used to check if your app is running in a Dart only
 /// or Flutter environment. It's `true` if `dart.library.ui` is defined and
 /// `false` otherwise.
