@@ -49,9 +49,9 @@ class SafeSequencer {
     _TOnPrevErr? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  }) : _onPrevErr = onPrevErr,
-       _eagerError = eagerError,
-       _buffer = buffer;
+  })  : _onPrevErr = onPrevErr,
+        _eagerError = eagerError,
+        _buffer = buffer;
 
   //
   //
@@ -88,13 +88,16 @@ class SafeSequencer {
   }
 
   FutureOr<void> add(FutureOr<void> Function() handler, {Duration? buffer}) {
-    return addSafe((_) {
-      final value = handler();
-      if (value is FutureOr<Object>) {
-        return value.toResolvable().map((e) => const None());
-      }
-      return const Sync.value(Ok(None()));
-    }, buffer: buffer).unwrap();
+    return addSafe(
+      (_) {
+        final value = handler();
+        if (value is FutureOr<Object>) {
+          return value.toResolvable().map((e) => const None());
+        }
+        return const Sync.value(Ok(None()));
+      },
+      buffer: buffer,
+    ).unwrap();
   }
 
   //
@@ -105,8 +108,7 @@ class SafeSequencer {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    handlers, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
     Duration? buffer,
   }) {
     return handlers
@@ -131,9 +133,7 @@ class SafeSequencer {
             Future<Resolvable<Option<T>>?>.value(handler(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) =>
-                (e.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>()),
+            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
           );
         }).flatten();
       });
@@ -170,8 +170,7 @@ class SafeSequencer {
           return _transfCurrent<T>(_current);
         }
       }
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
