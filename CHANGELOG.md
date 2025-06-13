@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.13]
+
+- Released @ 6/2025 (UTC)
+- feat: Add eagerError option to SafeSequencer
+
 ## [0.13.12]
 
 - Released @ 6/2025 (UTC)
