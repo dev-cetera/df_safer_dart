@@ -30,6 +30,7 @@ class SafeSequencer {
   //
 
   final Duration? _buffer;
+  final _TOnPrevErr? _onPrevErr;
 
   /// The current value or future in the queue.
   Resolvable<Option> get current => _current;
@@ -45,84 +46,114 @@ class SafeSequencer {
 
   /// Creates an [SafeSequencer] with an optional [buffer] for throttling
   /// execution.
-  SafeSequencer({Duration? buffer}) : _buffer = buffer;
+  SafeSequencer({
+    Duration? buffer,
+    _TOnPrevErr? onPrevErr,
+  })  : _buffer = buffer,
+        _onPrevErr = onPrevErr;
 
-  /// Adds multiple [unsafe] functions to the queue for sequential execution.
+  /// Adds multiple [handler] functions to the queue for sequential execution.
   /// See [add].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAll<T extends Object>(
-    Iterable<TAddFunction<T>> unsafe, {
+    Iterable<_TAddFunction<T>> handler, {
     Duration? buffer,
+    _TOnPrevErr? onPrevErr,
   }) {
-    return unsafe
-        .map((e) => add<T>(e, buffer: buffer))
-        .toList(); // Must be a list, not an Iterable so that the map function is immediately executed.
+    return handler
+        .map((e) => add<T>(
+              e,
+              buffer: buffer,
+              onPrevErr: onPrevErr,
+            ))
+        // Must be a list, not an Iterable so that the map function is immediately executed.
+        .toList();
   }
 
-  /// Adds multiple [functions] to the queue for sequential execution. See
+  /// Adds multiple [handlers] to the queue for sequential execution. See
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    functions, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
     Duration? buffer,
+    _TOnPrevErr? onPrevErr,
   }) {
-    return functions
-        .map((e) => addSafe<T>(e, buffer: buffer))
-        .toList(); // Must be a list, not an Iterable so that the map function is immediately executed.
+    return handlers
+        .map(
+          (e) => addSafe<T>(
+            e,
+            buffer: buffer,
+            onPrevErr: onPrevErr,
+          ),
+        )
+        // Must be a list, not an Iterable so that the map function is immediately executed.
+        .toList();
   }
 
-  /// Adds an [unsafe] function to the queue that processes the previous value.
+  /// Adds an [handler] function to the queue that processes the previous value.
   /// Applies an optional [buffer] duration to throttle the execution.
   Resolvable<Option<T>> add<T extends Object>(
-    TAddFunction<T> unsafe, {
+    _TAddFunction<T> handler, {
     Duration? buffer,
+    _TOnPrevErr? onPrevErr,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
-      final temp = unsafe(previous);
-      if (temp is Option<T>?) {
-        return temp ?? const None();
-      }
-      return temp.then((e) => e ?? const None());
-    });
-    return addSafe<T>(fn, buffer: buffer);
+          final temp = handler(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
+        });
+    return addSafe<T>(
+      fn,
+      buffer: buffer,
+      onPrevErr: onPrevErr,
+    );
   }
 
-  /// Adds a [function] to the queue that processes the previous value.
+  /// Adds a [handler] to the queue that processes the previous value.
   /// Applies an optional [buffer] duration to throttle the execution.
   Resolvable<Option<T>> addSafe<T extends Object>(
-    Resolvable<Option<T>>? Function(Result<Option> previous) function, {
+    Resolvable<Option<T>>? Function(Result<Option> previous) handler, {
     Duration? buffer,
+    _TOnPrevErr? onPrevErr,
   }) {
     final buffer1 = buffer ?? _buffer;
     if (buffer1 == null) {
-      return _enqueue<T>(function);
+      return _enqueue<T>(handler, onPrevErr);
     } else {
-      return _enqueue<T>((previous) {
-        return Resolvable(() async {
-          return await Future.wait<dynamic>([
-            Future<Resolvable<Option<T>>?>.value(function(previous)),
-            Future<void>.delayed(buffer1),
-          ]).then(
-            (e) =>
-                (e.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>()),
-          );
-        }).flatten();
-      });
+      return _enqueue<T>(
+        (previous) {
+          return Resolvable(() async {
+            return await Future.wait<dynamic>([
+              Future<Resolvable<Option<T>>?>.value(handler(previous)),
+              Future<void>.delayed(buffer1),
+            ]).then(
+              (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
+            );
+          }).flatten();
+        },
+        onPrevErr,
+      );
     }
   }
 
   /// Eenqueue a [function] without buffering.
   Resolvable<Option<T>> _enqueue<T extends Object>(
     Resolvable<Option<T>>? Function(Result<Option> previous) function,
+    _TOnPrevErr? onPrevErr,
   ) {
+    final onPrevErr1 = onPrevErr ?? _onPrevErr;
     _isEmpty = false;
     // ignore: invalid_use_of_visible_for_testing_member
     final value = _current.value;
     if (value is Future<Result<Option<Object>>>) {
       _current = Async(() async {
-        final temp = function(await value);
+        final awaitedValue = await value;
+        if (awaitedValue.isErr()) {
+          onPrevErr1?.call(awaitedValue.err().unwrap());
+        }
+        final temp = function(awaitedValue);
         if (temp == null) {
           return _current;
         }
@@ -130,8 +161,10 @@ class SafeSequencer {
         return temp;
       }).flatten();
     } else {
-      _current =
-          function(value)?.map((e) {
+      if (value.isErr()) {
+        onPrevErr1?.call(value.err().unwrap());
+      }
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -146,6 +179,6 @@ class SafeSequencer {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef TAddFunction<T extends Object> =
-    TFutureOrOption<T> Function(Result<Option> previous);
+typedef _TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
+typedef _TAddFunction<T extends Object> = _TFutureOrOption<T> Function(Result<Option> previous);
+typedef _TOnPrevErr<T extends Object> = void Function(Err<T> err);
