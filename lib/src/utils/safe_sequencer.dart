@@ -47,8 +47,8 @@ class SafeSequencer {
   /// Creates an [SafeSequencer] with an optional [buffer] for throttling
   /// execution.
   SafeSequencer({Duration? buffer, _TOnPrevErr? onPrevErr})
-    : _buffer = buffer,
-      _onPrevErr = onPrevErr;
+      : _buffer = buffer,
+        _onPrevErr = onPrevErr;
 
   /// Adds multiple [handler] functions to the queue for sequential execution.
   /// See [add].
@@ -68,8 +68,7 @@ class SafeSequencer {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
-    handlers, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
     Duration? buffer,
     _TOnPrevErr? onPrevErr,
   }) {
@@ -87,12 +86,12 @@ class SafeSequencer {
     _TOnPrevErr? onPrevErr,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
-      final temp = handler(previous);
-      if (temp is Option<T>?) {
-        return temp ?? const None();
-      }
-      return temp.then((e) => e ?? const None());
-    });
+          final temp = handler(previous);
+          if (temp is Option<T>?) {
+            return temp ?? const None();
+          }
+          return temp.then((e) => e ?? const None());
+        });
     return addSafe<T>(fn, buffer: buffer, onPrevErr: onPrevErr);
   }
 
@@ -107,18 +106,19 @@ class SafeSequencer {
     if (buffer1 == null) {
       return _enqueue<T>(handler, onPrevErr);
     } else {
-      return _enqueue<T>((previous) {
-        return Resolvable(() async {
-          return await Future.wait<dynamic>([
-            Future<Resolvable<Option<T>>?>.value(handler(previous)),
-            Future<void>.delayed(buffer1),
-          ]).then(
-            (e) =>
-                (e.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>()),
-          );
-        }).flatten();
-      }, onPrevErr);
+      return _enqueue<T>(
+        (previous) {
+          return Resolvable(() async {
+            return await Future.wait<dynamic>([
+              Future<Resolvable<Option<T>>?>.value(handler(previous)),
+              Future<void>.delayed(buffer1),
+            ]).then(
+              (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
+            );
+          }).flatten();
+        },
+        onPrevErr,
+      );
     }
   }
 
@@ -148,8 +148,7 @@ class SafeSequencer {
       if (value.isErr()) {
         onPrevErr1?.call(value.err().unwrap());
       }
-      _current =
-          function(value)?.map((e) {
+      _current = function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
@@ -165,6 +164,5 @@ class SafeSequencer {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef _TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
-typedef _TAddFunction<T extends Object> =
-    _TFutureOrOption<T> Function(Result<Option> previous);
+typedef _TAddFunction<T extends Object> = _TFutureOrOption<T> Function(Result<Option> previous);
 typedef _TOnPrevErr<T extends Object> = void Function(Err<T> err);
