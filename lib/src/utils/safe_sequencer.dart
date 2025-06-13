@@ -29,8 +29,9 @@ class SafeSequencer {
   //
   //
 
-  final Duration? _buffer;
   final _TOnPrevErr? _onPrevErr;
+  final bool _eagerError;
+  final Duration? _buffer;
 
   /// The current value or future in the queue.
   Resolvable<Option> get current => _current;
@@ -44,11 +45,13 @@ class SafeSequencer {
   //
   //
 
-  /// Creates an [SafeSequencer] with an optional [buffer] for throttling
-  /// execution.
-  SafeSequencer({Duration? buffer, _TOnPrevErr? onPrevErr})
-      : _buffer = buffer,
-        _onPrevErr = onPrevErr;
+  SafeSequencer({
+    _TOnPrevErr? onPrevErr,
+    bool eagerError = false,
+    Duration? buffer,
+  })  : _onPrevErr = onPrevErr,
+        _eagerError = eagerError,
+        _buffer = buffer;
 
   /// Adds multiple [handler] functions to the queue for sequential execution.
   /// See [add].
@@ -56,10 +59,9 @@ class SafeSequencer {
   List<Resolvable<Option<T>>> addAll<T extends Object>(
     Iterable<_TAddFunction<T>> handler, {
     Duration? buffer,
-    _TOnPrevErr? onPrevErr,
   }) {
     return handler
-        .map((e) => add<T>(e, buffer: buffer, onPrevErr: onPrevErr))
+        .map((e) => add<T>(e, buffer: buffer))
         // Must be a list, not an Iterable so that the map function is immediately executed.
         .toList();
   }
@@ -70,10 +72,9 @@ class SafeSequencer {
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
     Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
     Duration? buffer,
-    _TOnPrevErr? onPrevErr,
   }) {
     return handlers
-        .map((e) => addSafe<T>(e, buffer: buffer, onPrevErr: onPrevErr))
+        .map((e) => addSafe<T>(e, buffer: buffer))
         // Must be a list, not an Iterable so that the map function is immediately executed.
         .toList();
   }
@@ -83,7 +84,6 @@ class SafeSequencer {
   Resolvable<Option<T>> add<T extends Object>(
     _TAddFunction<T> handler, {
     Duration? buffer,
-    _TOnPrevErr? onPrevErr,
   }) {
     Resolvable<Option<T>> fn(Result<Option> previous) => Resolvable(() {
           final temp = handler(previous);
@@ -92,7 +92,7 @@ class SafeSequencer {
           }
           return temp.then((e) => e ?? const None());
         });
-    return addSafe<T>(fn, buffer: buffer, onPrevErr: onPrevErr);
+    return addSafe<T>(fn, buffer: buffer);
   }
 
   /// Adds a [handler] to the queue that processes the previous value.
@@ -100,11 +100,10 @@ class SafeSequencer {
   Resolvable<Option<T>> addSafe<T extends Object>(
     Resolvable<Option<T>>? Function(Result<Option> previous) handler, {
     Duration? buffer,
-    _TOnPrevErr? onPrevErr,
   }) {
     final buffer1 = buffer ?? _buffer;
     if (buffer1 == null) {
-      return _enqueue<T>(handler, onPrevErr);
+      return _enqueue<T>(handler);
     } else {
       return _enqueue<T>(
         (previous) {
@@ -117,7 +116,6 @@ class SafeSequencer {
             );
           }).flatten();
         },
-        onPrevErr,
       );
     }
   }
@@ -125,9 +123,7 @@ class SafeSequencer {
   /// Eenqueue a [function] without buffering.
   Resolvable<Option<T>> _enqueue<T extends Object>(
     Resolvable<Option<T>>? Function(Result<Option> previous) function,
-    _TOnPrevErr? onPrevErr,
   ) {
-    final onPrevErr1 = onPrevErr ?? _onPrevErr;
     _isEmpty = false;
     // ignore: invalid_use_of_visible_for_testing_member
     final value = _current.value;
@@ -135,7 +131,10 @@ class SafeSequencer {
       _current = Async(() async {
         final awaitedValue = await value;
         if (awaitedValue.isErr()) {
-          onPrevErr1?.call(awaitedValue.err().unwrap());
+          _onPrevErr?.call(awaitedValue.err().unwrap());
+          if (_eagerError) {
+            return _current;
+          }
         }
         final temp = function(awaitedValue);
         if (temp == null) {
@@ -146,7 +145,10 @@ class SafeSequencer {
       }).flatten();
     } else {
       if (value.isErr()) {
-        onPrevErr1?.call(value.err().unwrap());
+        _onPrevErr?.call(value.err().unwrap());
+        if (_eagerError) {
+          return _transfCurrent<T>(_current);
+        }
       }
       _current = function(value)?.map((e) {
             _isEmpty = true;
@@ -154,14 +156,20 @@ class SafeSequencer {
           }) ??
           _current;
     }
-    return _current.transf((e) => e.transf((e) => e as T).unwrap());
+    return _transfCurrent<T>(_current);
   }
 
   /// Retrieves the last value in the queue.
+  @pragma('vm:prefer-inline')
   Resolvable<Object> get last => addSafe((e) => Sync.value(e));
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+@pragma('vm:prefer-inline')
+Resolvable<Option<T>> _transfCurrent<T extends Object>(Resolvable<Option<Object>> input) {
+  return input.transf((e) => e.transf((e) => e as T).unwrap());
+}
 
 typedef _TFutureOrOption<T extends Object> = FutureOr<Option<T>?>;
 typedef _TAddFunction<T extends Object> = _TFutureOrOption<T> Function(Result<Option> previous);
