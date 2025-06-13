@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.12]
+
+- Released @ 6/2025 (UTC)
+- feat: Add onPrevErr to SafeSequencer
+
 ## [0.13.11]
 
 - Released @ 6/2025 (UTC)
