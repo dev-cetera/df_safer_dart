@@ -12,7 +12,7 @@
 
 name: df_safer_dart
 description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
-version: 0.13.13
+version: 0.13.14
 homepage: https://dev-cetera.com/
 repository: https://github.com/dev-cetera/df_safer_dart
 funding:
@@ -41,4 +41,3 @@ dependencies:
 
 dev_dependencies:
   lints: ^6.0.0
-  test: ^1.24.0

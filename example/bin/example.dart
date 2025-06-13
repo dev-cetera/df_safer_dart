@@ -46,21 +46,20 @@ Async<Option<String>> getUserNotificationSound(int userId) {
                 .flatMap((config) => letAsOrNone<Map>(config['notifications']))
                 // d. Finally, access `sound`.
                 .flatMap(
-                  (notifications) =>
-                      letAsOrNone<String>(notifications['sound']),
+                  (notifications) => letAsOrNone<String>(notifications['sound']),
                 ),
       );
 }
 
 /// Async - Use Case: An operation over time that might fail.
 Async<String> fetchUserData(int userId) => Async(() async {
-  await Future.delayed(const Duration(milliseconds: 10));
-  if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
-  if (userId == 2) return '{"config":{"notifications":{}}}';
-  if (userId == 3) return '{"config":{}}';
-  if (userId == 4) return '{"config": "bad_data"}';
-  throw Err('User Not Found');
-});
+      await Future.delayed(const Duration(milliseconds: 10));
+      if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
+      if (userId == 2) return '{"config":{"notifications":{}}}';
+      if (userId == 3) return '{"config":{}}';
+      if (userId == 4) return '{"config": "bad_data"}';
+      throw Err('User Not Found');
+    });
 
 /// Sync - Use Case: An immediate operation that might fail (e.g., parsing).
 Sync<Map<String, dynamic>> parseJson(String json) =>
@@ -82,24 +81,24 @@ void main() {
   // The `_` in `add((_) => ...)` indicates we don't care about the result
   // of the *previous* operation in the queue, as our tasks are independent.
   for (final id in userIds) {
-    processor.add((_) {
+    processor.add(() async {
       // 1. Run the main pipeline for the current user ID.
-      return getUserNotificationSound(id)
+      await getUserNotificationSound(id)
           // 2. Chain a final `map` to format the result for display.
           //    This map only runs if the pipeline was successful.
           .map((option) => formatResult(Ok(option)))
           // 3. Use `match` to handle the final `Result` (Ok or Err).
           //    This is the final "exit" from the monad for this one operation.
           .match(
-            (successString) {
-              print('User $id -> $successString');
-              return NONE;
-            },
-            (err) {
-              print('User $id -> ${formatResult(err.transf())}');
-              return NONE;
-            },
-          );
+        (successString) {
+          print('User $id -> $successString');
+          return NONE;
+        },
+        (err) {
+          print('User $id -> ${formatResult(err.transf())}');
+          return NONE;
+        },
+      );
     });
   }
 }
