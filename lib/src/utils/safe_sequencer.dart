@@ -49,9 +49,9 @@ class SafeSequencer {
     _TOnPrevErr? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  })  : _onPrevErr = onPrevErr,
-        _eagerError = eagerError,
-        _buffer = buffer;
+  }) : _onPrevErr = onPrevErr,
+       _eagerError = eagerError,
+       _buffer = buffer;
 
   //
   //
@@ -87,20 +87,14 @@ class SafeSequencer {
   /// Adds a [handler] to the queue that processes the previous value.
   ///
   /// The [buffer] duration can be used to throttle the execution.
-  FutureOr<void> add(
-    FutureOr<void> Function() handler, {
-    Duration? buffer,
-  }) {
-    final result = addSafe(
-      (_) {
-        final value = handler();
-        if (value is FutureOr<Object>) {
-          return value.toResolvable().map((e) => const None());
-        }
-        return const Sync.unsafe(Ok(None()));
-      },
-      buffer: buffer,
-    ).value;
+  FutureOr<void> add(FutureOr<void> Function() handler, {Duration? buffer}) {
+    final result = addSafe((_) {
+      final value = handler();
+      if (value is FutureOr<Object>) {
+        return value.toResolvable().map((e) => const None());
+      }
+      return const Sync.unsafe(Ok(None()));
+    }, buffer: buffer).value;
     if (result is Future<Result<Option<Object>>>) {
       return result.then<void>((e) {
         if (e.isErr()) {
@@ -118,7 +112,8 @@ class SafeSequencer {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
+    handlers, {
     Duration? buffer,
   }) {
     return handlers
@@ -144,7 +139,9 @@ class SafeSequencer {
             Future<Resolvable<Option<T>>?>.value(handler(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
+            (e) =>
+                (e.first as Resolvable<Option<T>>?) ??
+                Resolvable(() => None<T>()),
           );
         }).flatten();
       });
@@ -180,7 +177,8 @@ class SafeSequencer {
           return _transfCurrent<T>(_current);
         }
       }
-      _current = function(value)?.map((e) {
+      _current =
+          function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
