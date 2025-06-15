@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.3]
+
+- Released @ 6/2025 (UTC)
+- chore: Fix example code paths
+
 ## [0.14.2]
 
 - Released @ 6/2025 (UTC)
