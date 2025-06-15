@@ -183,7 +183,8 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) predicate) => predicate(value) ? this : const None();
+  Option<T> filter(bool Function(T value) predicate) =>
+      predicate(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')

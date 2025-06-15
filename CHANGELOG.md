@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.6]
+
+- Released @ 6/2025 (UTC)
+- chore: Do preparation for linter rules and improve documentation
+
 ## [0.14.5]
 
 - Released @ 6/2025 (UTC)
