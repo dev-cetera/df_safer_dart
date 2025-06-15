@@ -8,6 +8,10 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 
 ---
 
+## Read this Article on Medium.com
+
+[An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451)
+
 ## Summary
 
 This package, inspired by [Rust](<https://en.wikipedia.org/wiki/Rust_(programming_language)>) and [functional programming](https://en.wikipedia.org/wiki/Functional_programming), aims to enhance the structure, safety and debuggability of your applications by leveraging [monads](<https://en.wikipedia.org/wiki/Monad_(functional_programming)>) and other advanced mechanisms.

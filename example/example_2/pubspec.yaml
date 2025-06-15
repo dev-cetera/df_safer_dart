@@ -1,12 +1,10 @@
-name: df_safer_dart_example
+name: df_safer_dart_example_2
 publish_to: none
-
 environment:
   sdk: ">=3.5.0 <4.0.0"
-
 dependencies:
   df_safer_dart:
-    path: ../
+    path: ../../
 
 dev_dependencies:
   lints: ^6.0.0
