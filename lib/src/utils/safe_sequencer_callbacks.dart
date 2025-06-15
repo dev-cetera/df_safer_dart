@@ -39,15 +39,13 @@ class SafeSequencerCallbacks<TParam extends Object> {
   //
   //
 
-  bool callbackExists(dynamic callbackKey) =>
-      _callbacks.containsKey(callbackKey);
+  bool callbackExists(dynamic callbackKey) => _callbacks.containsKey(callbackKey);
 
   //
   //
   //
 
-  bool removeCallback(Object callbackKey) =>
-      _callbacks.remove(callbackKey) != null;
+  bool removeCallback(Object callbackKey) => _callbacks.remove(callbackKey) != null;
 
   //
   //
@@ -106,18 +104,18 @@ class SafeSequencerCallbacks<TParam extends Object> {
         }
       }
     }
-    return _seq
-        .addSafe((_) {
-          return Sync.value(Ok(Some(results)));
-        })
-        .map((e) => e.unwrap());
+    return _seq.addSafe((_) {
+      return Sync.value(Ok(Some(results)));
+    }).map((e) => e.unwrap());
   }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef TSafeCallback<T> =
-    Resolvable<Option<Object>> Function(Object callbackKey, T param);
+typedef TSafeCallback<T> = Resolvable<Option<Object>> Function(
+  Object callbackKey,
+  T param,
+);
 
 class _CallbackRemover {
   final void Function() _remover;

@@ -54,11 +54,11 @@ final class Here {
 
   /// A string representing the basepath location of the call.
   Option<String> get basepath => call().map(
-    (e) => [
-      p.basenameWithoutExtension(e.library),
-      if (e.member != null) e.member,
-    ].join('/'),
-  );
+        (e) => [
+          p.basenameWithoutExtension(e.library),
+          if (e.member != null) e.member,
+        ].join('/'),
+      );
 
   /// A string representing the location of the call.
   Option<String> get location => call().map((e) => e.location);
