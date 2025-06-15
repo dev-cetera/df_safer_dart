@@ -39,17 +39,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   }) {
     final result = awaitAllFuturesInHere();
     if (result is Future<T>) {
-      return Async(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Async(() => result, onError: onError, onFinalize: onFinalize);
     } else {
-      return Sync(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Sync(() => result, onError: onError, onFinalize: onFinalize);
     }
   }
 
@@ -211,11 +203,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(this.value)
-      : assert(
-          !_isSubtype<T, Future<Object>>(),
-          '$T must never be a Future.',
-        ),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates a [Sync] executing a synchronous function [noFuturesInHere].
   ///
@@ -228,10 +217,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     Err<T> Function(Object? error)? onError,
     void Function()? onFinalize,
   }) {
-    assert(
-      !_isSubtype<T, Future<Object>>(),
-      '$T must never be a Future.',
-    );
+    assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     return Sync.value(() {
       try {
         return Ok(noFuturesInHere());
@@ -446,11 +432,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(this.value)
-      : assert(
-          !_isSubtype<T, Future<Object>>(),
-          '$T must never be a Future.',
-        ),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates an [Async] by executing an asynchronous function
   /// [awaitAllFuturesInHere].
@@ -464,10 +447,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     Err<T> Function(Object? error)? onError,
     void Function()? onFinalize,
   }) {
-    assert(
-      !_isSubtype<T, Future<Object>>(),
-      '$T must never be a Future.',
-    );
+    assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     return Async.value(() async {
       try {
         return Ok<T>(await awaitAllFuturesInHere());

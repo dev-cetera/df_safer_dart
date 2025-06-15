@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.0]
+
+- Released @ 6/2025 (UTC)
+- breaking: Add robustness to package
+
 ## [0.13.14]
 
 - Released @ 6/2025 (UTC)

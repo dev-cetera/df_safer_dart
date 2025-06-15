@@ -225,7 +225,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+  Result<R> map<R extends Object>(R Function(T value) mapper) =>
+      Ok(mapper(value));
 
   @override
   Result<R> transf<R extends Object>([R Function(T e)? transformer]) {
@@ -284,9 +285,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-      : statusCode = Option.fromNullable(statusCode),
-        stackTrace = Trace.current(),
-        super._();
+    : statusCode = Option.fromNullable(statusCode),
+      stackTrace = Trace.current(),
+      super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -385,16 +386,14 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() =>
+      error is E ? Some(error as E) : NONE;
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(
-      error,
-      statusCode: statusCode.orNull(),
-    );
+    return Err(error, statusCode: statusCode.orNull());
   }
 
   /// Converts this [Err] to a data model for serialization.
