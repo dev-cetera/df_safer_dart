@@ -115,7 +115,8 @@ class SafeSequencer {
   /// [addSafe].
   @pragma('vm:prefer-inline')
   List<Resolvable<Option<T>>> addAllSafe<T extends Object>(
-    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)> handlers, {
+    Iterable<Resolvable<Option<T>>? Function(Result<Option> previous)>
+        handlers, {
     Duration? buffer,
   }) {
     return handlers
@@ -141,7 +142,9 @@ class SafeSequencer {
             Future<Resolvable<Option<T>>?>.value(handler(previous)),
             Future<void>.delayed(buffer1),
           ]).then(
-            (e) => (e.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>()),
+            (e) =>
+                (e.first as Resolvable<Option<T>>?) ??
+                Resolvable(() => None<T>()),
           );
         }).flatten();
       });
