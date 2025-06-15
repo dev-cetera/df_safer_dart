@@ -15,43 +15,47 @@ part of 'monad.dart';
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A [Monad] that represents a value which can be resolved either synchronously
-/// [Sync] or asynchronously [Async]. The value of a [Sync] is never a [Future]
-/// while the value of an [Async] is always a [Future].
+/// [Sync] or asynchronously [Async].
+///
+/// The [value] of a [Sync] is never a [Future] while the value of an [Async]
+/// is always a [Future].
 sealed class Resolvable<T extends Object> extends Monad<T> {
-  /// The underlying value, which is a `FutureOr` of a [Result].
+  const Resolvable.unsafe(this.value);
+
+  /// The contained value.
   final FutureOr<Result<T>> value;
 
-  const Resolvable.value(this.value);
-
-  /// Creates a [Sync] or [Async] depending on the return type of [unsafe].
+  /// Creates a [Sync] or [Async] depending on the return type of
+  /// [awaitAllFuturesInHere].
+  ///
+  /// # IMPORTANT:
+  ///
+  /// Always all futures witin [awaitAllFuturesInHere] to ensure errors are be
+  /// caught and propagated.
   factory Resolvable(
-    FutureOr<T> Function() unsafe, {
+    FutureOr<T> Function() awaitAllFuturesInHere, {
     Err<T> Function(Object? error)? onError,
     void Function()? onFinalize,
   }) {
-    final result = unsafe();
+    final result = awaitAllFuturesInHere();
     if (result is Future<T>) {
-      return Async(() => result, onError: onError, onFinalize: onFinalize);
+      return Async(
+        () => result,
+        onError: onError,
+        onFinalize: onFinalize,
+      );
     } else {
-      return Sync(() => result, onError: onError, onFinalize: onFinalize);
+      return Sync(
+        () => result,
+        onError: onError,
+        onFinalize: onFinalize,
+      );
     }
   }
 
-  /// Returns this as an [Resolvable].
+  /// Returns `this` as a base [Resolvable] type.
   @pragma('vm:prefer-inline')
   Resolvable<T> asResolvable() => this;
-
-  /// Converts this [Resolvable] to an [Async].
-  Async<T> asAsync();
-
-  /// Returns this [Resolvable] as a [Some].
-  Some<Resolvable<T>> asSome();
-
-  /// Returns this [Resolvable] as a [None].
-  None<Resolvable<T>> asNone();
-
-  /// Returns this [Resolvable] as an [Ok].
-  Ok<Resolvable<T>> asOk();
 
   /// Returns `true` if this is a [Sync] instance.
   bool isSync();
@@ -59,49 +63,36 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Returns `true` if this is an [Async] instance.
   bool isAsync();
 
-  /// Performs a side-effect if this is a [Sync].
-  Resolvable<T> ifSync(void Function(Sync<T> sync) unsafe);
-
-  /// Performs a side-effect if this is an [Async].
-  Resolvable<T> ifAsync(void Function(Async<T> async) unsafe);
-
-  /// Returns a [Result] containing the [Sync] instance if it is one.
+  /// Safely gets the [Sync] instance.
+  /// Returns an [Ok] on [Sync], or an [Err] on [Async].
   Result<Sync<T>> sync();
 
-  /// Returns a [Result] containing the [Async] instance if it is one.
+  /// Safely gets the [Async] instance.
+  /// Returns an [Ok] on [Async], or an [Err] on [Sync].
   Result<Async<T>> async();
 
-  /// Returns the contained [Ok] value, resolving the [Future] if necessary.
-  @override
-  FutureOr<T> unwrap();
+  /// Performs a side-effect if this is a [Sync].
+  Resolvable<T> ifSync(void Function(Sync<T> sync) noFuturesInHere);
 
-  @override
-  FutureOr<T> unwrapOr(T fallback);
+  /// Performs a side-effect if this is an [Async].
+  Resolvable<T> ifAsync(void Function(Async<T> async) noFuturesInHere);
 
-  @override
+  /// Unsafely gets the [Sync] instance. Throws if not a [Sync].
   @pragma('vm:prefer-inline')
-  FutureOr<T> unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+  Sync<T> unwrapSync() => sync().unwrap();
 
-  /// Unwraps the [Sync] instance and returns its value. Throws if not [Sync].
+  /// Unsafely gets the [Async] instance. Throws if not an [Async].
   @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync({int stackLevel = 0}) => sync().unwrap();
+  Async<T> unwrapAsync() => async().unwrap();
 
-  /// Unwraps the [Async] instance and returns its value. Throws if not [Async].
-  @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync({int stackLevel = 0}) => async().unwrap();
-
-  /// Maps the contained [Ok] value to a new value.
-  @override
-  Resolvable<R> map<R extends Object>(R Function(T value) unsafe);
-
-  /// Chains [Resolvable] computations by applying a function to the inner [Result].
+  /// Maps the inner [Result] of this [Resolvable] using `mapper`.
   Resolvable<R> resultMap<R extends Object>(
     Result<R> Function(Result<T> value) mapper,
   );
 
   /// Maps the contained [Ok] value using a function that returns a `FutureOr`.
   Resolvable<R> mapFutureOr<R extends Object>(
-    FutureOr<R> Function(T value) unsafe,
+    FutureOr<R> Function(T value) noFuturesInHere,
   );
 
   /// Handles [Sync] and [Async] cases to produce a new [Resolvable].
@@ -110,48 +101,62 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     Resolvable<Object>? Function(Async<T> async) onAsync,
   );
 
-  /// Exhaustively handles [Ok] and [Err] cases, returning a final value.
+  /// Exhaustively handles the inner [Ok] and [Err] cases, returning a new
+  /// [Resolvable].
   Resolvable<Object> foldResult(
     Result<Object>? Function(Ok<T> ok) onOk,
     Result<Object>? Function(Err<T> err) onErr,
   );
 
-  /// Exhaustively handles [Ok] and [Err] cases, returning a final value.
+  /// Exhaustively handles the inner [Ok] and [Err] cases, returning a value `R`.
   FutureOr<R> match<R extends Object>(
     R Function(T value) onOk,
     R Function(Err<T> err) onErr,
   );
 
-  /// Converts this [Resolvable] to a [Sync]. Throws if it's an [Async].
+  /// Unsafely converts this [Resolvable] to a [Sync]. Throws if it's an [Async].
   Sync<T> toSync();
 
   /// Converts this [Resolvable] to an [Async].
   Async<T> toAsync();
 
-  /// Returns the contained [Ok] value or `null`, resolving the [Future] if necessary.
+  /// Returns the contained [Ok] value or `null`, resolving any [Future].
   Future<T?> orNull();
 
-  /// Returns this if it's [Sync], otherwise returns [other].
+  /// Returns this if it's [Sync], otherwise returns `other`.
   Resolvable<Object> syncOr<R extends Object>(Resolvable<R> other);
 
-  /// Returns this if it's [Async], otherwise returns [other].
+  /// Returns this if it's [Async], otherwise returns `other`.
   Resolvable<Object> asyncOr<R extends Object>(Resolvable<R> other);
 
-  /// Returns this if it's [Ok], otherwise returns [other].
+  /// Returns this if it contains an [Ok], otherwise returns `other`.
   Resolvable<Object> okOr<R extends Object>(Resolvable<R> other);
 
-  /// Returns this if it's [Err], otherwise returns [other].
+  /// Returns this if it contains an [Err], otherwise returns `other`.
   Resolvable<Object> errOr<R extends Object>(Resolvable<R> other);
 
-  /// Transforms the contained [Ok] value's type from `T` to `R`.
-  @override
-  Resolvable<R> transf<R extends Object>([R Function(T e)? transformer]);
-
-  /// Returns the value as an [Ok] if possible or [None] if there's an error.
+  /// Safely gets the [Ok] instance, resolving any [Future].
   FutureOr<Option<Ok<T>>> ok();
 
-  /// Returns the [Err] if possible or [None] if there is a value.
+  /// Safely gets the [Err] instance, resolving any [Future].
   FutureOr<Option<Err<T>>> err();
+
+  @override
+  FutureOr<T> unwrap();
+
+  @override
+  FutureOr<T> unwrapOr(T fallback);
+
+  @override
+  @pragma('vm:prefer-inline')
+  FutureOr<T> unwrapOrElse(T Function() ensureThisDoesNotThrow) =>
+      unwrapOr(ensureThisDoesNotThrow());
+
+  @override
+  Resolvable<R> map<R extends Object>(R Function(T value) noFuturesInHere);
+
+  @override
+  Resolvable<R> transf<R extends Object>([R Function(T e)? transformer]);
 
   @override
   @pragma('vm:prefer-inline')
@@ -175,7 +180,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  List<Object?> get props => [this.value];
+  List<Object?> get props => [value];
 
   @override
   @pragma('vm:prefer-inline')
@@ -184,25 +189,52 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represnets a [Resolvable] that holds a synchronous [Result].
-/// It's [value] is never a [Future].
+/// A [Monad] that represents a [Resolvable] that holds a synchronous [Result].
+///
+/// The contained [value] is never a [Future].
+///
+/// # IMPORTANT:
+///
+/// Do not use any Futures in the constructor [Sync.new] to ensure errors are
+/// properly caught and propagated.
 final class Sync<T extends Object> extends Resolvable<T> {
   @override
   // ignore: overridden_fields
   final Result<T> value;
 
-  /// Creates a [Sync] with a pre-computed [Result].
-  const Sync.value(this.value) : super.value(value);
+  @protected
+  const Sync.unsafe(this.value) : super.unsafe(value);
 
-  /// Creates a [Sync] by executing a synchronous function [unsafe].
+  /// Creates a [Sync] with a pre-computed [Result].
+  ///
+  /// # IMPORTANT
+  ///
+  /// [T] must never be a [Future].
+  Sync.value(this.value)
+      : assert(
+          !_isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
+        super.unsafe(value);
+
+  /// Creates a [Sync] executing a synchronous function [noFuturesInHere].
+  ///
+  /// # IMPORTANT:
+  ///
+  /// Do not use any Futures in [noFuturesInHere] to ensure errors are be
+  /// caught and propagated.
   factory Sync(
-    T Function() unsafe, {
+    T Function() noFuturesInHere, {
     Err<T> Function(Object? error)? onError,
     void Function()? onFinalize,
   }) {
+    assert(
+      !_isSubtype<T, Future<Object>>(),
+      '$T must never be a Future.',
+    );
     return Sync.value(() {
       try {
-        return Ok(unsafe());
+        return Ok(noFuturesInHere());
       } on Err catch (e) {
         return e.transfErr<T>();
       } catch (error) {
@@ -222,42 +254,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> asAsync() => Async.value(Future.value(value));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Sync<T>> asSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Sync<T>> asNone() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Sync<T>> asOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
   bool isSync() => true;
 
   @override
   @pragma('vm:prefer-inline')
   bool isAsync() => false;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<T> ifSync(void Function(Sync<T> sync) unsafe) {
-    try {
-      unsafe(this);
-      return this;
-    } catch (error) {
-      return Sync.value(Err(error));
-    }
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<T> ifAsync(void Function(Async<T> async) unsafe) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -271,31 +272,33 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => value.unwrap();
-
-  @override
-  T unwrapOr(T fallback) => value.unwrapOr(fallback);
+  Sync<T> ifSync(void Function(Sync<T> sync) noFuturesInHere) {
+    try {
+      noFuturesInHere(this);
+      return this;
+    } catch (error) {
+      return Sync.value(Err(error));
+    }
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<R> map<R extends Object>(R Function(T value) unsafe) {
-    return Sync(() => value.map((e) => unsafe(e)).unwrap());
-  }
+  Sync<T> ifAsync(void Function(Async<T> async) noFuturesInHere) => this;
 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> resultMap<R extends Object>(
     Result<R> Function(Result<T> value) mapper,
   ) {
-    return Sync.value(mapper(value));
+    return Sync(() => mapper(value).unwrap());
   }
 
   @override
   @pragma('vm:prefer-inline')
   Resolvable<R> mapFutureOr<R extends Object>(
-    FutureOr<R> Function(T value) unsafe,
+    FutureOr<R> Function(T value) noFuturesInHere,
   ) {
-    return Resolvable(() => unsafe(value.unwrap()));
+    return Resolvable(() => noFuturesInHere(value.unwrap()));
   }
 
   @override
@@ -367,6 +370,27 @@ final class Sync<T extends Object> extends Resolvable<T> {
   }
 
   @override
+  @pragma('vm:prefer-inline')
+  Option<Ok<T>> ok() => value.ok();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<Err<T>> err() => value.err();
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => value.unwrap();
+
+  @override
+  T unwrapOr(T fallback) => value.unwrapOr(fallback);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<R> map<R extends Object>(R Function(T value) noFuturesInHere) {
+    return Sync(() => value.map((e) => noFuturesInHere(e)).unwrap());
+  }
+
+  @override
   Sync<R> transf<R extends Object>([R Function(T e)? transformer]) {
     return Sync(() {
       final okOrErr = value.transf<R>(transformer);
@@ -376,14 +400,6 @@ final class Sync<T extends Object> extends Resolvable<T> {
       return okOrErr.unwrap();
     });
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<Ok<T>> ok() => value.ok();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Option<Err<T>> err() => value.err();
 
   @override
   @pragma('vm:prefer-inline')
@@ -408,25 +424,53 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents a [Resolvable] that holds an asynchronous
-/// [Result]. It's [value] is always a [Future].
+/// A [Monad] that represents a [Resolvable] that holds an asynchronous [Result].
+///
+/// The contained [value] is always a [Future].
+///
+/// # IMPORTANT:
+///
+/// Await all Futures in the constructor [Async.new] to ensure errors are
+/// properly caught and propagated.
 final class Async<T extends Object> extends Resolvable<T> {
   @override
   // ignore: overridden_fields
   final Future<Result<T>> value;
 
-  /// Creates an [Async] with a [Future] of a [Result].
-  const Async.value(this.value) : super.value(value);
+  @protected
+  const Async.unsafe(this.value) : super.unsafe(value);
 
-  /// Creates an [Async] by executing an asynchronous function [unsafe].
+  /// Creates an [Async] with a pre-computed [Future] of a [Result].
+  ///
+  /// # IMPORTANT
+  ///
+  /// [T] must never be a [Future].
+  Async.value(this.value)
+      : assert(
+          !_isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
+        super.unsafe(value);
+
+  /// Creates an [Async] by executing an asynchronous function
+  /// [awaitAllFuturesInHere].
+  ///
+  /// # IMPORTANT:
+  ///
+  /// Always all futures witin [awaitAllFuturesInHere] to ensure errors are be
+  /// caught and propagated.
   factory Async(
-    Future<T> Function() unsafe, {
+    Future<T> Function() awaitAllFuturesInHere, {
     Err<T> Function(Object? error)? onError,
     void Function()? onFinalize,
   }) {
+    assert(
+      !_isSubtype<T, Future<Object>>(),
+      '$T must never be a Future.',
+    );
     return Async.value(() async {
       try {
-        return Ok<T>(await unsafe());
+        return Ok<T>(await awaitAllFuturesInHere());
       } on Err catch (e) {
         return e.transfErr<T>();
       } catch (error) {
@@ -446,42 +490,11 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> asAsync() => this;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Async<T>> asSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Async<T>> asNone() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Async<T>> asOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
   bool isSync() => false;
 
   @override
   @pragma('vm:prefer-inline')
   bool isAsync() => true;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<T> ifSync(void Function(Sync<T> async) unsafe) => this;
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<T> ifAsync(void Function(Async<T> async) unsafe) {
-    try {
-      unsafe(this);
-      return this;
-    } catch (error) {
-      return Async.value(Future.value(Err(error)));
-    }
-  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -495,17 +508,17 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap() {
-    return value.then((e) => e.unwrap());
-  }
-
-  @override
-  FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
+  Async<T> ifSync(void Function(Sync<T> async) noFuturesInHere) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> map<R extends Object>(R Function(T value) unsafe) {
-    return Async.value(value.then((e) => e.map(unsafe)));
+  Async<T> ifAsync(void Function(Async<T> async) noFuturesInHere) {
+    try {
+      noFuturesInHere(this);
+      return this;
+    } catch (error) {
+      return Async.value(Future.value(Err(error)));
+    }
   }
 
   @override
@@ -527,8 +540,10 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) unsafe) {
-    return Async(() async => unsafe((await value).unwrap()));
+  Async<R> mapFutureOr<R extends Object>(
+    FutureOr<R> Function(T value) noFuturesInHere,
+  ) {
+    return Async(() async => noFuturesInHere((await value).unwrap()));
   }
 
   @override
@@ -577,17 +592,6 @@ final class Async<T extends Object> extends Resolvable<T> {
   Future<T?> orNull() => value.then((e) => e.orNull());
 
   @override
-  Async<R> transf<R extends Object>([R Function(T e)? transformer]) {
-    return Async(() async {
-      final okOrErr = (await value).transf<R>(transformer);
-      if (okOrErr.isErr()) {
-        throw okOrErr;
-      }
-      return okOrErr.unwrap();
-    });
-  }
-
-  @override
   @pragma('vm:prefer-inline')
   Resolvable<R> syncOr<R extends Object>(Resolvable<R> other) => other;
 
@@ -599,7 +603,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Async<Object> okOr<R extends Object>(Resolvable<R> other) {
     return Async(() async {
-      final awaitedValue = await this.value;
+      final awaitedValue = await value;
       if (awaitedValue.isOk()) {
         return awaitedValue;
       }
@@ -611,7 +615,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Async<Object> errOr<R extends Object>(Resolvable<R> other) {
     return Async(() async {
-      final awaitedValue = await this.value;
+      final awaitedValue = await value;
       if (awaitedValue.isErr()) {
         return awaitedValue;
       }
@@ -626,6 +630,32 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Future<Option<Err<T>>> err() => value.then((e) => e.err());
+
+  @override
+  @pragma('vm:prefer-inline')
+  Future<T> unwrap() {
+    return value.then((e) => e.unwrap());
+  }
+
+  @override
+  FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<R> map<R extends Object>(R Function(T value) noFuturesInHere) {
+    return Async.value(value.then((e) => e.map(noFuturesInHere)));
+  }
+
+  @override
+  Async<R> transf<R extends Object>([R Function(T e)? transformer]) {
+    return Async(() async {
+      final okOrErr = (await value).transf<R>(transformer);
+      if (okOrErr.isErr()) {
+        throw okOrErr;
+      }
+      return okOrErr.unwrap();
+    });
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -647,3 +677,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Async<Async<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 }
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+@pragma('vm:prefer-inline')
+bool _isSubtype<TChild, TParent>() => <TChild>[] is List<TParent>;

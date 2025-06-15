@@ -32,7 +32,7 @@ extension ToSafeStreamExtension<T extends Object> on Stream<T> {
         },
         handleError: (error, stackTrace, sink) {
           if (error is Err) {
-            sink.add(error.transf());
+            sink.add(error.transfErr());
           } else {
             sink.add(Err<T>(error));
           }

@@ -24,6 +24,8 @@ part '_resolvable.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// The foundational sealed class for all monadic types like [Option], [Result],
+/// and [Resolvable].
 sealed class Monad<T extends Object> implements Equatable {
   const Monad();
 
@@ -38,7 +40,7 @@ sealed class Monad<T extends Object> implements Equatable {
       case Some<T> some:
         return _resolveValue(some.value);
       case None<T> _:
-        return const Sync.value(Ok(None()));
+        return const Sync.unsafe(Ok(None()));
       case Ok<T> ok:
         return _resolveValue(ok.value);
       case Err<T> err:
@@ -58,7 +60,8 @@ sealed class Monad<T extends Object> implements Equatable {
       }
       try {
         return test.unwrap().transf<R>().unwrap();
-      } catch (_) {
+      } catch (e) {
+        assert(false, e);
         throw Err<T>('Cannot resolve $T to $R.');
       }
     });
@@ -72,31 +75,48 @@ sealed class Monad<T extends Object> implements Equatable {
       return Resolvable(() {
         try {
           return Some(value as R);
-        } catch (_) {
+        } catch (e) {
+          assert(false, e);
           throw Err<T>('Cannot resolve $T to $R.');
         }
       });
     }
   }
 
+  /// Unsafely returns the contained value. Throws [Err] the `Monad` is an
+  /// [Err] or [None].
   FutureOr<T> unwrap();
 
+  /// Returns the contained value, or the `fallback` if the [Monad] is in an
+  /// [Err] or [None] state.
   FutureOr<T> unwrapOr(T fallback);
 
+  /// Returns the contained value, or computes it from `unsafe` if the [Monad]
+  /// is in an [Err] or [None] state.
   @pragma('vm:prefer-inline')
-  FutureOr<T> unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+  FutureOr<T> unwrapOrElse(T Function() makeSureThisDoesNotThrow);
 
+  /// Transforms the contained value using the `mapper` function while preserving
+  /// the [Monad]'s structure.
   Monad<R> map<R extends Object>(R Function(T value) mapper);
 
+  /// Transforms the [Monad]'s generic type from `T` to `R`.
+  ///
+  /// Uses the `transformer` function if provided, otherwise attempts a direct cast.
   Monad transf<R extends Object>([R Function(T e)? transformer]);
 
+  /// Wraps this [Monad] in a [Some].
   Some<Monad<T>> wrapSome();
 
+  /// Wraps this [Monad] in an [Ok].
   Ok<Monad<T>> wrapOk();
 
+  /// Wraps this [Monad] in a [Resolvable].
   Resolvable<Monad<T>> wrapResolvable();
 
+  /// Wraps this [Monad] in a [Sync].
   Sync<Monad<T>> wrapSync();
 
+  /// Wraps this [Monad] in an [Async].
   Async<Monad<T>> wrapAsync();
 }

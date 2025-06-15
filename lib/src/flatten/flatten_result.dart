@@ -22,12 +22,7 @@ extension FlattenResult2<T extends Object> on Result<Result<T>> {
     if (isErr()) {
       return transf();
     } else {
-      final result = unwrap();
-      if (result.isErr()) {
-        return result.transf();
-      } else {
-        return Ok(result.unwrap());
-      }
+      return unwrap();
     }
   }
 }
@@ -40,8 +35,7 @@ extension FlattenResult3<T extends Object> on Result<Result<Result<T>>> {
   Result<T> flatten3() => flatten2().flatten2();
 }
 
-extension FlattenResult4<T extends Object>
-    on Result<Result<Result<Result<T>>>> {
+extension FlattenResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten4();
 
@@ -49,8 +43,7 @@ extension FlattenResult4<T extends Object>
   Result<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenResult5<T extends Object>
-    on Result<Result<Result<Result<Result<T>>>>> {
+extension FlattenResult5<T extends Object> on Result<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten5();
 
@@ -58,8 +51,7 @@ extension FlattenResult5<T extends Object>
   Result<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenResult6<T extends Object>
-    on Result<Result<Result<Result<Result<Result<T>>>>>> {
+extension FlattenResult6<T extends Object> on Result<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten6();
 
@@ -86,10 +78,7 @@ extension FlattenResult8<T extends Object>
 }
 
 extension FlattenResult9<T extends Object>
-    on
-        Result<
-          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
-        > {
+    on Result<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten9();
 

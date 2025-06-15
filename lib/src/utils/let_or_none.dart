@@ -28,7 +28,8 @@ Option<T> jsonDecodeOrNone<T extends Object>(String input) {
   try {
     final decoded = jsonDecode(input);
     return decoded is T ? Some(decoded) : const None();
-  } catch (_) {
+  } catch (e) {
+    assert(false, e);
     return const None();
   }
 }

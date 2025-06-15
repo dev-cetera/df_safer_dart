@@ -61,15 +61,14 @@ class SafeSequencer {
   @pragma('vm:prefer-inline')
   Resolvable<Object> get last => addSafe((e) => Sync.value(e));
 
-  //
-  //
-  //
-
+  /// Adds multiple [handlers] to the queue for sequential execution. See
+  /// [addSafe].
   FutureOr<void> addAll(
-    Iterable<FutureOr<void> Function()> handler, {
+    Iterable<FutureOr<void> Function()> handlers, {
     Duration? buffer,
   }) {
-    final results = handler.map((e) => add(e, buffer: buffer));
+    final results = handlers.map((e) => add(e, buffer: buffer));
+    final unhandled = <Object>[];
     for (var n = 0; n < results.length; n++) {
       try {
         final result = results.elementAt(n);
@@ -83,26 +82,45 @@ class SafeSequencer {
         if (_eagerError) {
           rethrow;
         }
+        unhandled.add(e);
       }
+    }
+    if (unhandled.isNotEmpty) {
+      throw unhandled.first;
     }
   }
 
-  FutureOr<void> add(FutureOr<void> Function() handler, {Duration? buffer}) {
-    return addSafe(
+  /// Adds a [handler] to the queue that processes the previous value.
+  ///
+  /// The [buffer] duration can be used to throttle the execution.
+  FutureOr<Result<void>> add(
+    FutureOr<void> Function() handler, {
+    Duration? buffer,
+  }) {
+    final result = addSafe(
       (_) {
         final value = handler();
         if (value is FutureOr<Object>) {
           return value.toResolvable().map((e) => const None());
         }
-        return const Sync.value(Ok(None()));
+        return const Sync.unsafe(Ok(None()));
       },
       buffer: buffer,
-    ).unwrap();
+    ).value;
+    if (result is Future<Result<Option<Object>>>) {
+      return result.then((e) {
+        if (e.isErr()) {
+          throw e;
+        }
+        return e;
+      });
+    } else {
+      if (result.isErr()) {
+        throw result;
+      }
+      return result;
+    }
   }
-
-  //
-  //
-  //
 
   /// Adds multiple [handlers] to the queue for sequential execution. See
   /// [addSafe].
@@ -118,7 +136,8 @@ class SafeSequencer {
   }
 
   /// Adds a [handler] to the queue that processes the previous value.
-  /// Applies an optional [buffer] duration to throttle the execution.
+  ///
+  /// The [buffer] duration can be used to throttle the execution.
   Resolvable<Option<T>> addSafe<T extends Object>(
     Resolvable<Option<T>>? Function(Result<Option> previous) handler, {
     Duration? buffer,
@@ -140,12 +159,11 @@ class SafeSequencer {
     }
   }
 
-  /// Eenqueue a [function] without buffering.
+  /// Enqueue a [function] without buffering.
   Resolvable<Option<T>> _enqueue<T extends Object>(
     Resolvable<Option<T>>? Function(Result<Option> previous) function,
   ) {
     _isEmpty = false;
-    // ignore: invalid_use_of_visible_for_testing_member
     final value = _current.value;
     if (value is Future<Result<Option<Object>>>) {
       _current = Async(() async {

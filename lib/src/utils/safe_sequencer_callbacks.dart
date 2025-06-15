@@ -101,7 +101,7 @@ class SafeSequencerCallbacks<TParam extends Object> {
           call(callbackKey, param, eagerError: eagerError, onError: onError);
           _seq.addSafe((e) {
             results[callbackKey] = e;
-            return const Sync.value(Ok(None()));
+            return const Sync.unsafe(Ok(None()));
           });
         }
       }

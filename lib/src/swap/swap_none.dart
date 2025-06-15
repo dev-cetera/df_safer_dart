@@ -16,17 +16,17 @@ import '/src/_src.g.dart';
 
 extension NoneSyncSwapX<T extends Object> on None<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<None<T>> swap() => Ok(None<T>()).asSync();
+  Sync<None<T>> swap() => None<T>().wrapSync();
 }
 
 extension NoneAsyncSwapX<T extends Object> on None<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<None<T>> swap() => Ok(None<T>()).asAsync();
+  Async<None<T>> swap() => None<T>().wrapAsync();
 }
 
 extension NoneResolvableSwapX<T extends Object> on None<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<None<T>> swap() => Ok(None<T>()).asSync();
+  Resolvable<None<T>> swap() => None<T>().wrapResolvable();
 }
 
 extension NoneOptionSwapX<T extends Object> on None<Option<T>> {

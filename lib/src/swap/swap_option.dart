@@ -56,7 +56,7 @@ extension OptionSomeSwapX<T extends Object> on Option<Some<T>> {
 
 extension OptionNoneSwapX<T extends Object> on Option<None<T>> {
   @pragma('vm:prefer-inline')
-  Option<T> swap() {
+  None<Option<T>> swap() {
     return const None();
   }
 }

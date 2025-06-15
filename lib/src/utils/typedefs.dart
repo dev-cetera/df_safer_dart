@@ -18,16 +18,15 @@ import '/src/_src.g.dart';
 
 const NONE = None<Never>();
 
-const SYNC_NONE = TSyncNone.value(Ok(None<Never>()));
+const SYNC_NONE = TSyncNone.unsafe(Ok(None<Never>()));
 
 const TResolvableNone<Never> RESOLVABLE_NONE = SYNC_NONE;
 
 @pragma('vm:prefer-inline')
-Sync<None<T>> syncNone<T extends Object>() => const TSyncNone.value(Ok(None()));
+Sync<None<T>> syncNone<T extends Object>() => const TSyncNone.unsafe(Ok(None()));
 
 @pragma('vm:prefer-inline')
-Async<None<T>> asyncNone<T extends Object>() =>
-    TAsyncNone.value(Future.value(Ok(None<T>())));
+Async<None<T>> asyncNone<T extends Object>() => TAsyncNone.value(Future.value(Ok(None<T>())));
 
 @pragma('vm:prefer-inline')
 Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();

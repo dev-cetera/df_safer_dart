@@ -59,17 +59,17 @@ extension SyncOptionSwapX<T extends Object> on Sync<Option<T>> {
   Option<Sync<T>> swap() {
     return value.match(
       (value) => value.match(
-        (value) => Sync.value(Ok(value)).asSome(),
+        (value) => Sync.value(Ok(value)).wrapSome(),
         () => const None(),
       ),
-      (err) => Sync.value(err.transfErr<T>()).asSome(),
+      (err) => Sync.value(err.transfErr<T>()).wrapSome(),
     );
   }
 }
 
 extension SyncSomeSwapX<T extends Object> on Sync<Some<T>> {
   @pragma('vm:prefer-inline')
-  Some<Sync<T>> swap() => map((e) => e.unwrap()).asSome();
+  Some<Sync<T>> swap() => map((e) => e.unwrap()).wrapSome();
 }
 
 extension SyncNoneSwapX<T extends Object> on Sync<None<T>> {
@@ -82,7 +82,7 @@ extension SyncResultSwapX<T extends Object> on Sync<Result<T>> {
   Result<Sync<T>> swap() {
     return value.match(
       (value) => value.match(
-        (value) => Sync.value(Ok(value)).asOk(),
+        (value) => Sync.value(Ok(value)).wrapOk(),
         (err) => err.transfErr<Sync<T>>(),
       ),
       (err) => err.transfErr<Sync<T>>(),

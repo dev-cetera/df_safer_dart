@@ -32,22 +32,13 @@ Option<Iterable<T>> letIterableOrNone<T extends Object>(dynamic input) {
 }
 
 Option<List<T>> letListOrNone<T extends Object>(dynamic input) {
-  if (input is Option<List<T>>) return input;
-  if (input is List<T>) return Some(input);
-
-  return letIterableOrNone<T>(input).flatMap((i) => letAsOrNone<List<T>>(i));
+  return letIterableOrNone<T>(input).map((e) => List.from(e));
 }
 
 Option<Set<T>> letSetOrNone<T extends Object>(dynamic input) {
-  if (input is Option<Set<T>>) return input;
-  if (input is Set<T>) return Some(input);
-
-  return letIterableOrNone<T>(input).flatMap((i) => letAsOrNone<Set<T>>(i));
+  return letIterableOrNone<T>(input).map((e) => Set.from(e));
 }
 
 Option<Queue<T>> letQueueOrNone<T extends Object>(dynamic input) {
-  if (input is Option<Queue<T>>) return input;
-  if (input is Queue<T>) return Some(input);
-
-  return letIterableOrNone<T>(input).flatMap((i) => letAsOrNone<Queue<T>>(i));
+  return letIterableOrNone<T>(input).map((e) => Queue.from(e));
 }

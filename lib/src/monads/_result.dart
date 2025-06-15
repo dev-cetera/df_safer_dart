@@ -14,97 +14,84 @@ part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents either an [Ok] result or an [Error] result.
+/// A [Monad] that represents the result of an operation: every [Result] is
+/// either [Ok] and contains a success value, or [Err] and contains an error
+/// value.
 sealed class Result<T extends Object> extends Monad<T> {
   const Result._();
 
-  /// Returns this as an [Option].
+  /// Returns `this` as a base [Result] type.
   @pragma('vm:prefer-inline')
   Result<T> asResult() => this;
 
-  /// Returns this [Result] as a [Some].
-  Some<Result<T>> asSome();
-
-  /// Returns this [Result] as a [None].
-  None<Result<T>> asNone();
-
-  /// Converts this [Result] to an [Async] monad.
-  @pragma('vm:prefer-inline')
-  Async<T> asAsync() => Async.value(Future.value(this));
-
-  /// Converts this [Result] to a [Sync] monad.
-  @pragma('vm:prefer-inline')
-  Sync<T> asSync() => Sync.value(this);
-
-  /// Returns `true` if this is an [Ok].
+  /// Returns `true` if this [Result] is an [Ok].
   bool isOk();
 
-  /// Returns `true` if this is an [Err].
+  /// Returns `true` if this [Result] is an [Err].
   bool isErr();
 
-  /// Performs a side-effect if this is an [Ok].
-  Result<T> ifOk(void Function(Ok<T> ok) unsafe);
+  /// Performs a side-effect with the contained value if this is an [Ok].
+  Result<T> ifOk(void Function(Ok<T> ok) noFuturesInHere);
 
-  /// Performs a side-effect if this is an [Err].
-  Result<T> ifErr(void Function(Err<T> err) unsafe);
+  /// Performs a side-effect with the contained error if this is an [Err].
+  Result<T> ifErr(void Function(Err<T> err) noFuturesInHere);
 
-  /// Returns an [Option] containing the [Err] if this is an [Err].
+  /// Safely gets the [Err] instance.
+  /// Returns a [Some] on [Err], or a [None] on [Ok].
   Option<Err<T>> err();
 
-  /// Returns an [Option] containing the [Ok] if this is an [Ok].
+  /// Safely gets the [Ok] instance.
+  /// Returns a [Some] on [Ok], or a [None] on [Err].
   Option<Ok<T>> ok();
-
-  /// Returns the contained [Ok] value. Throws an [Err] if this is an [Err].
-  @override
-  T unwrap();
-
-  /// Returns the contained [Ok] value or a provided fallback.
-  @override
-  T unwrapOr(T fallback);
-
-  /// Returns the contained [Ok] value or computes it from a function.
-  @override
-  @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
 
   /// Returns the contained [Ok] value or `null`.
   T? orNull();
 
-  /// Maps a `Result<T, E>` to `Result<R, E>` by applying a function to a contained [Ok] value.
-  @override
-  Result<R> map<R extends Object>(R Function(T value) mapper);
+  /// Maps a `Result<T>` to `Result<R>` by applying a function that returns
+  /// another [Result].
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper);
 
-  /// Maps an `Result<T>` to `Result<R>` by applying the [mapper] function.
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper) {
-    if (isOk()) {
-      return mapper(unwrap());
-    } else {
-      return Err('Called flatMap() on Err<$T>.');
-    }
-  }
+  /// Transforms the inner [Ok] instance if this is an [Ok].
+  Result<T> mapOk(Ok<T> Function(Ok<T> ok) mapper);
 
-  /// Chains [Result] instances by handling [Ok] and [Err] cases.
+  /// Transforms the inner [Err] instance if this is an [Err].
+  Result<T> mapErr(Err<T> Function(Err<T> err) mapper);
+
+  /// Folds the two cases of this [Result] into a single new [Result].
   Result<Object> fold(
     Result<Object>? Function(Ok<T> ok) onOk,
     Result<Object>? Function(Err<T> err) onErr,
   );
 
-  /// Exhaustively handles [Ok] and [Err] cases, returning a new value.
+  /// Exhaustively handles both [Ok] and [Err] cases, returning a value `R`.
   R match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
+    R Function(T value) onOkUnsafe,
+    R Function(Err<T> err) onErrUnsafe,
   );
 
-  /// Combines this [Result] with another, returning a tuple of their values if both are [Ok].
+  /// Combines two [Result] instances.
+  /// If both are [Ok], returns a tuple of their values, otherwise returns `None`.
   (Option<T>, Option<R>) and<R extends Object>(Result<R> other);
 
-  /// Returns this if it's [Ok], otherwise returns [other].
+  /// Returns this if it's [Ok], otherwise returns the `other` [Result].
   Result<Object> okOr<R extends Object>(Result<R> other);
 
-  /// Returns this if it's [Err], otherwise returns [other].
+  /// Returns this if it's [Err], otherwise returns the `other` [Result].
   Result<Object> errOr<R extends Object>(Result<R> other);
 
-  /// Transforms the [Ok] value's type.
+  @override
+  T unwrap();
+
+  @override
+  T unwrapOr(T fallback);
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+
+  @override
+  Result<R> map<R extends Object>(R Function(T value) mapper);
+
   @override
   Result<R> transf<R extends Object>([R Function(T e)? transformer]);
 
@@ -131,18 +118,13 @@ sealed class Result<T extends Object> extends Monad<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents a [Result] that represents a non-error [value].
+/// A [Monad] that represents the success case of a [Result], containing a
+/// [value].
 final class Ok<T extends Object> extends Result<T> {
+  /// The contained value.
   final T value;
+
   const Ok(this.value) : super._();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Ok<T>> asSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Ok<T>> asNone() => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -154,9 +136,9 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(Ok<T> ok) unsafe) {
+  Result<T> ifOk(void Function(Ok<T> ok) noFuturesInHere) {
     try {
-      unsafe(this);
+      noFuturesInHere(this);
       return this;
     } catch (error) {
       return Err(error);
@@ -165,7 +147,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(void Function(Err<T> err) unsafe) => this;
+  Ok<T> ifErr(void Function(Err<T> err) noFuturesInHere) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -177,20 +159,21 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrap() => value;
-
-  @override
-  @pragma('vm:prefer-inline')
-  T unwrapOr(T fallback) => value;
-
-  @override
-  @pragma('vm:prefer-inline')
   T? orNull() => value;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper) {
+    return mapper(unwrap());
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<T> mapOk(Ok<T> Function(Ok<T> ok) mapper) => mapper(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<T> mapErr(Err<T> Function(Err<T> err) mapper) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -208,10 +191,10 @@ final class Ok<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   R match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
+    R Function(T value) onOkUnsafe,
+    R Function(Err<T> err) onErrUnsafe,
   ) {
-    return onOk(this.value);
+    return onOkUnsafe(this.value);
   }
 
   @override
@@ -233,11 +216,25 @@ final class Ok<T extends Object> extends Result<T> {
   Result<R> errOr<R extends Object>(Result<R> other) => other;
 
   @override
+  @pragma('vm:prefer-inline')
+  T unwrap() => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => value;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<R> map<R extends Object>(R Function(T value) mapper) => Ok(mapper(value));
+
+  @override
   Result<R> transf<R extends Object>([R Function(T e)? transformer]) {
     try {
       final a = unwrap();
-      return Ok(transformer?.call(a) ?? a as R);
-    } catch (_) {
+      final b = transformer?.call(a) ?? a as R;
+      return Ok(b);
+    } catch (e) {
+      assert(false, e);
       return Err('Cannot transform $T to $R.');
     }
   }
@@ -273,30 +270,25 @@ final class Ok<T extends Object> extends Result<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents a [Result] that represents an error.
+/// A [Monad] that represents the failure case of a [Result], containing an
+/// [error].
 final class Err<T extends Object> extends Result<T> implements Exception {
-  //
-  //
-  //
-
+  /// The contained error object.
   final Object error;
+
+  /// An optional HTTP status code associated with the error.
   final Option<int> statusCode;
+
+  /// The stack trace captured when the [Err] was created.
   final Trace stackTrace;
 
-  //
-  //
-  //
-
-  @protected
+  /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-    : statusCode = Option.fromNullable(statusCode),
-      stackTrace = Trace.current(),
-      super._();
+      : statusCode = Option.fromNullable(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
-  //
-  //
-  //
-
+  /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
@@ -305,18 +297,6 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     }
     return Err(error, statusCode: model.statusCode);
   }
-
-  //
-  //
-  //
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Err<T>> asSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Err<T>> asNone() => const None();
 
   @override
   @pragma('vm:prefer-inline')
@@ -328,13 +308,17 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifOk(void Function(Ok<T> ok) unsafe) => this;
+  Err<T> ifOk(void Function(Ok<T> ok) noFuturesInHere) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifErr(void Function(Err<T> err) unsafe) {
-    unsafe(this);
-    return this;
+  Err<T> ifErr(void Function(Err<T> err) noFuturesInHere) {
+    try {
+      noFuturesInHere(this);
+      return this;
+    } catch (error) {
+      return Err(error);
+    }
   }
 
   @override
@@ -346,23 +330,22 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   None<Ok<T>> ok() => const None();
 
   @override
-  @protected
-  @pragma('vm:prefer-inline')
-  T unwrap() {
-    throw Err<T>('Called unwrap() on Err<$T>.');
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  T unwrapOr(T fallback) => fallback;
-
-  @override
   @pragma('vm:prefer-inline')
   T? orNull() => null;
 
   @override
   @pragma('vm:prefer-inline')
-  Err<R> map<R extends Object>(R Function(T value) mapper) => transfErr<R>();
+  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper) {
+    return transfErr();
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<T> mapOk(Ok<T> Function(Ok<T> ok) mapper) => this;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<T> mapErr(Err<T> Function(Err<T> err) mapper) => mapper(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -380,10 +363,10 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   @override
   @pragma('vm:prefer-inline')
   R match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
+    R Function(T value) onUnsafeOk,
+    R Function(Err<T> err) onUnsafeErr,
   ) {
-    return onErr(this);
+    return onUnsafeErr(this);
   }
 
   @override
@@ -399,6 +382,60 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   @override
   @pragma('vm:prefer-inline')
   Result<T> errOr<R extends Object>(Result<R> other) => this;
+
+  /// Returns an [Option] containing the error if its type matches `E`.
+  @pragma('vm:prefer-inline')
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+
+  /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
+  /// contained `error`.
+  @pragma('vm:prefer-inline')
+  Err<R> transfErr<R extends Object>() {
+    return Err(
+      error,
+      statusCode: statusCode.orNull(),
+    );
+  }
+
+  /// Converts this [Err] to a data model for serialization.
+  ErrModel toModel() {
+    final type = 'Err<${T.toString()}>';
+    final error = _safeToString(this.error);
+    return ErrModel(
+      type: type,
+      error: error,
+      statusCode: statusCode.orNull(),
+      stackTrace: stackTrace.frames.map((e) => e.toString()).toList(),
+    );
+  }
+
+  /// Converts this [Err] to a JSON map.
+  Map<String, dynamic> toJson() {
+    final model = toModel();
+    return {
+      if (model.type != null) 'type': model.type,
+      if (model.error != null) 'error': model.error,
+      if (model.statusCode != null) 'statusCode': model.statusCode,
+      if (model.stackTrace != null) 'stackTrace': model.stackTrace,
+    };
+  }
+
+  @override
+  @protected
+  @pragma('vm:prefer-inline')
+  T unwrap() {
+    throw this;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  T unwrapOr(T fallback) => fallback;
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<R> map<R extends Object>(R Function(T value) mapper) {
+    return transfErr();
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -426,45 +463,17 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   @pragma('vm:prefer-inline')
   Async<Err<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
 
-  /// Checks if the contained [error] matches the type [E].
-  @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
-
-  /// Transforms the type [T] without casting [error].
-  @pragma('vm:prefer-inline')
-  Err<R> transfErr<R extends Object>() {
-    return Err(error, statusCode: statusCode.orNull());
-  }
-
-  /// Converts this [Err] to an `ErrModel`.
-  ErrModel toModel() {
-    final type = 'Err<${T.toString()}>';
-    final error = _safeToString(this.error);
-    return ErrModel(
-      type: type,
-      error: error,
-      statusCode: statusCode.orNull(),
-      stackTrace: stackTrace.frames.map((e) => e.toString()).toList(),
-    );
-  }
-
-  /// Converts this [Err] to a JSON map.
-  Map<String, dynamic> toJson() {
-    final model = toModel();
-    return {
-      if (model.type != null) 'type': model.type,
-      if (model.error != null) 'error': model.error,
-      if (model.statusCode != null) 'statusCode': model.statusCode,
-      if (model.stackTrace != null) 'stackTrace': model.stackTrace,
-    };
-  }
-
   @override
   @pragma('vm:prefer-inline')
   String toString() {
-    final encoder = const JsonEncoder.withIndent('  ');
-    return encoder.convert(toJson());
+    try {
+      final encoder = const JsonEncoder.withIndent('  ');
+      return encoder.convert(toJson());
+    } catch (e) {
+      // This should never happen!
+      assert(false, e);
+      return '{}';
+    }
   }
 
   @override
@@ -481,7 +490,8 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 String _safeToString(Object? obj) {
   try {
     return obj.toString();
-  } catch (_) {
+  } catch (e) {
+    assert(false, e);
     return '${obj.runtimeType}@${obj.hashCode.toRadixString(16)}';
   }
 }

@@ -10,21 +10,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'dart:convert';
 import 'let_or_none.dart';
 
 import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-Option<T> _tryJsonDecode<T extends Object>(String s) {
-  try {
-    final decoded = jsonDecode(s);
-    return decoded is T ? Some(decoded) : const None();
-  } catch (_) {
-    return const None();
-  }
-}
 
 Option<Map<K, V>> letMapOrNone<K extends Object, V extends Object>(
   dynamic input,
@@ -36,7 +26,7 @@ Option<Map<K, V>> letMapOrNone<K extends Object, V extends Object>(
   if (rawValue is Map<K, V>) return Some(rawValue);
   final sourceMap = switch (rawValue) {
     Map<dynamic, dynamic> m => Some(m),
-    String s => _tryJsonDecode<Map<dynamic, dynamic>>(s),
+    String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(s),
     _ => const None<Map<dynamic, dynamic>>(),
   };
   return sourceMap.flatMap((map) => letAsOrNone<Map<K, V>>(map));

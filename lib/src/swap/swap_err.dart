@@ -16,17 +16,17 @@ import '/src/_src.g.dart';
 
 extension ErrSyncSwapX<T extends Object> on Err<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<Err<T>> swap() => transfErr<Err<T>>().asSync();
+  Sync<Err<T>> swap() => transfErr<T>().wrapSync();
 }
 
 extension ErrAsyncSwapX<T extends Object> on Err<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<Err<T>> swap() => transfErr<Err<T>>().asAsync();
+  Async<Err<T>> swap() => transfErr<T>().wrapAsync();
 }
 
 extension ErrResolvableSwapX<T extends Object> on Err<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<Err<T>> swap() => transfErr<Err<T>>().asSync();
+  Resolvable<Err<T>> swap() => transfErr<T>().wrapSync();
 }
 
 extension ErrOptionSwapX<T extends Object> on Err<Option<T>> {
