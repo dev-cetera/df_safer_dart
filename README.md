@@ -45,9 +45,9 @@ These monads form the foundation for more predictable, expressive, and maintaina
 
 Additionally, the package includes two complementary mechanisms:
 
-- `Finisher<T>`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable<T>` to listen for the result, maintaining type safety throughout.
+- `SafeCompleter<T>`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable<T>` to listen for the result, maintaining type safety throughout.
 
-- `Sequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
+- `SafeSequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
 
 With these tools, the package provides a solid framework for improving the reliability and readability of your Dart applications.
 
