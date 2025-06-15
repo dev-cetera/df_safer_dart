@@ -20,28 +20,28 @@ Dart’s traditional error-handling approach depends on null checks, try-catch b
 
 Aiming to address these challenges, this package offers safer alternatives and more predictable mechanisms.
 
-While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like Future, FutureOr, try-catch, and nullable types may be more appropriate.
+While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like `Future`, `FutureOr`, try-catch, and nullable types may be more appropriate.
 
 This package introduces three core monads (`Result`, `Option`, and `Resolvable`) that work seamlessly together:
 
-- `Result<T>`: Represents the outcome of an operation that can fail. It will either be:
+- `Result`: Represents the outcome of an operation that can fail. It will either be:
 
-  - `Ok<T>`: A success value of type T.
-  - `Err<T>`: A failure value containing details about the error.
+  - `Ok`: A success value of type T.
+  - `Err`: A failure value containing details about the error.
 
 `Result` eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
 
-- `Option<T>`: Represents a value that may or may not be present. It will either be:
+- `Option`: Represents a value that may or may not be present. It will either be:
 
-  - `Some<T>`: A present value of type T.
-  - `None<T>`: The absence of a value.
+  - `Some`: A present value of type T.
+  - `None`: The absence of a value.
 
 `Option` eliminates null values and forces the developer to explicitly handle the "absent" case, preventing NullPointerExceptions.
 
-- `Resolvable<T>`: A powerful wrapper that unifies synchronous and asynchronous operations. It will either be:
+- `Resolvable`: A powerful wrapper that unifies synchronous and asynchronous operations. It will either be:
 
-  - `Sync<T>`: For immediate, failable operations.
-  - `Async<T>`: For time-based, failable operations.
+  - `Sync`: For immediate, failable operations.
+  - `Async`: For time-based, failable operations.
 
 `Resolvable` provides a consistent API for chaining operations, regardless of whether they are synchronous or asynchronous.
 
@@ -49,7 +49,7 @@ These monads form the foundation for more predictable, expressive, and maintaina
 
 Additionally, the package includes two complementary mechanisms:
 
-- `SafeCompleter<T>`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable<T>` to listen for the result, maintaining type safety throughout.
+- `SafeCompleter`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable` to listen for the result, maintaining type safety throughout.
 
 - `SafeSequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
 
