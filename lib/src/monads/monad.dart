@@ -13,7 +13,7 @@
 import 'dart:async' show FutureOr;
 import 'dart:convert' show JsonEncoder;
 import 'package:equatable/equatable.dart' show Equatable;
-import 'package:meta/meta.dart' show protected;
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import '/df_safer_dart.dart';

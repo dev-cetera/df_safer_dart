@@ -35,6 +35,7 @@ export './extensions/to_resolvable_extension.dart';
 export './extensions/safer_iterable.dart';
 export './extensions/to_safe_stream_extension.dart';
 export './extensions/option_iterable_extension.dart';
+export './annotations/must_handle_return.dart';
 export './flatten/flatten_option.dart';
 export './flatten/flatten_resolvable.dart';
 export './flatten/flatten_result.dart';

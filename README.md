@@ -8,9 +8,11 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 
 ---
 
-## Read this Article on Medium.com
+## Blog Articles
 
-[An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451)
+For an introduction, please refer to any of these articles:
+
+- **An Introduction to Monads in Dart: Building Unbreakable Code:** [Medium.com](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451) || [Dev.to](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
 
 ## Summary
 

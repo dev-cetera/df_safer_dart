@@ -1,4 +1,4 @@
-name: df_safer_dart_example_1
+name: df_safer_dart_async_example
 publish_to: none
 environment:
   sdk: ">=3.5.0 <4.0.0"

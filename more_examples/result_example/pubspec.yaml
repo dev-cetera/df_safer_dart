@@ -1,4 +1,4 @@
-name: df_safer_dart_example_3
+name: df_safer_dart_result_example
 publish_to: none
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -8,3 +8,4 @@ dependencies:
 
 dev_dependencies:
   lints: ^6.0.0
+

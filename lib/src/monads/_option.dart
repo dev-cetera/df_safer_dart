@@ -32,6 +32,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Returns `this` as a base [Option] type.
   @pragma('vm:prefer-inline')
+  @mustHandleReturn
   Option<T> asOption() => this;
 
   /// Returns `true` if this [Option] is a [Some].
@@ -182,8 +183,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) predicate) =>
-      predicate(value) ? this : const None();
+  Option<T> filter(bool Function(T value) predicate) => predicate(value) ? this : const None();
 
   @override
   @pragma('vm:prefer-inline')
