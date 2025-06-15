@@ -5,15 +5,20 @@ typedef KeyValueMap = Map<String, dynamic>;
 
 // A network call that can fail. Async handles both success and exceptions.
 Async<String> fetchUserData(int userId) => Async(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 10)); // Simulate network latency
-      if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
-      if (userId == 2) return '{"config":{}}';
-      if (userId == 3) return '{"config": "bad_data"}';
-      throw Exception('User Not Found'); // This will be caught by Async and become an Err
-    });
+  await Future<void>.delayed(
+    const Duration(milliseconds: 10),
+  ); // Simulate network latency
+  if (userId == 1) return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
+  if (userId == 2) return '{"config":{}}';
+  if (userId == 3) return '{"config": "bad_data"}';
+  throw Exception(
+    'User Not Found',
+  ); // This will be caught by Async and become an Err
+});
 
 // A parser that can fail. Sync automatically catches the jsonDecode exception.
-Sync<KeyValueMap> parseJson(String json) => Sync(() => jsonDecode(json) as KeyValueMap);
+Sync<KeyValueMap> parseJson(String json) =>
+    Sync(() => jsonDecode(json) as KeyValueMap);
 
 // A helper to safely extract a typed value. It cannot fail, it can only be absent,
 // so it returns an Option.
@@ -38,8 +43,12 @@ Async<Option<String>> getUserNotificationSound(int userId) {
             // Start the Option chain to safely drill into the data.
             // .flatMap is used to chain functions that return another Option.
             getFromMap<KeyValueMap>(data, 'config')
-                .flatMap((config) => getFromMap<KeyValueMap>(config, 'notifications'))
-                .flatMap((notifications) => getFromMap<String>(notifications, 'sound')),
+                .flatMap(
+                  (config) => getFromMap<KeyValueMap>(config, 'notifications'),
+                )
+                .flatMap(
+                  (notifications) => getFromMap<String>(notifications, 'sound'),
+                ),
       );
 }
 
