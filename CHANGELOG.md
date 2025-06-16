@@ -4,6 +4,8 @@
 
 - Released @ 6/2025 (UTC)
 - chore: Rename Option.fromNullable to Option.from for simplicity
+- docs Add TODO.md
+- docs: Update README.md
 
 ## [0.14.9+1]
 
@@ -13,7 +15,7 @@
 ## [0.14.9]
 
 - Released @ 6/2025 (UTC)
-- docs: Update readme
+- docs: Update README.md
 
 ## [0.14.8]
 
@@ -23,7 +25,7 @@
 ## [0.14.7]
 
 - Released @ 6/2025 (UTC)
-- feat: Add linter rules and update readme
+- feat: Add linter rules and update README.md
 
 ## [0.14.6]
 
@@ -48,7 +50,7 @@
 ## [0.14.2]
 
 - Released @ 6/2025 (UTC)
-- docs: Update readme and add more examples
+- docs: Update README.md and add more examples
 
 ## [0.14.1]
 
@@ -128,7 +130,7 @@
 ## [0.13.1]
 
 - Released @ 6/2025 (UTC)
-- docs: Fix readme.md
+- docs: Fix README.md.md
 
 ## [0.13.0]
 
