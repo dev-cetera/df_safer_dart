@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.9]
+
+- Released @ 6/2025 (UTC)
+- docs: Update readme
+
 ## [0.14.8]
 
 - Released @ 6/2025 (UTC)
