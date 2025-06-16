@@ -48,7 +48,7 @@ Option<num> letNumOrNone(dynamic input) {
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is num) return Some(rawValue);
   if (rawValue is String) {
-    return Option.fromNullable(num.tryParse(rawValue.trim()));
+    return Option.from(num.tryParse(rawValue.trim()));
   }
   if (rawValue is bool) return Some(rawValue ? 1 : 0);
 
@@ -75,7 +75,7 @@ Option<bool> letBoolOrNone(dynamic input) {
   if (rawValue is bool) return Some(rawValue);
   if (rawValue is num) return Some(rawValue != 0);
   if (rawValue is String) {
-    return Option.fromNullable(bool.tryParse(rawValue, caseSensitive: false));
+    return Option.from(bool.tryParse(rawValue, caseSensitive: false));
   }
 
   return const None();
@@ -88,7 +88,7 @@ Option<Uri> letUriOrNone(dynamic input) {
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is Uri) return Some(rawValue);
   if (rawValue is String) {
-    return Option.fromNullable(Uri.tryParse(rawValue.trim()));
+    return Option.from(Uri.tryParse(rawValue.trim()));
   }
 
   return const None();
@@ -101,7 +101,7 @@ Option<DateTime> letDateTimeOrNone(dynamic input) {
   final rawValue = unwrapOptionOrNull(input);
   if (rawValue is DateTime) return Some(rawValue);
   if (rawValue is String) {
-    return Option.fromNullable(DateTime.tryParse(rawValue.trim()));
+    return Option.from(DateTime.tryParse(rawValue.trim()));
   }
   return const None();
 }

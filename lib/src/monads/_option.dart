@@ -22,13 +22,16 @@ sealed class Option<T extends Object> extends Monad<T> {
   /// Creates an [Option] from a nullable value.
   ///
   /// Returns [Some] if the [value] is not `null`, otherwise returns [None].
-  factory Option.fromNullable(T? value) {
+  factory Option.from(T? value) {
     if (value != null) {
       return Some(value);
     } else {
       return const None();
     }
   }
+
+  @Deprecated('Use "Option.from(T? value)? instead.')
+  factory Option.fromNullable(T? value) => Option.from(value);
 
   /// Returns `this` as a base [Option] type.
   @pragma('vm:prefer-inline')
@@ -256,7 +259,7 @@ final class Some<T extends Object> extends Option<T> {
     try {
       final value0 = unwrap();
       final value1 = noFuturesAllowed?.call(value0) ?? value0 as R;
-      return Ok(Option.fromNullable(value1));
+      return Ok(Option.from(value1));
     } catch (e) {
       assert(false, e);
       return Err('Cannot transform $T to $R');

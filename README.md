@@ -42,7 +42,7 @@ To get the full benefit of `df_safer_dart`, you must enable its custom linter ru
 1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.14.9
+  df_safer_dart: ^0.14.10
 
 dev_dependencies:
   lints: ^6.0.0
@@ -55,6 +55,14 @@ dev_dependencies:
 analyzer:
   plugins:
     - custom_lint
+# Optional.
+custom_lint:
+  rules:
+    # If any rule gives you trouble, you can set them to false here:
+    - must_use_monad_or_error: true
+    - must_await_all_futures: true
+    - must_be_anonymous: true
+    - no_futures_allowed: true
 ```
 
 ## The Core Monads

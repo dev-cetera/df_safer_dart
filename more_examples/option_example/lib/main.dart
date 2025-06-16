@@ -4,15 +4,14 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 Option<String> findUsername(int id) {
   final users = {1: 'Alice', 2: 'Bob'};
   final username = users[id];
-  // Option.fromNullable handles the null check for us.
-  return Option.fromNullable(username);
+  // Option.from handles the null check for us.
+  return Option.from(username);
 }
 
 void main() {
   // Chaining operations:
-  final result =
-      findUsername(1) // This returns Some('Alice')
-          .map((name) => name.toUpperCase()); // .map only runs if it's a Some
+  final result = findUsername(1) // This returns Some('Alice')
+      .map((name) => name.toUpperCase()); // .map only runs if it's a Some
 
   // Prints "Username is: ALICE"
   switch (result) {

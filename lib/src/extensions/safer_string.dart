@@ -4,15 +4,15 @@ import 'dart:convert';
 
 extension SaferString on String {
   Option<int> toIntOrNone() {
-    return Option.fromNullable(int.tryParse(this));
+    return Option.from(int.tryParse(this));
   }
 
   Option<double> toDoubleOrNone() {
-    return Option.fromNullable(double.tryParse(this));
+    return Option.from(double.tryParse(this));
   }
 
   Option<bool> toBoolOrNone() {
-    return Option.fromNullable(bool.tryParse(this, caseSensitive: false));
+    return Option.from(bool.tryParse(this, caseSensitive: false));
   }
 
   Result<T> decodeJson<T extends Object>() {

@@ -31,7 +31,6 @@ linter:
     prefer_single_quotes: true
     require_trailing_commas: true
     unnecessary_this: true
-
 analyzer:
   plugins:
     - custom_lint

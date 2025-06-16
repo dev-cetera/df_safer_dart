@@ -307,7 +307,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-    : statusCode = Option.fromNullable(statusCode),
+    : statusCode = Option.from(statusCode),
       stackTrace = Trace.current(),
       super._();
 

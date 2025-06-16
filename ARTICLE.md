@@ -35,8 +35,8 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 Option<String> findUsername(int id) {
   final users = {1: 'Alice', 2: 'Bob'};
   final username = users[id];
-  // Option.fromNullable handles the null check for us.
-  return Option.fromNullable(username);
+  // Option.from handles the null check for us.
+  return Option.from(username);
 }
 
 // Chaining operations:
