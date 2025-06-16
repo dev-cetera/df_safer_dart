@@ -216,8 +216,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(this.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -286,8 +286,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
-  ) =>
-      this;
+  ) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -454,8 +453,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(this.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].

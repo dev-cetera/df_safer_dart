@@ -46,9 +46,9 @@ class SafeSequencer {
     _TOnPrevErr? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  })  : _onPrevErr = onPrevErr,
-        _eagerError = eagerError,
-        _buffer = buffer;
+  }) : _onPrevErr = onPrevErr,
+       _eagerError = eagerError,
+       _buffer = buffer;
 
   //
   //
@@ -142,7 +142,8 @@ class SafeSequencer {
           return _transfCurrent<T>(_current);
         }
       }
-      _current = function(value)?.map((e) {
+      _current =
+          function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??
