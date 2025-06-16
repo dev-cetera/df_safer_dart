@@ -307,9 +307,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-    : statusCode = Option.fromNullable(statusCode),
-      stackTrace = Trace.current(),
-      super._();
+      : statusCode = Option.fromNullable(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')

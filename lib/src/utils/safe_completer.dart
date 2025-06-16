@@ -84,9 +84,8 @@ class SafeCompleter<T extends Object> {
     final completer = SafeCompleter<R>();
     resolvable().map((e) {
       try {
-        final result = noFuturesAllowed != null
-            ? noFuturesAllowed(e)
-            : (e as R);
+        final result =
+            noFuturesAllowed != null ? noFuturesAllowed(e) : (e as R);
         completer.resolve(Sync<R>.value(Ok(result))).end();
       } catch (e) {
         completer

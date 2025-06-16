@@ -85,11 +85,8 @@ extension FlattenOption8<T extends Object>
   Option<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenOption9<T extends Object>
-    on
-        Option<
-          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
-        > {
+extension FlattenOption9<T extends Object> on Option<
+    Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten9();
 

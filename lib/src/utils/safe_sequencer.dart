@@ -12,7 +12,8 @@
 
 import 'dart:async' show FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
+    show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
@@ -89,7 +90,8 @@ class SafeSequencer {
   ///
   /// The [buffer] duration can be used to throttle the execution.
   Resolvable<Option<T>> addSafe<T extends Object>(
-    @noFuturesAllowed Resolvable<Option<T>>? Function(Result<Option> previous) handler, {
+    @noFuturesAllowed
+    Resolvable<Option<T>>? Function(Result<Option> previous) handler, {
     Duration? buffer,
   }) {
     final buffer1 = buffer ?? _buffer;
@@ -104,7 +106,8 @@ class SafeSequencer {
             // ignore: must_await_all_futures
             Future<void>.delayed(buffer1),
           ]);
-          return (a.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>());
+          return (a.first as Resolvable<Option<T>>?) ??
+              Resolvable(() => None<T>());
         }).flatten();
       });
     }
