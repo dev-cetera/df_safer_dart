@@ -31,10 +31,10 @@ sealed class Result<T extends Object> extends Monad<T> {
   bool isErr();
 
   /// Performs a side-effect with the contained value if this is an [Ok].
-  Result<T> ifOk(void Function(Ok<T> ok) noFuturesInHere);
+  Result<T> ifOk(@noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed);
 
   /// Performs a side-effect with the contained error if this is an [Err].
-  Result<T> ifErr(void Function(Err<T> err) noFuturesInHere);
+  Result<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed);
 
   /// Safely gets the [Err] instance.
   /// Returns a [Some] on [Err], or a [None] on [Ok].
@@ -49,18 +49,24 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   /// Maps a `Result<T>` to `Result<R>` by applying a function that returns
   /// another [Result].
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper);
+  Result<R> flatMap<R extends Object>(
+    @noFuturesAllowed Result<R> Function(T value) noFuturesAllowed,
+  );
 
   /// Transforms the inner [Ok] instance if this is an [Ok].
-  Result<T> mapOk(Ok<T> Function(Ok<T> ok) mapper);
+  Result<T> mapOk(
+    @noFuturesAllowed Ok<T> Function(Ok<T> ok) noFuturesAllowed,
+  );
 
   /// Transforms the inner [Err] instance if this is an [Err].
-  Result<T> mapErr(Err<T> Function(Err<T> err) mapper);
+  Result<T> mapErr(
+    @noFuturesAllowed Err<T> Function(Err<T> err) noFuturesAllowed,
+  );
 
   /// Folds the two cases of this [Result] into a single new [Result].
   Result<Object> fold(
-    Result<Object>? Function(Ok<T> ok) onOk,
-    Result<Object>? Function(Err<T> err) onErr,
+    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
+    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   );
 
   /// Exhaustively handles both [Ok] and [Err] cases, returning a value `R`.
@@ -74,10 +80,10 @@ sealed class Result<T extends Object> extends Monad<T> {
   (Option<T>, Option<R>) and<R extends Object>(Result<R> other);
 
   /// Returns this if it's [Ok], otherwise returns the `other` [Result].
-  Result<Object> okOr<R extends Object>(Result<R> other);
+  Result<T> okOr(Result<T> other);
 
   /// Returns this if it's [Err], otherwise returns the `other` [Result].
-  Result<Object> errOr<R extends Object>(Result<R> other);
+  Result<T> errOr(Result<T> other);
 
   @override
   T unwrap();
@@ -87,13 +93,21 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+  T unwrapOrElse(
+    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
+  ) {
+    return unwrapOr(ensureThisDoesNotThrow());
+  }
 
   @override
-  Result<R> map<R extends Object>(R Function(T value) mapper);
+  Result<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  );
 
   @override
-  Result<R> transf<R extends Object>([R Function(T e)? transformer]);
+  Result<R> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]);
 
   @override
   @pragma('vm:prefer-inline')
@@ -136,9 +150,11 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(void Function(Ok<T> ok) noFuturesInHere) {
+  Result<T> ifOk(
+    @noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed,
+  ) {
     try {
-      noFuturesInHere(this);
+      noFuturesAllowed(this);
       return this;
     } catch (error) {
       return Err(error);
@@ -147,7 +163,10 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(void Function(Err<T> err) noFuturesInHere) => this;
+  Ok<T> ifErr(
+    @noFuturesAllowed void Function(Err<T> err) noFuturesAllowed,
+  ) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -163,23 +182,29 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper) {
-    return mapper(unwrap());
+  Result<R> flatMap<R extends Object>(
+    @noFuturesAllowed Result<R> Function(T value) noFuturesAllowed,
+  ) {
+    return noFuturesAllowed(unwrap());
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> mapOk(Ok<T> Function(Ok<T> ok) mapper) => mapper(this);
+  Ok<T> mapOk(@noFuturesAllowed Ok<T> Function(Ok<T> ok) noFuturesAllowed) {
+    return noFuturesAllowed(this);
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> mapErr(Err<T> Function(Err<T> err) mapper) => this;
+  Ok<T> mapErr(@noFuturesAllowed Err<T> Function(Err<T> err) noFuturesAllowed) {
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Object> fold(
-    Result<Object>? Function(Ok<T> ok) onOk,
-    Result<Object>? Function(Err<T> err) onErr,
+    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
+    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   ) {
     try {
       return onOk(this) ?? this;
@@ -209,11 +234,11 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> okOr<R extends Object>(Result<R> other) => this;
+  Ok<T> okOr(Result<T> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> errOr<R extends Object>(Result<R> other) => other;
+  Result<T> errOr(Result<T> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
@@ -225,14 +250,19 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> map<R extends Object>(R Function(T value) mapper) =>
-      Ok(mapper(value));
+  Result<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
+    return Ok(noFuturesAllowed(value));
+  }
 
   @override
-  Result<R> transf<R extends Object>([R Function(T e)? transformer]) {
+  Result<R> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]) {
     try {
       final a = unwrap();
-      final b = transformer?.call(a) ?? a as R;
+      final b = noFuturesAllowed?.call(a) ?? a as R;
       return Ok(b);
     } catch (e) {
       assert(false, e);
@@ -309,13 +339,19 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifOk(void Function(Ok<T> ok) noFuturesInHere) => this;
+  Err<T> ifOk(
+    @noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed,
+  ) {
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifErr(void Function(Err<T> err) noFuturesInHere) {
+  Err<T> ifErr(
+    @noFuturesAllowed void Function(Err<T> err) noFuturesAllowed,
+  ) {
     try {
-      noFuturesInHere(this);
+      noFuturesAllowed(this);
       return this;
     } catch (error) {
       return Err(error);
@@ -336,23 +372,33 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> flatMap<R extends Object>(Result<R> Function(T value) mapper) {
+  Result<R> flatMap<R extends Object>(
+    @noFuturesAllowed Result<R> Function(T value) noFuturesAllowed,
+  ) {
     return transfErr();
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> mapOk(Ok<T> Function(Ok<T> ok) mapper) => this;
+  Err<T> mapOk(
+    @noFuturesAllowed Ok<T> Function(Ok<T> ok) noFuturesAllowed,
+  ) {
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> mapErr(Err<T> Function(Err<T> err) mapper) => mapper(this);
+  Err<T> mapErr(
+    @noFuturesAllowed Err<T> Function(Err<T> err) noFuturesAllowed,
+  ) {
+    return noFuturesAllowed(this);
+  }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Object> fold(
-    Result<Object>? Function(Ok<T> ok) onOk,
-    Result<Object>? Function(Err<T> err) onErr,
+    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
+    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   ) {
     try {
       return onErr(this) ?? this;
@@ -378,16 +424,15 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> okOr<R extends Object>(Result<R> other) => other;
+  Result<T> okOr(Result<T> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> errOr<R extends Object>(Result<R> other) => this;
+  Result<T> errOr(Result<T> other) => this;
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
@@ -432,13 +477,17 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Err<R> map<R extends Object>(R Function(T value) mapper) {
+  Err<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
     return transfErr();
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<R> transf<R extends Object>([R Function(T e)? transformer]) {
+  Err<R> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]) {
     return transfErr<R>();
   }
 

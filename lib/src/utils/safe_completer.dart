@@ -12,21 +12,12 @@
 
 import 'dart:async' show Completer, FutureOr;
 
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+
 import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-@Deprecated('Renamed to SafeCompleter.')
-typedef SafeFinisher<T extends Object> = SafeCompleter<T>;
-
-@Deprecated('Renamed to SafeCompleter.')
-typedef Finisher<T extends Object> = SafeCompleter<T>;
-
-/// A utility class for managing completion of both synchronous and asynchronous
-/// values.
-///
-/// [SafeCompleter] is similar to a [Completer], but it handles both synchronous
-/// and asynchronous results seamlessly.
 class SafeCompleter<T extends Object> {
   //
   //
@@ -86,19 +77,23 @@ class SafeCompleter<T extends Object> {
   bool get isCompleted => _completer.isCompleted || _value.isSome();
 
   /// Transforms the type of the value managed by this [SafeCompleter].
-  SafeCompleter<R> transf<R extends Object>([R Function(T e)? transformer]) {
+  SafeCompleter<R> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]) {
     final completer = SafeCompleter<R>();
     resolvable().map((e) {
       try {
-        final result = transformer != null ? transformer(e) : (e as R);
-        completer.resolve(Sync<R>.value(Ok(result)));
+        final result = noFuturesAllowed != null ? noFuturesAllowed(e) : (e as R);
+        completer.resolve(Sync<R>.value(Ok(result))).end();
       } catch (e) {
-        completer.resolve(
-          Sync.value(Err('Failed to transform type $T to $R.')),
-        );
+        completer
+            .resolve(
+              Sync.value(Err('Failed to transform type $T to $R.')),
+            )
+            .end();
       }
       return e;
-    });
+    }).end();
     return completer;
   }
 }

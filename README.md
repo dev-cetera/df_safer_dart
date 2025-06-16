@@ -8,21 +8,65 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 
 ---
 
-## Blog Articles
 
-For an introduction, please refer to any of these articles:
 
-- **An Introduction to Monads in Dart: Building Unbreakable Code:** [Medium.com](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451) || [Dev.to](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
+## Write Unbreakable Code in Dart
 
-## Summary
+In software development, we spend an enormous amount of time writing defensive code. We check for null, handle exceptions with try-catch, and manage asynchronous operations with async/await. While essential, these tools often lead to code that is nested, verbose, and difficult to read. The core logic — the “happy path” — gets buried under layers of error handling.
 
-This package, inspired by [Rust](<https://en.wikipedia.org/wiki/Rust_(programming_language)>) and [functional programming](https://en.wikipedia.org/wiki/Functional_programming), aims to enhance the structure, safety and debuggability of your applications by leveraging [monads](<https://en.wikipedia.org/wiki/Monad_(functional_programming)>) and other advanced mechanisms.
+`df_safer_dart` offers a different approach.
 
-Dart’s traditional error-handling approach depends on null checks, try-catch blocks, and Futures that can throw errors at any time, necessitating asynchronous error handling. This often leads to complex and unpredictable error management.
+It provides a set of tools inspired by functional programming that allow you to write clean, linear code describing the happy path, while all the messy details of null values, failures, and asynchronicity are handled automatically and safely in the background. This package introduces three core monadic types (`Option`, `Result`, and `Resolvable`) that work seamlessly together to make your code dramatically more robust and readable.
 
-Aiming to address these challenges, this package offers safer alternatives and more predictable mechanisms.
+## The Philosophy: Compile-Time Safety First
 
-While it introduces some boilerplate and incurs a minor performance trade-off due to safety checks, it is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like `Future`, `FutureOr`, try-catch, and nullable types may be more appropriate.
+Many libraries provide tools for safety, but they still allow developers to make mistakes that only appear at runtime. `df_safer_dart` is different. It is designed to be a paternalistic library that actively guides you towards correct usage and flags incorrect patterns at compile time.
+
+- **No More Runtime Future Surprises:** Using a Future in a synchronous context is a compile-time error.
+- **Guaranteed await:** Forgetting to await inside an Async block is a compile-time error.
+- **Automatic Exception Handling:** You can't forget a try-catch block, because the library's core constructors handle it for you.
+
+This philosophy is enforced by a companion linter package, which is a required part of the setup.
+
+## Getting Started (1/2): The Core Concepts
+
+For an introduction, please refer to this article:
+
+- **MEDIUM.COM** [An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a245)
+- **DEV.TO** [An Introduction to Monads in Dart: Building Unbreakable Code](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
+
+For a full feature set, please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/).
+
+## Getting Started (2/2): Enable the Safety Lints
+
+To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is not optional; it is fundamental to the library's design.
+
+1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
+```yaml
+dependencies:
+  df_safer_dart: ^0.14.7
+
+dev_dependencies:
+  lints: ^6.0.0
+  custom_lint: ^0.7.5
+  df_safer_dart_lints: ^0.1.0
+```
+
+2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
+```yaml
+analyzer:
+  plugins:
+    - custom_lint
+
+custom_lint:
+  rules:
+    - must_await_all_futures: error
+    - must_be_anonymous: error
+    - must_use_monad: error
+    - no_futures_allowed: error
+```
+
+## The Core Monads
 
 This package introduces three core monads (`Result`, `Option`, and `Resolvable`) that work seamlessly together:
 
@@ -49,90 +93,15 @@ This package introduces three core monads (`Result`, `Option`, and `Resolvable`)
 
 These monads form the foundation for more predictable, expressive, and maintainable error handling in Dart.
 
+## Additional
+
+**NOTE:** This packate is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like `Future`, `FutureOr`, try-catch, and nullable types may be more appropriate.
+
 Additionally, the package includes two complementary mechanisms:
 
 - `SafeCompleter`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable` to listen for the result, maintaining type safety throughout.
 
 - `SafeSequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
-
-With these tools, the package provides a solid framework for improving the reliability and readability of your Dart applications.
-
-For a full feature set, please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/).
-
-## How We Avoid `null`
-
-Instead of returning `null` when a value might be absent (e.g., a missing key in a map, an empty list), you return an `Option`.
-
-- `Some(value)`: If the value is present.
-- `None()`: If the value is absent.
-
-The type system then forces you to handle both cases using methods like `.match()` or `.flatMap()`, making it impossible to accidentally use a `null` value.
-
-## How We Avoid Direct `Future`
-
-A standard `Future` in Dart can complete with a value or an error. Handling this often requires `await` inside a `try-catch` block. The `Async` monad improves upon this:
-
-- It encapsulates a `Future`.
-- It automatically catches any error the `Future` might throw and converts it into an `Err` state.
-- It allows you to chain subsequent operations using `.map()` without needing to `await` at each step.
-
-This creates clean, linear "pipelines" of asynchronous logic, where you only handle the final `Result` at the very end, rather than managing errors at every step.
-
-## The Rules of `Async`
-
-- **ALWAYS `await` inside the `Async` closure**: When you provide a function to the `Async` constructor, you must `await` any `Future` inside it. This is crucial for the `Async` monad to be able to catch the error if the `Future` fails.
-- **NEVER `await` the `Async` monad itself**: The point is to chain operations using `.map()`. You should only "exit" the monad (e.g., by accessing `.value`) at the end of your program or function.
-
-We definitely need a linter for this!
-
-## Usage Example
-
-Example of avoiding try-catch blocks in Dart, to produce safer code:
-
-```dart
-void main() async {
-  // Fetch the IP address and handle both success and error results.
-  fetchIpAddress().match((result) {
-    print('IP address: $result');
-    return NONE; // Returning `null` is deliberately not supported!
-  }, (err) {
-    print(err);
-    return NONE;
-  });
-}
-
-Async<String> fetchIpAddress() {
-  // Async, Sync or Resolvable can be used to wrap
-  // potentially throwing code.
-  //
-  // The only rules here are:
-  //
-  // 1. ALWAYS await all asynchronous operations inside Async
-  // (or Resolvable) to ensure that exceptions are properly caught and
-  // wrapped in a Result.
-  //
-  // 2. Only deal with asynchronous operations in Async or
-  // Resolvable. Not in Sync.
-  //
-  // 3. You can throw any Objects within the closure, but prefer
-  // throwing Err objects as it is the standard and will help
-  // with debugging. You can also wrap any of your exceptions
-  // with Err.
-  return Async(() async {
-    final response = await http.get(
-      Uri.parse('https://api.ipify.org?format=json'),
-    );
-    // Throw an Err if the status code is not 200. Any other exceptions within
-    // Resolvable.wrap will be caught and wrapped in an Err.
-    if (response.statusCode != 200) {
-      throw Err('Failed to fetch IP address');
-    }
-    final data = jsonDecode(response.body);
-    final ip = data['ip'] as String;
-    return ip;
-  });
-}
-```
 
 ---
 

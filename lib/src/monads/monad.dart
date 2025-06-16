@@ -16,7 +16,9 @@ import 'package:equatable/equatable.dart' show Equatable;
 import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import '/df_safer_dart.dart';
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
+
+import '../_src.g.dart';
 
 part '_option.dart';
 part '_result.dart';
@@ -91,19 +93,26 @@ sealed class Monad<T extends Object> implements Equatable {
   /// [Err] or [None] state.
   FutureOr<T> unwrapOr(T fallback);
 
-  /// Returns the contained value, or computes it from `unsafe` if the [Monad]
-  /// is in an [Err] or [None] state.
+  /// Returns the contained value, or computes it from [ensureThisDoesNotThrow]
+  /// if the [Monad] is in an [Err] or [None] state.
   @pragma('vm:prefer-inline')
-  FutureOr<T> unwrapOrElse(T Function() makeSureThisDoesNotThrow);
+  FutureOr<T> unwrapOrElse(
+    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
+  );
 
-  /// Transforms the contained value using the `mapper` function while preserving
-  /// the [Monad]'s structure.
-  Monad<R> map<R extends Object>(R Function(T value) mapper);
+  /// Transforms the contained value using the mapper function
+  /// [noFuturesAllowed] while preserving the [Monad]'s structure.
+  Monad<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  );
 
   /// Transforms the [Monad]'s generic type from `T` to `R`.
   ///
-  /// Uses the `transformer` function if provided, otherwise attempts a direct cast.
-  Monad transf<R extends Object>([R Function(T e)? transformer]);
+  /// Uses the transformer function [noFuturesAllowed] if provided, otherwise
+  /// attempts a direct cast.
+  Monad transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]);
 
   /// Wraps this [Monad] in a [Some].
   Some<Monad<T>> wrapSome();
@@ -119,4 +128,9 @@ sealed class Monad<T extends Object> implements Equatable {
 
   /// Wraps this [Monad] in an [Async].
   Async<Monad<T>> wrapAsync();
+
+  /// Suppresses the linter error `must_use_monad`.
+  @nonVirtual
+  @pragma('vm:prefer-inline')
+  void end() {}
 }

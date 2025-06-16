@@ -32,7 +32,6 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Returns `this` as a base [Option] type.
   @pragma('vm:prefer-inline')
-  @mustHandleReturn
   Option<T> asOption() => this;
 
   /// Returns `true` if this [Option] is a [Some].
@@ -50,41 +49,51 @@ sealed class Option<T extends Object> extends Monad<T> {
   Result<None<T>> none();
 
   /// Performs a side-effect with the contained value if this is a [Some].
-  Result<Option<T>> ifSome(void Function(Some<T> some) unsafe);
+  Result<Option<T>> ifSome(
+    @noFuturesAllowed void Function(Some<T> some) noFuturesAllowed,
+  );
 
   /// Performs a side-effect if this is a [None].
-  Result<Option<T>> ifNone(void Function() unsafe);
+  Result<Option<T>> ifNone(
+    @noFuturesAllowed void Function() noFuturesAllowed,
+  );
 
   /// Returns the contained value or `null`.
   T? orNull();
 
   /// Transforms the inner [Some] instance if this is a [Some].
-  Option<T> mapSome(Some<T> Function(Some<T> some) mapper);
+  Option<T> mapSome(
+    @noFuturesAllowed Some<T> Function(Some<T> some) noFuturesAllowed,
+  );
 
   /// Maps an `Option<T>` to `Option<R>` by applying a function that returns
   /// another [Option].
-  Option<R> flatMap<R extends Object>(Option<R> Function(T value) mapper);
+  Option<R> flatMap<R extends Object>(
+    @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
+  );
 
-  /// Returns [None] if the [predicate] returns `false`. Otherwise, returns
-  /// the original [Option].
-  Option<T> filter(bool Function(T value) predicate);
+  /// Returns [None] if the predicate [noFuturesAllowed] returns `false`.
+  /// Otherwise, returns the original [Option].
+  Option<T> filter(
+    @noFuturesAllowed bool Function(T value) noFuturesAllowed,
+  );
 
   /// Folds the two cases of this [Option] into a single [Result].
   ///
   /// The `onSome` and `onNone` functions must return a new [Option].
   Result<Option<Object>> fold(
-    Option<Object>? Function(Some<T> some) onSome,
-    Option<Object>? Function(None<T> none) onNone,
+    @noFuturesAllowed Option<Object>? Function(Some<T> some) onSome,
+    @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
   );
 
   /// Exhaustively handles both [Some] and [None] cases, returning a value `R`.
   R match<R extends Object>(R Function(T value) onSome, R Function() onNone);
 
   /// Returns this if it's [Some], otherwise returns the `other` [Option].
-  Option<Object> someOr<R extends Object>(Option<R> other);
+  Option<T> someOr(Option<T> other);
 
   /// Returns this if it's [None], otherwise returns the `other` [Option].
-  Option<Object> noneOr<R extends Object>(Option<R> other);
+  Option<T> noneOr(Option<T> other);
 
   @override
   T unwrap();
@@ -94,13 +103,21 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(T Function() unsafe) => unwrapOr(unsafe());
+  T unwrapOrElse(
+    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
+  ) {
+    return unwrapOr(ensureThisDoesNotThrow());
+  }
 
   @override
-  Option<R> map<R extends Object>(R Function(T value) mapper);
+  Option<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  );
 
   @override
-  Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]);
+  Result<Option<R>> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]);
 
   @override
   @pragma('vm:prefer-inline')
@@ -152,9 +169,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Some<T>> ifSome(void Function(Some<T> some) unsafe) {
+  Result<Some<T>> ifSome(
+    @noFuturesAllowed void Function(Some<T> some) noFuturesAllowed,
+  ) {
     try {
-      unsafe(this);
+      noFuturesAllowed(this);
       return Ok(this);
     } catch (error) {
       return Err(error);
@@ -163,7 +182,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Some<T>> ifNone(void Function() unsafe) => Ok(this);
+  Ok<Some<T>> ifNone(
+    @noFuturesAllowed void Function() noFuturesAllowed,
+  ) {
+    return Ok(this);
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -171,26 +194,33 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<T> mapSome(Some<T> Function(Some<T> some) mapper) {
-    return mapper(this);
+  Some<T> mapSome(
+    @noFuturesAllowed Some<T> Function(Some<T> some) noFuturesAllowed,
+  ) {
+    return noFuturesAllowed(this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> flatMap<R extends Object>(Option<R> Function(T value) mapper) {
-    return mapper(unwrap());
+  Option<R> flatMap<R extends Object>(
+    @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
+  ) {
+    return noFuturesAllowed(unwrap());
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(bool Function(T value) predicate) =>
-      predicate(value) ? this : const None();
+  Option<T> filter(
+    @noFuturesAllowed bool Function(T value) noFuturesAllowed,
+  ) {
+    return noFuturesAllowed(value) ? this : const None();
+  }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Option<Object>> fold(
-    Option<Object>? Function(Some<T> some) onSome,
-    Option<Object>? Function(None<T> none) onNone,
+    @noFuturesAllowed Option<Object>? Function(Some<T> some) onSome,
+    @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
       return Ok(onSome(this) ?? this);
@@ -201,17 +231,20 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
+  R match<R extends Object>(
+    R Function(T value) onSome,
+    R Function() onNone,
+  ) {
     return onSome(this.value);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Some<T> someOr<R extends Object>(Option<R> other) => this;
+  Some<T> someOr(Option<T> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Option<R> noneOr<R extends Object>(Option<R> other) => other;
+  Option<T> noneOr(Option<T> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
@@ -223,15 +256,19 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(R Function(T value) mapper) {
-    return Some(mapper(value));
+  Some<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
+    return Some(noFuturesAllowed(value));
   }
 
   @override
-  Result<Option<R>> transf<R extends Object>([R Function(T e)? transformer]) {
+  Result<Option<R>> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]) {
     try {
       final value0 = unwrap();
-      final value1 = transformer?.call(value0) ?? value0 as R;
+      final value1 = noFuturesAllowed?.call(value0) ?? value0 as R;
       return Ok(Option.fromNullable(value1));
     } catch (e) {
       assert(false, e);
@@ -294,13 +331,15 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> ifSome(void Function(Some<T> some) unsafe) => Ok(this);
+  Ok<None<T>> ifSome(@noFuturesAllowed void Function(Some<T> some) noFuturesAllowed) {
+    return Ok(this);
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<None<T>> ifNone(void Function() unsafe) {
+  Result<None<T>> ifNone(@noFuturesAllowed void Function() noFuturesAllowed) {
     try {
-      unsafe();
+      noFuturesAllowed();
       return Ok(this);
     } catch (error) {
       return Err(error);
@@ -313,25 +352,31 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  None<T> mapSome(Some<T> Function(Some<T> some) mapper) {
+  None<T> mapSome(
+    @noFuturesAllowed Some<T> Function(Some<T> some) noFuturesAllowed,
+  ) {
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  None<R> flatMap<R extends Object>(Option<R> Function(T value) mapper) {
+  None<R> flatMap<R extends Object>(
+    @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
+  ) {
     return const None();
   }
 
   @override
   @pragma('vm:prefer-inline')
-  None<T> filter(bool Function(T value) predicate) => const None();
+  None<T> filter(@noFuturesAllowed bool Function(T value) noFuturesAllowed) {
+    return const None();
+  }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Option<Object>> fold(
-    Option<Object>? Function(Some<T> some) onSome,
-    Option<Object>? Function(None<T> none) onNone,
+    @noFuturesAllowed Option<Object>? Function(Some<T> some) onSome,
+    @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
       return Ok(onNone(this) ?? this);
@@ -348,11 +393,11 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<Object> someOr<R extends Object>(Option<R> other) => other;
+  Option<T> someOr(Option<T> other) => other;
 
   @override
   @pragma('vm:prefer-inline')
-  None<T> noneOr<R extends Object>(Option<R> other) => this;
+  None<T> noneOr(Option<T> other) => this;
 
   @override
   @protected
@@ -367,11 +412,17 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  None<R> map<R extends Object>(R Function(T value) mapper) => None<R>();
+  None<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
+    return None<R>();
+  }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<R>> transf<R extends Object>([R Function(T e)? transformer]) {
+  Ok<None<R>> transf<R extends Object>([
+    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+  ]) {
     return const Ok(None());
   }
 

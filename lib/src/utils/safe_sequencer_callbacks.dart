@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+
 import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -27,7 +29,7 @@ class SafeSequencerCallbacks<TParam extends Object> {
   //
 
   _CallbackRemover addCallback(
-    TSafeCallback<TParam> callback, {
+    @noFuturesAllowed TSafeCallback<TParam> callback, {
     Object? callbackKey,
   }) {
     final key = callbackKey ?? callback;
@@ -96,11 +98,16 @@ class SafeSequencerCallbacks<TParam extends Object> {
       if (include == null || include.contains(e)) {
         if (exclude.isEmpty || !exclude.contains(e)) {
           final callbackKey = e.key;
-          call(callbackKey, param, eagerError: eagerError, onError: onError);
+          call(
+            callbackKey,
+            param,
+            eagerError: eagerError,
+            onError: onError,
+          ).end();
           _seq.addSafe((e) {
             results[callbackKey] = e;
             return const Sync.unsafe(Ok(None()));
-          });
+          }).end();
         }
       }
     }
