@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.10]
+
+- Released @ 6/2025 (UTC)
+- chore: Rename Option.fromNullable to Option.from for simplicity
+
 ## [0.14.9+1]
 
 - Released @ 6/2025 (UTC)
