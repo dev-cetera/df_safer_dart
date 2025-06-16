@@ -30,7 +30,7 @@ This philosophy is enforced by a companion linter package, which is a required p
 
 For an introduction, please refer to this article:
 
-- **MEDIUM.COM** [An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a245)
+- **MEDIUM.COM** [An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451)
 - **DEV.TO** [An Introduction to Monads in Dart: Building Unbreakable Code](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
 
 For a full feature set, please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/).
