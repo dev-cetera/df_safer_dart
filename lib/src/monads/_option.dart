@@ -54,9 +54,7 @@ sealed class Option<T extends Object> extends Monad<T> {
   );
 
   /// Performs a side-effect if this is a [None].
-  Result<Option<T>> ifNone(
-    @noFuturesAllowed void Function() noFuturesAllowed,
-  );
+  Result<Option<T>> ifNone(@noFuturesAllowed void Function() noFuturesAllowed);
 
   /// Returns the contained value or `null`.
   T? orNull();
@@ -74,9 +72,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   /// Returns [None] if the predicate [noFuturesAllowed] returns `false`.
   /// Otherwise, returns the original [Option].
-  Option<T> filter(
-    @noFuturesAllowed bool Function(T value) noFuturesAllowed,
-  );
+  Option<T> filter(@noFuturesAllowed bool Function(T value) noFuturesAllowed);
 
   /// Folds the two cases of this [Option] into a single [Result].
   ///
@@ -103,9 +99,7 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  T unwrapOrElse(
-    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
-  ) {
+  T unwrapOrElse(@noFuturesAllowed T Function() ensureThisDoesNotThrow) {
     return unwrapOr(ensureThisDoesNotThrow());
   }
 
@@ -182,9 +176,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Some<T>> ifNone(
-    @noFuturesAllowed void Function() noFuturesAllowed,
-  ) {
+  Ok<Some<T>> ifNone(@noFuturesAllowed void Function() noFuturesAllowed) {
     return Ok(this);
   }
 
@@ -210,9 +202,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(
-    @noFuturesAllowed bool Function(T value) noFuturesAllowed,
-  ) {
+  Option<T> filter(@noFuturesAllowed bool Function(T value) noFuturesAllowed) {
     return noFuturesAllowed(value) ? this : const None();
   }
 
@@ -231,10 +221,7 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(
-    R Function(T value) onSome,
-    R Function() onNone,
-  ) {
+  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
     return onSome(this.value);
   }
 
@@ -331,7 +318,9 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> ifSome(@noFuturesAllowed void Function(Some<T> some) noFuturesAllowed) {
+  Ok<None<T>> ifSome(
+    @noFuturesAllowed void Function(Some<T> some) noFuturesAllowed,
+  ) {
     return Ok(this);
   }
 

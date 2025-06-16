@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.7]
+
+- Released @ 6/2025 (UTC)
+- feat: Add linter rules and update readme
+
 ## [0.14.6]
 
 - Released @ 6/2025 (UTC)

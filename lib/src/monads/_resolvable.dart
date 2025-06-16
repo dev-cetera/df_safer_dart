@@ -33,23 +33,17 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
     final result = mustAwaitAllFutures();
     if (result is Future<T>) {
-      return Async(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Async(() => result, onError: onError, onFinalize: onFinalize);
     } else {
-      return Sync(
-        () => result,
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      return Sync(() => result, onError: onError, onFinalize: onFinalize);
     }
   }
 
@@ -72,10 +66,14 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   Result<Async<T>> async();
 
   /// Performs a side-effect if this is a [Sync].
-  Resolvable<T> ifSync(@noFuturesAllowed void Function(Sync<T> sync) noFuturesAllowed);
+  Resolvable<T> ifSync(
+    @noFuturesAllowed void Function(Sync<T> sync) noFuturesAllowed,
+  );
 
   /// Performs a side-effect if this is an [Async].
-  Resolvable<T> ifAsync(@noFuturesAllowed void Function(Async<T> async) noFuturesAllowed);
+  Resolvable<T> ifAsync(
+    @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
+  );
 
   /// Unsafely gets the [Sync] instance. Throws if not a [Sync].
   @pragma('vm:prefer-inline')
@@ -218,8 +216,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(this.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -286,7 +284,9 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<T> ifAsync(@noFuturesAllowed void Function(Async<T> async) noFuturesAllowed) => this;
+  Sync<T> ifAsync(
+    @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
+  ) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -389,7 +389,9 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<R> map<R extends Object>(@noFuturesAllowed R Function(T value) noFuturesAllowed) {
+  Sync<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
     return Sync(() => value.map((e) => noFuturesAllowed(e)).unwrap());
   }
 
@@ -451,8 +453,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(this.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe(value);
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe(value);
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -462,7 +464,9 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    Future<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -515,7 +519,9 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> ifAsync(@noFuturesAllowed void Function(Async<T> async) noFuturesAllowed) {
+  Async<T> ifAsync(
+    @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
+  ) {
     try {
       noFuturesAllowed(this);
       return this;
@@ -543,9 +549,7 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> mapFutureOr<R extends Object>(
-    FutureOr<R> Function(T value) mapper,
-  ) {
+  Async<R> mapFutureOr<R extends Object>(FutureOr<R> Function(T value) mapper) {
     return Async(() async => mapper((await value).unwrap()));
   }
 
@@ -645,7 +649,9 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> map<R extends Object>(@noFuturesAllowed R Function(T value) noFuturesAllowed) {
+  Async<R> map<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
     return Async.value(value.then((e) => e.map(noFuturesAllowed)));
   }
 

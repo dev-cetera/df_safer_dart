@@ -10,8 +10,9 @@ Option<String> findUsername(int id) {
 
 void main() {
   // Chaining operations:
-  final result = findUsername(1) // This returns Some('Alice')
-      .map((name) => name.toUpperCase()); // .map only runs if it's a Some
+  final result =
+      findUsername(1) // This returns Some('Alice')
+          .map((name) => name.toUpperCase()); // .map only runs if it's a Some
 
   // Prints "Username is: ALICE"
   switch (result) {

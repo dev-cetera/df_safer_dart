@@ -80,8 +80,11 @@ extension FlattenResult8<T extends Object>
   Result<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenResult9<T extends Object> on Result<
-    Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
+extension FlattenResult9<T extends Object>
+    on
+        Result<
+          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten9();
 
