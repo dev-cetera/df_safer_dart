@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.14.9+1]
+
+- Released @ 6/2025 (UTC)
+- fix: Fix medium article link in docs
+
 ## [0.14.9]
 
 - Released @ 6/2025 (UTC)
