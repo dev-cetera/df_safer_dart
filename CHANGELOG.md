@@ -6,6 +6,7 @@
 - chore: Rename Option.fromNullable to Option.from for simplicity
 - docs Add TODO.md
 - docs: Update README.md
+- Update workflow and test
 
 ## [0.14.9+1]
 
