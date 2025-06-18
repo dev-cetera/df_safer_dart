@@ -1,22 +1,54 @@
-## Write Unbreakable Code in Dart
+# Write Unbreakable Code in Dart
 
-In software development, we spend an enormous amount of time writing defensive code. We check for null, handle exceptions with try-catch, and manage asynchronous operations with async/await. While essential, these tools often lead to code that is nested, verbose, and difficult to read. The core logic — the “happy path” — gets buried under layers of error handling.
+In mission-critical software, every potential failure must be accounted for. We write defensive code, check for nulls, and handle exceptions. However, standard Dart tools like **try-catch** and **nullable** types place the burden of safety entirely on the developer. It's easy to forget a check or miss an exception, leading to runtime failures in production—exactly where they are least acceptable.
 
-`df_safer_dart` offers a different approach.
+☝️ **This is a reliability problem.**
 
-It provides a set of tools inspired by functional programming that allow you to write clean, linear code describing the happy path, while all the messy details of null values, failures, and asynchronicity are handled automatically and safely in the background. This package introduces three core monadic types (`Option`, `Result`, and `Resolvable`) that work seamlessly together to make your code dramatically more robust and readable.
+## 🧠 The Philosophy: Paternalistic Safety for Mission-Critical Code
 
-## The Philosophy: Compile-Time Safety First
+`df_safer_dart` is intentionally paternalistic. Drawing heavy inspiration from Rust's safety-first philosophy, it operates on the principle that the compiler should be your primary partner in preventing errors. It's not about being "functional"; it's about making your code predictable and reliable at scale.
 
-Many libraries provide tools for safety, but they still allow developers to make mistakes that only appear at runtime. `df_safer_dart` is different. It is designed to be a paternalistic library that actively guides you towards correct usage and flags incorrect patterns at compile time.
+While powerful functional libraries like `fpdart` and `dartz` provide excellent tools for safety, they often place the ultimate burden of correct implementation on the developer. An unhandled exception within a mapping function can still lead to a runtime crash if not handled with perfect discipline.
 
-- **No More Runtime Future Surprises:** Using a Future in a synchronous context is a compile-time error.
-- **Guaranteed await:** Forgetting to await inside an Async block is a compile-time error.
-- **Automatic Exception Handling:** You can't forget a try-catch block, because the library's core constructors handle it for you.
+`df_safer_dart` takes a stricter, more opinionated stance. It is architected to absorb common failure points, automatically converting runtime exceptions into manageable `Err` states and passing errors down a "chain". The goal is to shift the burden of safety from developer discipline to the library's core design.
 
-This philosophy is enforced by a companion linter package, which is a required part of the setup.
+The library achieves this through only three core types (`Option`, `Result`, and `Resolvable`) that wrap failable operations. This lets you write clean, linear code that describes the "happy path," confident that the type system is handling the messy details of nulls, exceptions, and asynchronicity.
 
-## Getting Started (1/2): The Core Concepts
+## ✨ Core Features & Design
+
+- **Automatic Exception Handling:** `Result` and `Resolvable` have built-in exception handling. An unexpected throw within your logic won't crash your entire operation chain; it will be automatically caught and converted into an `Err` state. This provides a "crash-proof" resilience against common mistakes that even other safety libraries might not prevent.
+- **Airtight Sync/Async Boundaries:** Dart's `Future` and `FutureOr` can be error-prone if misused. This library addresses these challenges with its `Resolvable` type, which splits into `Sync` or `Async` branches. By enforcing compile-time checks, it prevents using a `Future` in a synchronous context or forgetting to `await` a `Future` in an asynchronous context, ensuring structural correctness.
+- **Compile-Time Null Safety:** The `Option` type makes the absence of a value an explicit state (`None`) that your code must handle, eradicating null pointer exceptions at their source.
+- **A Unified API:** While `Option`, `Result`, and `Resolvable` are distinct, they all inherit from a common base class. This is an implementation detail that allows them to share a consistent, predictable API for core methods, making the library easy to learn and use.
+- **Ergonomic Helpers & Utilities:** To make working with the core types seamless, the library includes a rich set of extensions and utilities with minimal boilerplate. These helpers allow you to safely handle collections (firstOrNone), manage nested types (flatten, swap), and convert data (e.g. `letIntOrNone`), all while reducing boilerplate and keeping your business logic clean and linear. Do refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
+
+## 🤷 When to Use/Not Use
+
+`df_safer_dart` is a specialized tool. The goal is not to use it everywhere, but to use it where it matters most.
+
+### Use it for:
+
+✔️ **Core Business Logic:** Make complex rules safe and auditable by forcing every step to be explicitly handled.
+
+✔️ **Data Parsing & Validation:** Create a secure boundary between untrusted external data (like JSON) and your application.
+
+✔️ **Network & Database Interactions:** Model expected failures like timeouts as manageable data, not runtime exceptions.
+
+✔️ **Authoring Reliable Packages:** Provide a crash-proof public API for other developers that doesn't rely on try-catch.
+
+✔️ **Mission-Critical Modules:** Ensure any operation where a partial success is dangerous either completes fully or fails cleanly.
+
+### Do Not Use it for:
+
+❌ **Simple UI Display Code:** Dart's built-in null-aware operators (??, ?.) are often more concise and sufficient for declarative UI.
+
+❌ **Rapid Prototyping:** When the goal is maximum iteration speed, the deliberate safety constraints can be unnecessary overhead.
+
+❌ **Performance-Critical "Hot Paths":** In tight loops or micro-optimization scenarios where the minimal overhead of wrapper objects is a primary concern.
+
+❌ **Deeply Exception-Based Frameworks:** In codebases architecturally dependent on exceptions for control flow, as it may feel like fighting the current.
+
+## 🚀 Getting Started
 
 For an introduction, please refer to this article:
 
@@ -24,19 +56,52 @@ For an introduction, please refer to this article:
 - **DEV.TO** [An Introduction to Monads in Dart: Building Unbreakable Code](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
 - **GITHUB** [An Introduction to Monads in Dart: Building Unbreakable Code](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)
 
-## Getting Started (2/2): Enable the Safety Lints
+## 📦 The Core Types for Unbreakable Code
 
-To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is not optional; it is fundamental to the library's design.
+`df_safer_dart` is built on three core types that work seamlessly together:
+
+- `Result<T>`: **For Operations That Can Fail**
+
+  Represents the outcome of an operation. It will be either:
+
+  - `Ok<T>`: Contains the success value.
+  - `Err<T>`: Contains a detailed, traceable error object.
+
+Result transforms exceptions from runtime surprises into predictable data, forcing you to handle failure as an explicit, manageable case.
+
+- `Option<T>`: **For Values That Might Not Exist**
+
+  Represents an optional value. It will be either:
+
+  - `Some<T>`: Contains a present value.
+  - `None<T>`: Represents the absence of a value.
+
+Option is the ultimate weapon against null pointer exceptions. It makes absence a compile-time concern, not a runtime crash.
+
+- `Resolvable<T>`: **To Unify Sync and Async Logic**
+
+  A powerful wrapper that provides a single, consistent API for operations, regardless of whether they complete instantly or over time. It will be either:
+
+  - `Sync<T>`: For immediate, failable operations. Contains a Result.
+  - `Async<T>`: For operations that return a Future, also containing a Result.
+
+Resolvable eliminates the mental overhead of branching logic for sync vs. async code, allowing you to build complex, failable workflows with linear, readable chains.
+
+## ⚠️ Enable the Safety Lints (BETA feature)
+
+To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is NOT OPTIONAL! It is fundamental to the library's design.
+
+🪲 **BUG:** `must_await_all_futures` can give a false negative with nested anonymous functions. We'll fix it soon! Or if anyone out there is up for the task, here's the lints package: https://github.com/dev-cetera/df_safer_dart_lints.
 
 1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.14.10
+  df_safer_dart: ^0.14.12
 
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.1.3
+  df_safer_dart_lints: ^0.1.4
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
@@ -53,40 +118,3 @@ custom_lint:
     - must_be_anonymous: true
     - no_futures_allowed: true
 ```
-
-## The Core Monads
-
-This package introduces three core monads (`Result`, `Option`, and `Resolvable`) that work seamlessly together:
-
-- `Result`: Represents the outcome of an operation that can fail. It will either be:
-
-  - `Ok`: A success value of type T.
-  - `Err`: A failure value containing details about the error.
-
-`Result` eliminates the need for try-catch blocks by making failure an explicit and manageable part of the type system.
-
-- `Option`: Represents a value that may or may not be present. It will either be:
-
-  - `Some`: A present value of type T.
-  - `None`: The absence of a value.
-
-`Option` eliminates null values and forces the developer to explicitly handle the "absent" case, preventing NullPointerExceptions.
-
-- `Resolvable`: A powerful wrapper that unifies synchronous and asynchronous operations. It will either be:
-
-  - `Sync`: For immediate, failable operations.
-  - `Async`: For time-based, failable operations.
-
-`Resolvable` provides a consistent API for chaining operations, regardless of whether they are synchronous or asynchronous.
-
-These monads form the foundation for more predictable, expressive, and maintainable error handling in Dart.
-
-## Additional
-
-**NOTE:** This packate is best suited for mission critical sections of your project where reliability and safety are essential. For less sensitive code, standard approaches like `Future`, `FutureOr`, try-catch, and nullable types may be more appropriate.
-
-Additionally, the package includes two complementary mechanisms:
-
-- `SafeCompleter`: A safer, more powerful alternative to Dart’s Completer. It allows you to resolve a value (or an error) from any context (synchronous or asynchronous) and provides a `Resolvable` to listen for the result, maintaining type safety throughout.
-
-- `SafeSequential`: A utility for executing a series of failable, synchronous, or asynchronous operations in a guaranteed sequential order. It simplifies the management of complex workflows and provides an alternative to patterns like Future.wait while staying entirely within the monadic world.
