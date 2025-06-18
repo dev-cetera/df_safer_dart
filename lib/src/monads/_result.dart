@@ -176,7 +176,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
+  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -329,9 +330,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-      : statusCode = Option.from(statusCode),
-        stackTrace = Trace.current(),
-        super._();
+    : statusCode = Option.from(statusCode),
+      stackTrace = Trace.current(),
+      super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -440,7 +441,8 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() =>
+      error is E ? Some(error as E) : NONE;
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
