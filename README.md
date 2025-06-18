@@ -4,7 +4,7 @@
 Dart & Flutter Packages by dev-cetera.com & contributors.
 
 [![pub](https://img.shields.io/pub/v/df_safer_dart.svg)](https://pub.dev/packages/df_safer_dart)
-[![tag](https://img.shields.io/badge/tag-v0.14.11-purple)](https://github.com/dev-cetera/df_safer_dart/tree/v0.14.11)
+[![tag](https://img.shields.io/badge/tag-v0.14.12-purple)](https://github.com/dev-cetera/df_safer_dart/tree/v0.14.12)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE)
 
 ---
@@ -140,11 +140,11 @@ Please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/
 
 ---
 
-## 💬 Contributing and Discussions
+## Contributing and Discussions
 
 This is an open-source project, and we warmly welcome contributions from everyone, regardless of experience level. Whether you're a seasoned developer or just starting out, contributing to this project is a fantastic way to learn, share your knowledge, and make a meaningful impact on the community.
 
-### ☝️ Ways you can contribute
+### Ways you can contribute
 
 - **Buy me a coffee:** If you'd like to support the project financially, consider [buying me a coffee](https://www.buymeacoffee.com/dev_cetera). Your support helps cover the costs of development and keeps the project growing.
 - **Find us on Discord:** Feel free to ask questions and engage with the community here: https://discord.gg/gEQ8y2nfyX.
@@ -157,7 +157,7 @@ This is an open-source project, and we warmly welcome contributions from everyon
 
 No matter how you choose to contribute, your involvement is greatly appreciated and valued!
 
-### ☕ We drink a lot of coffee...
+### We drink a lot of coffee...
 
 If you're enjoying this package and find it valuable, consider showing your appreciation with a small donation. Every bit helps in supporting future development. You can donate here: https://www.buymeacoffee.com/dev_cetera
 
