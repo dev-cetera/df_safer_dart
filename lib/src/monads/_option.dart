@@ -17,18 +17,37 @@ part of 'monad.dart';
 /// A [Monad] that represents an optional value: every [Option] is either
 /// [Some] and contains a value, or [None] and does not.
 sealed class Option<T extends Object> extends Monad<T> {
-  /// Combines two [Option] monads into containing a tuple of their
-  /// values if both are [Some].
+  /// Combines 2 [Option] monads into 1 containing a tuple of their values if
+  /// all are [Some].
   ///
-  /// Returns [None] if either or both are [None].
+  /// Returns [None] if any are [None].
   static Option<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Option<T1> o1,
     Option<T2> o2,
   ) {
-    if (o1 is Some<T1> && o2 is Some<T2>) {
-      return Some((o1.value, o2.value));
+    switch ((o1, o2)) {
+      case (Some(value: final v1), Some(value: final v2)):
+        return Some((v1, v2));
+      default:
+        return const None();
     }
-    return const None();
+  }
+
+  /// Combines 3 [Option] monads into 1 containing a tuple of their values if
+  /// all are [Some].
+  ///
+  /// Returns [None] if any are [None]
+  static Option<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Option<T1> o1,
+    Option<T2> o2,
+    Option<T3> o3,
+  ) {
+    switch ((o1, o2, o3)) {
+      case (Some(value: final v1), Some(value: final v2), Some(value: final v3)):
+        return Some((v1, v2, v3));
+      default:
+        return const None();
+    }
   }
 
   const Option._();
@@ -37,6 +56,7 @@ sealed class Option<T extends Object> extends Monad<T> {
   ///
   /// Returns [Some] if the [value] is not `null`, otherwise returns [None].
   factory Option.from(T? value) {
+    // This is already safe and idiomatic, no switch needed here.
     if (value != null) {
       return Some(value);
     } else {
@@ -44,7 +64,7 @@ sealed class Option<T extends Object> extends Monad<T> {
     }
   }
 
-  @Deprecated('Use "Option.from(T? value)? instead.')
+  @Deprecated('Use "Option.from(T? value)" instead.')
   factory Option.fromNullable(T? value) => Option.from(value);
 
   /// Returns `this` as a base [Option] type.
@@ -109,16 +129,11 @@ sealed class Option<T extends Object> extends Monad<T> {
   Option<T> noneOr(Option<T> other);
 
   @override
+  @unsafeOrError
   T unwrap();
 
   @override
   T unwrapOr(T fallback);
-
-  @override
-  @pragma('vm:prefer-inline')
-  T unwrapOrElse(@noFuturesAllowed T Function() ensureThisDoesNotThrow) {
-    return unwrapOr(ensureThisDoesNotThrow());
-  }
 
   @override
   Option<R> map<R extends Object>(
@@ -144,11 +159,11 @@ sealed class Option<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Option<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Option<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Option<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Option<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -298,11 +313,11 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Some<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Some<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Some<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Some<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -454,11 +469,11 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<None<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<None<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<None<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<None<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')

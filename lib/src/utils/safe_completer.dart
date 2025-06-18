@@ -12,8 +12,7 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
-    show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
 
 import '../monads/monad.dart';
 
@@ -35,30 +34,26 @@ class SafeCompleter<T extends Object> {
   /// Completes the operation with the provided [resolvable].
   Resolvable<T> resolve(Resolvable<T> resolvable) {
     if (_isResolving) {
-      return Sync.value(Err('SafeFinisher<$T> is already resolving!'));
+      return Sync.unsafe(Err('SafeCompleter<$T> is already resolving!'));
     }
     _isResolving = true;
     if (isCompleted) {
-      return Sync.value(Err('SafeFinisher<$T> is already completed!'));
+      return Sync.unsafe(Err('SafeCompleter<$T> is already completed!'));
     }
 
     return resolvable.resultMap((e) {
-      if (e.isOk()) {
-        final a = e.unwrap();
-        _value = Some(a);
-        _completer.complete(a);
-        return e;
-      } else {
-        final err = e.err().unwrap();
-        _completer.completeError(err);
-        return err;
+      // Use a switch on the Result 'e' for exhaustive, safe handling.
+      switch (e) {
+        case Ok(value: final value):
+          _value = Some(value);
+          _completer.complete(value);
+          return e;
+        case Err():
+          _completer.completeError(e);
+          return e;
       }
     });
   }
-
-  @Deprecated('Use "complete" instead.')
-  @pragma('vm:prefer-inline')
-  Resolvable<T> finish(FutureOr<T> value) => complete(value);
 
   /// Completes the operation with the provided [value].
   @pragma('vm:prefer-inline')
@@ -68,9 +63,15 @@ class SafeCompleter<T extends Object> {
   /// completed.
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() {
-    return Resolvable(
-      () => (_value.isSome() ? _value.unwrap() : _completer.future),
-    );
+    return Resolvable(() {
+      // Use a switch on the Option '_value' for clear and safe state checking.
+      switch (_value) {
+        case Some(value: final v):
+          return v;
+        case None():
+          return _completer.future;
+      }
+    });
   }
 
   /// Checks if the value has been set or if the [SafeCompleter] is completed.
@@ -84,13 +85,13 @@ class SafeCompleter<T extends Object> {
     final completer = SafeCompleter<R>();
     resolvable().map((e) {
       try {
-        final result = noFuturesAllowed != null
-            ? noFuturesAllowed(e)
-            : (e as R);
-        completer.resolve(Sync<R>.value(Ok(result))).end();
+        final result = noFuturesAllowed != null ? noFuturesAllowed(e) : (e as R);
+        completer.resolve(Sync<R>.unsafe(Ok(result))).end();
       } catch (e) {
         completer
-            .resolve(Sync.value(Err('Failed to transform type $T to $R.')))
+            .resolve(
+              Sync.unsafe(Err('Failed to transform type $T to $R.')),
+            )
             .end();
       }
       return e;

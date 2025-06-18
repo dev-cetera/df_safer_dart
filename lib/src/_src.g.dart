@@ -25,6 +25,7 @@ export './utils/link_monad.dart';
 export './utils/debug.dart';
 export './utils/let_or_non_collections.dart';
 export './utils/lazy.dart';
+export './utils/unsafe.dart';
 export './utils/safe_sequencer_callbacks.dart';
 export './utils/let_or_none.dart';
 export './utils/let_or_non_map.dart';

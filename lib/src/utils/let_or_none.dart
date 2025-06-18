@@ -34,25 +34,34 @@ Option<T> jsonDecodeOrNone<T extends Object>(String input) {
   }
 }
 
-@pragma('vm:prefer-inline')
 Option<T> letAsOrNone<T extends Object>(dynamic input) {
-  if (input is T) return Some(input);
-  final rawValue = unwrapOptionOrNull(input);
-  return rawValue is T ? Some(rawValue) : const None();
+  switch (input) {
+    case T value:
+      return Some(value);
+    case Some(value: final innerValue):
+      // Recursively unwrap and check the inner value.
+      return letAsOrNone<T>(innerValue);
+    default:
+      return const None();
+  }
 }
 
 Option<num> letNumOrNone(dynamic input) {
-  if (input is Option<num>) return input;
-  if (input is num) return Some(input);
-
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue is num) return Some(rawValue);
-  if (rawValue is String) {
-    return Option.from(num.tryParse(rawValue.trim()));
+  switch (input) {
+    case Option<num> o:
+      return o;
+    case num n:
+      return Some(n);
+    case String s:
+      return Option.from(num.tryParse(s.trim()));
+    case bool b:
+      return Some(b ? 1 : 0);
+    case Some(value: final v):
+      // Handle nested Options like Some<String>
+      return letNumOrNone(v);
+    default:
+      return const None();
   }
-  if (rawValue is bool) return Some(rawValue ? 1 : 0);
-
-  return const None();
 }
 
 @pragma('vm:prefer-inline')
@@ -68,40 +77,48 @@ Option<double> letDoubleOrNone(dynamic input) {
 }
 
 Option<bool> letBoolOrNone(dynamic input) {
-  if (input is Option<bool>) return input;
-  if (input is bool) return Some(input);
-
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue is bool) return Some(rawValue);
-  if (rawValue is num) return Some(rawValue != 0);
-  if (rawValue is String) {
-    return Option.from(bool.tryParse(rawValue, caseSensitive: false));
+  switch (input) {
+    case Option<bool> o:
+      return o;
+    case bool b:
+      return Some(b);
+    case num n:
+      return Some(n != 0);
+    case String s:
+      return Option.from(bool.tryParse(s, caseSensitive: false));
+    case Some(value: final v):
+      return letBoolOrNone(v);
+    default:
+      return const None();
   }
-
-  return const None();
 }
 
 Option<Uri> letUriOrNone(dynamic input) {
-  if (input is Option<Uri>) return input;
-  if (input is Uri) return Some(input);
-
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue is Uri) return Some(rawValue);
-  if (rawValue is String) {
-    return Option.from(Uri.tryParse(rawValue.trim()));
+  switch (input) {
+    case Option<Uri> o:
+      return o;
+    case Uri u:
+      return Some(u);
+    case String s:
+      return Option.from(Uri.tryParse(s.trim()));
+    case Some(value: final v):
+      return letUriOrNone(v);
+    default:
+      return const None();
   }
-
-  return const None();
 }
 
 Option<DateTime> letDateTimeOrNone(dynamic input) {
-  if (input is Option<DateTime>) return input;
-  if (input is DateTime) return Some(input);
-
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue is DateTime) return Some(rawValue);
-  if (rawValue is String) {
-    return Option.from(DateTime.tryParse(rawValue.trim()));
+  switch (input) {
+    case Option<DateTime> o:
+      return o;
+    case DateTime d:
+      return Some(d);
+    case String s:
+      return Option.from(DateTime.tryParse(s.trim()));
+    case Some(value: final v):
+      return letDateTimeOrNone(v);
+    default:
+      return const None();
   }
-  return const None();
 }

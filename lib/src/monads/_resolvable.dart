@@ -22,20 +22,49 @@ part of 'monad.dart';
 sealed class Resolvable<T extends Object> extends Monad<T> {
   const Resolvable.unsafe(this.value);
 
-  /// Combines two [Resolvable] monads into a single one containing a tuple
-  /// of their values if both resolve to [Ok].
+  /// Combines 2 [Resolvable] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
   ///
-  /// If either resolve to [Err], applies the [onErr] function to combine their
-  /// errors.
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
   static Resolvable<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
   ) {
-    if (r1.isSync() && r2.isSync()) {
-      return Sync.zip2(r1.sync().unwrap(), r2.sync().unwrap(), onErr);
+    switch ((r1, r2)) {
+      case (Sync(value: final v1), Sync(value: final v2)):
+        return Sync.zip2(Sync.unsafe(v1), Sync.unsafe(v2), onErr);
+      case (final res1, final res2):
+        return Async.zip2(res1.toAsync(), res2.toAsync(), onErr);
     }
-    return Async.zip2(r1.toAsync(), r2.toAsync(), onErr);
+  }
+
+  /// Combines 3 [Resolvable] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
+  ///
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
+  static Resolvable<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Resolvable<T1> r1,
+    Resolvable<T2> r2,
+    Resolvable<T3> r3,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
+  ) {
+    switch ((r1, r2, r3)) {
+      case (Sync(value: final v1), Sync(value: final v2), Sync(value: final v3)):
+        return Sync.zip3(
+          Sync.unsafe(v1),
+          Sync.unsafe(v2),
+          Sync.unsafe(v3),
+          onErr,
+        );
+      case (final res1, final res2, final res3):
+        return Async.zip3(
+          res1.toAsync(),
+          res2.toAsync(),
+          res3.toAsync(),
+          onErr,
+        );
+    }
   }
 
   /// The contained value.
@@ -49,9 +78,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -92,10 +119,13 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   );
 
   /// Unsafely gets the [Sync] instance. Throws if not a [Sync].
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   Sync<T> unwrapSync() => sync().unwrap();
 
   /// Unsafely gets the [Async] instance. Throws if not an [Async].
+  /// @unsafeOrError
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   Async<T> unwrapAsync() => async().unwrap();
 
@@ -156,18 +186,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   FutureOr<Option<Err<T>>> err();
 
   @override
+  @unsafeOrError
   FutureOr<T> unwrap();
 
   @override
   FutureOr<T> unwrapOr(T fallback);
-
-  @override
-  @pragma('vm:prefer-inline')
-  FutureOr<T> unwrapOrElse(
-    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
-  ) {
-    return unwrapOr(ensureThisDoesNotThrow());
-  }
 
   @override
   Resolvable<R> map<R extends Object>(
@@ -193,11 +216,11 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Resolvable<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Resolvable<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Resolvable<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Resolvable<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -223,11 +246,10 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 /// Do not use any Futures in the constructor [Sync.new] to ensure errors are
 /// properly caught and propagated.
 final class Sync<T extends Object> extends Resolvable<T> {
-  /// Combines two [Sync] monads into a single one containing a tuple
-  /// of their values if both resolve to [Ok].
+  /// Combines 2 [Sync] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
   ///
-  /// If either resolve to [Err], applies the [onErr] function to combine their
-  /// errors.
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
   static Sync<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Sync<T1> s1,
     Sync<T2> s2,
@@ -236,10 +258,35 @@ final class Sync<T extends Object> extends Resolvable<T> {
     return Sync(() {
       final r1 = s1.value;
       final r2 = s2.value;
-      if (r1 is Ok<T1> && r2 is Ok<T2>) {
-        return (r1.value, r2.value);
+      switch ((r1, r2)) {
+        case (Ok(value: final v1), Ok(value: final v2)):
+          return (v1, v2);
+        default:
+          throw onErr(r1, r2);
       }
-      throw onErr(r1, r2);
+    });
+  }
+
+  /// Combines 3 [Sync] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
+  ///
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
+  static Sync<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Sync<T1> s1,
+    Sync<T2> s2,
+    Sync<T3> s3,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
+  ) {
+    return Sync(() {
+      final r1 = s1.value;
+      final r2 = s2.value;
+      final r3 = s3.value;
+      switch ((r1, r2, r3)) {
+        case (Ok(value: final v1), Ok(value: final v2), Ok(value: final v3)):
+          return (v1, v2, v3);
+        default:
+          throw onErr(r1, r2, r3);
+      }
     });
   }
 
@@ -256,8 +303,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(this.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe(value);
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe(value);
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -271,7 +318,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     @noFuturesAllowed void Function()? onFinalize,
   }) {
     assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
-    return Sync.value(() {
+    return Sync.unsafe(() {
       try {
         return Ok(noFuturesAllowed());
       } on Err catch (e) {
@@ -318,7 +365,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
       noFuturesAllowed(this);
       return this;
     } catch (error) {
-      return Sync.value(Err(error));
+      return Sync.unsafe(Err(error));
     }
   }
 
@@ -326,7 +373,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
-  ) => this;
+  ) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -352,7 +400,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     try {
       return onSync(this) ?? this;
     } catch (error) {
-      return Sync.value(Err(error));
+      return Sync.unsafe(Err(error));
     }
   }
 
@@ -362,7 +410,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
     @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   ) {
-    return Sync.value(value.fold(onOk, onErr));
+    return Sync.unsafe(value.fold(onOk, onErr));
   }
 
   @override
@@ -380,7 +428,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Async<T> toAsync() => Async.value(Future.value(value));
+  Async<T> toAsync() => Async.unsafe(Future.value(value));
 
   @override
   @pragma('vm:prefer-inline')
@@ -397,19 +445,23 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Resolvable<T> okOr(Resolvable<T> other) {
-    if (value.isOk()) {
-      return this;
+    switch (value) {
+      case Ok():
+        return this;
+      case Err():
+        return other;
     }
-    return other;
   }
 
   @override
   @pragma('vm:prefer-inline')
   Resolvable<T> errOr(Resolvable<T> other) {
-    if (value.isErr()) {
-      return this;
+    switch (value) {
+      case Err():
+        return this;
+      case Ok():
+        return other;
     }
-    return other;
   }
 
   @override
@@ -421,6 +473,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   Option<Err<T>> err() => value.err();
 
   @override
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrap() => value.unwrap();
 
@@ -462,11 +515,11 @@ final class Sync<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Sync<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Sync<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Sync<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Sync<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -484,11 +537,10 @@ final class Sync<T extends Object> extends Resolvable<T> {
 /// Await all Futures in the constructor [Async.new] to ensure errors are
 /// properly caught and propagated.
 final class Async<T extends Object> extends Resolvable<T> {
-  /// Combines two [Async] monads into a single one containing a tuple
-  /// of their values if both resolve to [Ok].
+  /// Combines 2 [Async] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
   ///
-  /// If either resolve to [Err], applies the [onErr] function to combine their
-  /// errors.
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
   static Async<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Async<T1> s1,
     Async<T2> s2,
@@ -497,10 +549,35 @@ final class Async<T extends Object> extends Resolvable<T> {
     return Async(() async {
       final r1 = await s1.value;
       final r2 = await s2.value;
-      if (r1 is Ok<T1> && r2 is Ok<T2>) {
-        return (r1.value, r2.value);
+      switch ((r1, r2)) {
+        case (Ok(value: final v1), Ok(value: final v2)):
+          return (v1, v2);
+        default:
+          throw onErr(r1, r2);
       }
-      throw onErr(r1, r2);
+    });
+  }
+
+  /// Combines 3 [Async] monads into 1 containing a tuple of their values
+  /// if all resolve to [Ok].
+  ///
+  /// If any resolve to [Err], applies [onErr] function to combine errors.
+  static Async<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Async<T1> s1,
+    Async<T2> s2,
+    Async<T3> s3,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
+  ) {
+    return Async(() async {
+      final r1 = await s1.value;
+      final r2 = await s2.value;
+      final r3 = await s3.value;
+      switch ((r1, r2, r3)) {
+        case (Ok(value: final v1), Ok(value: final v2), Ok(value: final v3)):
+          return (v1, v2, v3);
+        default:
+          throw onErr(r1, r2, r3);
+      }
     });
   }
 
@@ -517,8 +594,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(this.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe(value);
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe(value);
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -528,14 +605,12 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
     assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
-    return Async.value(() async {
+    return Async.unsafe(() async {
       try {
         return Ok<T>(await mustAwaitAllFutures());
       } on Err catch (e) {
@@ -590,7 +665,7 @@ final class Async<T extends Object> extends Resolvable<T> {
       noFuturesAllowed(this);
       return this;
     } catch (error) {
-      return Async.value(Future.value(Err(error)));
+      return Async.unsafe(Future.value(Err(error)));
     }
   }
 
@@ -600,14 +675,18 @@ final class Async<T extends Object> extends Resolvable<T> {
   ) {
     return Async(() async {
       final a = await value;
-      if (a.isErr()) {
-        throw a;
+      switch (a) {
+        case Ok():
+          final b = noFuturesAllowed(a);
+          switch (b) {
+            case Ok(value: final v):
+              return v;
+            case Err():
+              throw b;
+          }
+        case Err():
+          throw a;
       }
-      final b = noFuturesAllowed(a);
-      if (b.isErr()) {
-        throw b;
-      }
-      return b.unwrap();
     });
   }
 
@@ -626,7 +705,7 @@ final class Async<T extends Object> extends Resolvable<T> {
     try {
       return onAsync(this) ?? this;
     } catch (error) {
-      return Async.value(Future.value(Err(error)));
+      return Async.unsafe(Future.value(Err(error)));
     }
   }
 
@@ -675,10 +754,12 @@ final class Async<T extends Object> extends Resolvable<T> {
   Async<T> okOr(Resolvable<T> other) {
     return Async(() async {
       final awaitedValue = await value;
-      if (awaitedValue.isOk()) {
-        return awaitedValue.unwrap();
+      switch (awaitedValue) {
+        case Ok(value: final v):
+          return v;
+        case Err():
+          return (await other.value).unwrap();
       }
-      return (await other.value).unwrap();
     });
   }
 
@@ -687,10 +768,12 @@ final class Async<T extends Object> extends Resolvable<T> {
   Async<T> errOr(Resolvable<T> other) {
     return Async(() async {
       final awaitedValue = await value;
-      if (awaitedValue.isErr()) {
-        return awaitedValue.unwrap();
+      switch (awaitedValue) {
+        case Err():
+          return awaitedValue.unwrap();
+        case Ok():
+          return (await other.value).unwrap();
       }
-      return (await other.value).unwrap();
     });
   }
 
@@ -704,9 +787,8 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Future<T> unwrap() {
-    return value.then((e) => e.unwrap());
-  }
+  @unsafeOrError
+  Future<T> unwrap() => value.then((e) => e.unwrap());
 
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
@@ -716,7 +798,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   Async<R> map<R extends Object>(
     @noFuturesAllowed R Function(T value) noFuturesAllowed,
   ) {
-    return Async.value(value.then((e) => e.map(noFuturesAllowed)));
+    return Async.unsafe(value.then((e) => e.map(noFuturesAllowed)));
   }
 
   @override
@@ -725,10 +807,12 @@ final class Async<T extends Object> extends Resolvable<T> {
   ]) {
     return Async(() async {
       final okOrErr = (await value).transf<R>(noFuturesAllowed);
-      if (okOrErr.isErr()) {
-        throw okOrErr;
+      switch (okOrErr) {
+        case Ok(value: final v):
+          return v;
+        case Err():
+          throw okOrErr;
       }
-      return okOrErr.unwrap();
     });
   }
 
@@ -746,11 +830,11 @@ final class Async<T extends Object> extends Resolvable<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Async<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Async<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Async<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Async<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')

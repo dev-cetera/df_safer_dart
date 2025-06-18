@@ -18,17 +18,21 @@ import 'let_or_none.dart';
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 Option<Iterable<T>> letIterableOrNone<T extends Object>(dynamic input) {
-  if (input is Option<Iterable<T>>) return input;
-  if (input is Iterable<T>) return Some(input);
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue == null) return const None();
-  if (rawValue is Iterable<T>) return Some(rawValue);
-  final sourceIterable = switch (rawValue) {
-    Iterable<dynamic> i => Some(i),
-    String s => jsonDecodeOrNone<Iterable<dynamic>>(s),
-    _ => const None<Iterable<dynamic>>(),
-  };
-  return sourceIterable.flatMap((e) => letAsOrNone<Iterable<T>>((e)));
+  switch (input) {
+    case Option<Iterable<T>> o:
+      return o;
+    case Iterable<T> i:
+      return Some(i);
+    case String s:
+      final decodedIterable = jsonDecodeOrNone<Iterable<dynamic>>(s);
+      return decodedIterable.flatMap((iter) => letAsOrNone<Iterable<T>>(iter));
+    case Iterable<dynamic> i:
+      return letAsOrNone<Iterable<T>>(i);
+    case Some(value: final v):
+      return letIterableOrNone<T>(v);
+    default:
+      return const None();
+  }
 }
 
 Option<List<T>> letListOrNone<T extends Object>(dynamic input) {

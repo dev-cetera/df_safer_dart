@@ -19,15 +19,19 @@ import '../monads/monad.dart';
 Option<Map<K, V>> letMapOrNone<K extends Object, V extends Object>(
   dynamic input,
 ) {
-  if (input is Option<Map<K, V>>) return input;
-  if (input is Map<K, V>) return Some(input);
-  final rawValue = unwrapOptionOrNull(input);
-  if (rawValue == null) return const None();
-  if (rawValue is Map<K, V>) return Some(rawValue);
-  final sourceMap = switch (rawValue) {
-    Map<dynamic, dynamic> m => Some(m),
-    String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(s),
-    _ => const None<Map<dynamic, dynamic>>(),
-  };
-  return sourceMap.flatMap((map) => letAsOrNone<Map<K, V>>(map));
+  switch (input) {
+    case Option<Map<K, V>> o:
+      return o;
+    case Map<K, V> m:
+      return Some(m);
+    case String s:
+      final decodedMap = jsonDecodeOrNone<Map<dynamic, dynamic>>(s);
+      return decodedMap.flatMap((map) => letAsOrNone<Map<K, V>>(map));
+    case Map<dynamic, dynamic> m:
+      return letAsOrNone<Map<K, V>>(m);
+    case Some(value: final v):
+      return letMapOrNone<K, V>(v);
+    default:
+      return const None();
+  }
 }

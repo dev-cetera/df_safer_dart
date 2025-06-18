@@ -10,27 +10,26 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
-    show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class SafeSequencerCallbacks<TParam extends Object> {
+class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
   //
   //
   //
 
-  final _seq = SafeSequencer();
-  final _callbacks = <Object, TSafeCallback<TParam>>{};
+  final _seq = SafeSequencer<T>();
+  final _callbacks = <Object, TSafeCallback<T, TParam>>{};
 
   //
   //
   //
 
   _CallbackRemover addCallback(
-    @noFuturesAllowed TSafeCallback<TParam> callback, {
+    @noFuturesAllowed TSafeCallback<T, TParam> callback, {
     Object? callbackKey,
   }) {
     final key = callbackKey ?? callback;
@@ -42,15 +41,13 @@ class SafeSequencerCallbacks<TParam extends Object> {
   //
   //
 
-  bool callbackExists(dynamic callbackKey) =>
-      _callbacks.containsKey(callbackKey);
+  bool callbackExists(dynamic callbackKey) => _callbacks.containsKey(callbackKey);
 
   //
   //
   //
 
-  bool removeCallback(Object callbackKey) =>
-      _callbacks.remove(callbackKey) != null;
+  bool removeCallback(Object callbackKey) => _callbacks.remove(callbackKey) != null;
 
   //
   //
@@ -62,15 +59,15 @@ class SafeSequencerCallbacks<TParam extends Object> {
   //
   //
 
-  Resolvable<Option<Object>> call(
+  Resolvable<Option<T>> call(
     Object callbackKey,
     TParam param, {
     bool eagerError = false,
-    dynamic Function(Err err)? onError,
+    void Function(Err err)? onError,
   }) {
     final callback = _callbacks.getOption(callbackKey);
     if (callback.isNone()) {
-      return Sync.value(
+      return Sync.unsafe(
         Err('No callback associated with $callbackKey exists!'),
       );
     }
@@ -78,7 +75,7 @@ class SafeSequencerCallbacks<TParam extends Object> {
       if (prev.isErr()) {
         onError?.call(prev.err().unwrap());
         if (eagerError) {
-          return Sync.value(prev);
+          return Sync.unsafe(prev);
         }
       }
       return callback.unwrap()(callbackKey, param);
@@ -89,14 +86,14 @@ class SafeSequencerCallbacks<TParam extends Object> {
   //
   //
 
-  Resolvable<Map<Object, Result<Option<Object>>>> callAll(
+  Resolvable<Map<Object, Result<Option<T>>>> callAll(
     TParam param, {
     Set<dynamic>? include,
     Set<dynamic> exclude = const {},
     bool eagerError = true,
-    dynamic Function(Err err)? onError,
+    void Function(Err err)? onError,
   }) {
-    final results = <Object, Result<Option<Object>>>{};
+    final results = <Object, Result<Option<T>>>{};
     for (final e in _callbacks.entries) {
       if (include == null || include.contains(e)) {
         if (exclude.isEmpty || !exclude.contains(e)) {
@@ -114,18 +111,16 @@ class SafeSequencerCallbacks<TParam extends Object> {
         }
       }
     }
-    return _seq
-        .addSafe((_) {
-          return Sync.value(Ok(Some(results)));
-        })
-        .map((e) => e.unwrap());
+    return _seq.last.map((e) => results);
   }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef TSafeCallback<T> =
-    Resolvable<Option<Object>> Function(Object callbackKey, T param);
+typedef TSafeCallback<T extends Object, TParam extends Object> = Resolvable<Option<T>> Function(
+  Object callbackKey,
+  TParam param,
+);
 
 class _CallbackRemover {
   final void Function() _remover;

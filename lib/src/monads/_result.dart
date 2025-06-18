@@ -18,19 +18,48 @@ part of 'monad.dart';
 /// either [Ok] and contains a success value, or [Err] and contains an error
 /// value.
 sealed class Result<T extends Object> extends Monad<T> {
-  /// Combines two [Result] monads into a single one containing a tuple
-  /// of their values if both are [Ok].
+  /// Combines 2 [Result] monads into 1 containing a tuple of their values if
+  /// all are [Ok].
   ///
-  /// If either are [Err], applies the [onErr] function to combine their errors.
+  /// If any are [Err], applies [onErr] function to combine errors.
   static Result<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
-    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
+    @noFuturesAllowed
+    Err<(T1, T2)> Function(
+      Result<T1>,
+      Result<T2>,
+    ) onErr,
   ) {
-    if (r1 is Ok<T1> && r2 is Ok<T2>) {
-      return Ok((r1.value, r2.value));
+    switch ((r1, r2)) {
+      case (Ok(value: final v1), Ok(value: final v2)):
+        return Ok((v1, v2));
+      default:
+        return onErr(r1, r2);
     }
-    return onErr(r1, r2);
+  }
+
+  /// Combines 3 [Result] monads into 1 containing a tuple of their values if
+  /// all are [Ok].
+  ///
+  /// If any are [Err], applies [onErr] function to combine errors.
+  static Result<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Result<T1> r1,
+    Result<T2> r2,
+    Result<T3> r3,
+    @noFuturesAllowed
+    Err<(T1, T2, T3)> Function(
+      Result<T1>,
+      Result<T2>,
+      Result<T3>,
+    ) onErr,
+  ) {
+    switch ((r1, r2, r3)) {
+      case (Ok(value: final v1), Ok(value: final v2), Ok(value: final v3)):
+        return Ok((v1, v2, v3));
+      default:
+        return onErr(r1, r2, r3);
+    }
   }
 
   const Result._();
@@ -88,10 +117,6 @@ sealed class Result<T extends Object> extends Monad<T> {
     R Function(Err<T> err) onErrUnsafe,
   );
 
-  /// Combines two [Result] instances.
-  /// If both are [Ok], returns a tuple of their values, otherwise returns `None`.
-  (Option<T>, Option<R>) and<R extends Object>(Result<R> other);
-
   /// Returns this if it's [Ok], otherwise returns the `other` [Result].
   Result<T> okOr(Result<T> other);
 
@@ -99,16 +124,11 @@ sealed class Result<T extends Object> extends Monad<T> {
   Result<T> errOr(Result<T> other);
 
   @override
+  @unsafeOrError
   T unwrap();
 
   @override
   T unwrapOr(T fallback);
-
-  @override
-  @pragma('vm:prefer-inline')
-  T unwrapOrElse(@noFuturesAllowed T Function() ensureThisDoesNotThrow) {
-    return unwrapOr(ensureThisDoesNotThrow());
-  }
 
   @override
   Result<R> map<R extends Object>(
@@ -134,11 +154,11 @@ sealed class Result<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Result<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Result<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Result<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Result<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -176,8 +196,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) =>
-      this;
+  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -235,16 +254,6 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  (Option<T>, Option<R>) and<R extends Object>(Result<R> other) {
-    if (other.isOk()) {
-      return (Some(this.unwrap()), Some(other.unwrap()));
-    } else {
-      return (const None(), const None());
-    }
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
   Ok<T> okOr(Result<T> other) => this;
 
   @override
@@ -295,11 +304,11 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Ok<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Ok<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Ok<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Ok<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')
@@ -330,18 +339,18 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-    : statusCode = Option.from(statusCode),
-      stackTrace = Trace.current(),
-      super._();
+      : statusCode = Option.from(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
-    if (error == null) {
-      return Err('Error is null!');
-    }
-    return Err(error, statusCode: model.statusCode);
+    return Err(
+      error ?? 'Unknown error!',
+      statusCode: model.statusCode,
+    );
   }
 
   @override
@@ -427,12 +436,6 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  (None<T>, None<R>) and<R extends Object>(Result<R> other) {
-    return (const None(), const None());
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
   Result<T> okOr(Result<T> other) => other;
 
   @override
@@ -441,8 +444,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : NONE;
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : const None();
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
@@ -515,11 +517,11 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Err<T>> wrapSync() => Sync.value(Ok(this));
+  Sync<Err<T>> wrapSync() => Sync.unsafe(Ok(this));
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Err<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+  Async<Err<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
 
   @override
   @pragma('vm:prefer-inline')

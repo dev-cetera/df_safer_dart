@@ -87,18 +87,12 @@ sealed class Monad<T extends Object> implements Equatable {
 
   /// Unsafely returns the contained value. Throws [Err] the `Monad` is an
   /// [Err] or [None].
+  @unsafeOrError
   FutureOr<T> unwrap();
 
   /// Returns the contained value, or the `fallback` if the [Monad] is in an
   /// [Err] or [None] state.
   FutureOr<T> unwrapOr(T fallback);
-
-  /// Returns the contained value, or computes it from [ensureThisDoesNotThrow]
-  /// if the [Monad] is in an [Err] or [None] state.
-  @pragma('vm:prefer-inline')
-  FutureOr<T> unwrapOrElse(
-    @noFuturesAllowed T Function() ensureThisDoesNotThrow,
-  );
 
   /// Transforms the contained value using the mapper function
   /// [noFuturesAllowed] while preserving the [Monad]'s structure.

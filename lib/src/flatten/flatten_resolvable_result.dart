@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: invalid_use_of_visible_for_testing_member
+import 'package:meta/meta.dart' show protected;
 
 import '../monads/monad.dart';
 import 'flatten_result.dart';
@@ -21,15 +21,17 @@ extension FlattenResolvableResult2<T extends Object> on Resolvable<Result<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten2();
 
+  @protected
   Resolvable<T> flatten2() {
-    if (value is Result<Result<T>>) {
-      return Sync(() {
-        return (value as Result<Result<T>>).flatten2().unwrap();
-      });
-    } else {
-      return Async(() async {
-        return (await value).flatten2().unwrap();
-      });
+    switch (value) {
+      case Future<Result<Result<T>>> value:
+        return Async(() async {
+          return (await value).flatten2().unwrap();
+        });
+      default:
+        return Sync(() {
+          return (value as Result<Result<T>>).flatten2().unwrap();
+        });
     }
   }
 }
@@ -38,6 +40,7 @@ extension FlattenResolvableResulte3<T extends Object> on Resolvable<Result<Resul
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten3();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten3() => flatten2().flatten2();
 }
@@ -46,6 +49,7 @@ extension FlattenResolvableResulte4<T extends Object> on Resolvable<Result<Resul
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten4();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten4() => flatten3().flatten2();
 }
@@ -55,6 +59,7 @@ extension FlattenResolvableResulte5<T extends Object>
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten5();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten5() => flatten4().flatten2();
 }
@@ -64,6 +69,7 @@ extension FlattenResolvableResulte6<T extends Object>
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten6();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten6() => flatten5().flatten2();
 }
@@ -73,6 +79,7 @@ extension FlattenResolvableResulte7<T extends Object>
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten7();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten7() => flatten6().flatten2();
 }
@@ -82,6 +89,7 @@ extension FlattenResolvableResulte8<T extends Object>
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten8();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten8() => flatten7().flatten2();
 }
@@ -91,6 +99,7 @@ extension FlattenResolvableResulte9<T extends Object>
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten9();
 
+  @protected
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten9() => flatten8().flatten2();
 }

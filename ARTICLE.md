@@ -83,7 +83,7 @@ final result1 = syncResult.value; // This returns a Result<int>
 switch (result1) {
   case Ok(value: final number):
     print('Result: $number');
-  case Err():
+  case Err err:
     print('Failed to parse');
 }
 
@@ -92,7 +92,7 @@ final result2 = parseInt('Hello!').map((number) => number * 2).value;
 switch (result2) {
   case Ok(value: final number):
     print('Result: $number');
-  case Err():
+  case Err err:
     print('Failed to parse: ${result2.error}');
 }
 ```
@@ -198,7 +198,7 @@ for (var id in [1, 2, 3, 4, 5]) {
         case None():
           print('  -> Success: Sound setting was not specified.\n');
       }
-    case Err():
+    case Err err:
       // The entire pipeline failed at some point.
       print('  -> Failure: An error occurred: ${finalResult.error}\n');
   }
