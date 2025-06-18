@@ -22,6 +22,30 @@ part of 'monad.dart';
 sealed class Resolvable<T extends Object> extends Monad<T> {
   const Resolvable.unsafe(this.value);
 
+  /// Combines two [Resolvable] monads into a single one containing a tuple
+  /// of their values if both resolve to [Ok].
+  ///
+  /// If either resolve to [Err], applies the [onErr] function to combine their
+  /// errors.
+  static Resolvable<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
+    Resolvable<T1> r1,
+    Resolvable<T2> r2,
+    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
+  ) {
+    if (r1.isSync() && r2.isSync()) {
+      return Sync.zip2(
+        r1.sync().unwrap(),
+        r2.sync().unwrap(),
+        onErr,
+      );
+    }
+    return Async.zip2(
+      r1.toAsync(),
+      r2.toAsync(),
+      onErr,
+    );
+  }
+
   /// The contained value.
   final FutureOr<Result<T>> value;
 
@@ -33,9 +57,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -185,6 +207,10 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
+  Resolvable<void> asVoid() => this;
+
+  @override
+  @pragma('vm:prefer-inline')
   List<Object?> get props => [value];
 
   @override
@@ -203,6 +229,29 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 /// Do not use any Futures in the constructor [Sync.new] to ensure errors are
 /// properly caught and propagated.
 final class Sync<T extends Object> extends Resolvable<T> {
+  /// Combines two [Sync] monads into a single one containing a tuple
+  /// of their values if both resolve to [Ok].
+  ///
+  /// If either resolve to [Err], applies the [onErr] function to combine their
+  /// errors.
+  static Sync<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
+    Sync<T1> s1,
+    Sync<T2> s2,
+    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
+  ) {
+    return Sync(() {
+      final r1 = s1.value;
+      final r2 = s2.value;
+      if (r1 is Ok<T1> && r2 is Ok<T2>) {
+        return (r1.value, r2.value);
+      }
+      throw onErr(
+        r1,
+        r2,
+      );
+    });
+  }
+
   @override
   // ignore: overridden_fields
   final Result<T> value;
@@ -216,8 +265,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(this.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe(value);
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe(value);
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -286,7 +335,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
-  ) => this;
+  ) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -427,6 +477,10 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<Sync<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Sync<void> asVoid() => this;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -440,6 +494,26 @@ final class Sync<T extends Object> extends Resolvable<T> {
 /// Await all Futures in the constructor [Async.new] to ensure errors are
 /// properly caught and propagated.
 final class Async<T extends Object> extends Resolvable<T> {
+  /// Combines two [Async] monads into a single one containing a tuple
+  /// of their values if both resolve to [Ok].
+  ///
+  /// If either resolve to [Err], applies the [onErr] function to combine their
+  /// errors.
+  static Async<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
+    Async<T1> s1,
+    Async<T2> s2,
+    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
+  ) {
+    return Async(() async {
+      final r1 = await s1.value;
+      final r2 = await s2.value;
+      if (r1 is Ok<T1> && r2 is Ok<T2>) {
+        return (r1.value, r2.value);
+      }
+      throw onErr(r1, r2);
+    });
+  }
+
   @override
   // ignore: overridden_fields
   final Future<Result<T>> value;
@@ -453,8 +527,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(this.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe(value);
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe(value);
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -464,9 +538,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -687,6 +759,10 @@ final class Async<T extends Object> extends Resolvable<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<Async<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<void> asVoid() => this;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

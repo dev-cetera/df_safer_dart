@@ -129,6 +129,10 @@ sealed class Monad<T extends Object> implements Equatable {
   /// Wraps this [Monad] in an [Async].
   Async<Monad<T>> wrapAsync();
 
+  /// Transforms the contained value to `void`.
+  @pragma('vm:prefer-inline')
+  Monad<void> asVoid();
+
   /// Suppresses the linter error `must_use_monad`.
   @nonVirtual
   @pragma('vm:prefer-inline')

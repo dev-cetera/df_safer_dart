@@ -17,6 +17,20 @@ part of 'monad.dart';
 /// A [Monad] that represents an optional value: every [Option] is either
 /// [Some] and contains a value, or [None] and does not.
 sealed class Option<T extends Object> extends Monad<T> {
+  /// Combines two [Option] monads into containing a tuple of their
+  /// values if both are [Some].
+  ///
+  /// Returns [None] if either or both are [None].
+  static Option<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
+    Option<T1> o1,
+    Option<T2> o2,
+  ) {
+    if (o1 is Some<T1> && o2 is Some<T2>) {
+      return Some((o1.value, o2.value));
+    }
+    return const None();
+  }
+
   const Option._();
 
   /// Creates an [Option] from a nullable value.
@@ -135,6 +149,10 @@ sealed class Option<T extends Object> extends Monad<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<Option<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Option<void> asVoid() => this;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -285,6 +303,10 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<Some<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Some<void> asVoid() => this;
 
   @pragma('vm:prefer-inline')
   @override
@@ -437,6 +459,10 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Async<None<T>> wrapAsync() => Async.value(Future.value(Ok(this)));
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<void> asVoid() => this;
 
   @override
   @pragma('vm:prefer-inline')
