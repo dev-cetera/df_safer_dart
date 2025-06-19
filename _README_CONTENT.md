@@ -112,10 +112,13 @@ analyzer:
 # Optional.
 custom_lint:
   rules:
-    # If any rule gives you trouble, you can set them to false here:
+    # If any rule gives you trouble, you can set them to false.
     - must_use_monad_or_error: true
     - must_await_all_futures: true
     - must_be_anonymous: true
     - no_futures_allowed: true
     - must_use_unsafe_wrapper_or_error: true
+  errors:
+    # If you're using the "UNSAFE". See API documentation.
+    unused_label: ignore
 ```

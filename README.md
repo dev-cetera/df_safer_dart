@@ -125,19 +125,22 @@ analyzer:
 # Optional.
 custom_lint:
   rules:
-    # If any rule gives you trouble, you can set them to false here:
+    # If any rule gives you trouble, you can set them to false.
     - must_use_monad_or_error: true
     - must_await_all_futures: true
     - must_be_anonymous: true
     - no_futures_allowed: true
     - must_use_unsafe_wrapper_or_error: true
+  errors:
+    # If you're using the "UNSAFE". See API documentation.
+    unused_label: ignore
 ```
 
 <!-- END _README_CONTENT -->
 
 ---
 
-Please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
+☝️ Please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
 
 ---
 
@@ -164,6 +167,7 @@ If you're enjoying this package and find it valuable, consider showing your appr
 
 <a href="https://www.buymeacoffee.com/dev_cetera" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" height="40"></a>
 
-## License
+## 🧑‍⚖️ License
 
 This project is released under the [MIT License](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE). See [LICENSE](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE) for more information.
+
