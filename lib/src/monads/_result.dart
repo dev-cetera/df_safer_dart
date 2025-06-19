@@ -39,13 +39,11 @@ sealed class Result<T extends Object> extends Monad<T> {
   /// all are [Ok].
   ///
   /// If any are [Err], applies [onErr] function to combine errors.
-  static Result<(T1, T2, T3)>
-  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Result<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
     Result<T3> r3,
-    @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
   ) {
     switch ((r1, r2, r3)) {
       case (Ok(value: final v1), Ok(value: final v2), Ok(value: final v3)):
@@ -183,8 +181,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) =>
-      this;
+  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -318,9 +315,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [error] and an optional [statusCode].
   Err(this.error, {int? statusCode})
-    : statusCode = Option.from(statusCode),
-      stackTrace = Trace.current(),
-      super._();
+      : statusCode = Option.from(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -411,8 +408,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : const None();
+  Option<E> matchError<E extends Object>() => error is E ? Some(error as E) : const None();
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
@@ -453,6 +449,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   }
 
   @override
+  @protected
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => fallback;
 
@@ -465,6 +462,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   }
 
   @override
+  @protected
   @pragma('vm:prefer-inline')
   Err<R> transf<R extends Object>([
     @noFuturesAllowed R Function(T e)? noFuturesAllowed,
@@ -497,16 +495,11 @@ final class Err<T extends Object> extends Result<T> implements Exception {
   Err<void> asVoid() => this;
 
   @override
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   String toString() {
-    try {
-      final encoder = const JsonEncoder.withIndent('  ');
-      return encoder.convert(toJson());
-    } catch (e) {
-      // This should never happen!
-      assert(false, e);
-      return '{}';
-    }
+    final encoder = const JsonEncoder.withIndent('  ');
+    return encoder.convert(toJson());
   }
 
   @override

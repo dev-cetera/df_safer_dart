@@ -109,12 +109,12 @@ To get the full benefit of `df_safer_dart`, you must enable its custom linter ru
 1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.14.12
+  df_safer_dart: ^0.15.1
 
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.1.4
+  df_safer_dart_lints: ^0.2.1
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
@@ -136,7 +136,7 @@ custom_lint:
 
 ---
 
-Please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
+☝️ Please refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
 
 ---
 
@@ -163,6 +163,7 @@ If you're enjoying this package and find it valuable, consider showing your appr
 
 <a href="https://www.buymeacoffee.com/dev_cetera" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" height="40"></a>
 
-## License
+## 🧑‍⚖️ License
 
 This project is released under the [MIT License](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE). See [LICENSE](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE) for more information.
+

@@ -26,7 +26,7 @@ extension FlattenResult2<T extends Object> on Result<Result<T>> {
       case Ok(value: final innerResult):
         return innerResult;
       case Err err:
-        return err.transf();
+        return err.transfErr();
     }
   }
 }

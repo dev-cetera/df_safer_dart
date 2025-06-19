@@ -16,7 +16,7 @@ repository: https://github.com/robmllze/df_safer_dart
 funding:
   - https://www.buymeacoffee.com/dev_cetera
 description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
-version: 0.15.0
+version: 0.15.1
 topics:
   - rust
   - error-handling
@@ -43,6 +43,6 @@ dependencies:
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.2.0
+  df_safer_dart_lints: ^0.2.1
   test: ^1.26.2
 

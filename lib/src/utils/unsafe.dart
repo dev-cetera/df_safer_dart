@@ -12,8 +12,6 @@
 
 import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
 
-import '/df_safer_dart.dart';
-
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// Executes a block of code that is considered UNSAFE, allowing the use of
@@ -27,11 +25,8 @@ T UNSAFE<T>(@mustBeAnonymous @noFuturesAllowed T Function() block) {
   assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
   try {
     return block();
-  } catch (e) {
-    const Here(2).call().ifSome((e) {
-      final location = e.value.location;
-      assert(false, 'UNSAFE throw at: $location');
-    }).end();
+  } catch (_) {
+    // We may want to do something here at some point.
     rethrow;
   }
 }
