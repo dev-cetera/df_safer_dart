@@ -117,4 +117,5 @@ custom_lint:
     - must_await_all_futures: true
     - must_be_anonymous: true
     - no_futures_allowed: true
+    - must_use_unsafe_wrapper_or_error: true
 ```
