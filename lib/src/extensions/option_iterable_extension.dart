@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -24,8 +26,7 @@ extension IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
   }
 }
 
-extension IterableFutureOptionExtension<T extends Object>
-    on Iterable<Future<Option<T>>> {
+extension IterableFutureOptionExtension<T extends Object> on Iterable<Future<Option<T>>> {
   Future<Iterable<Some<T>>> whereSome() {
     return Future.wait(this).then((e) => e.whereSome());
   }
@@ -41,8 +42,7 @@ extension IterableSomeExtension<T extends Object> on Iterable<Some<T>> {
   }
 }
 
-extension FutureIterableSomeExtension<T extends Object>
-    on Future<Iterable<Some<T>>> {
+extension FutureIterableSomeExtension<T extends Object> on Future<Iterable<Some<T>>> {
   Future<Iterable<T>> unwrapAll() {
     return then((e) => e.unwrapAll());
   }

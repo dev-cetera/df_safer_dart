@@ -111,12 +111,6 @@ sealed class Result<T extends Object> extends Monad<T> {
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   );
 
-  /// Exhaustively handles both [Ok] and [Err] cases, returning a value `R`.
-  R match<R extends Object>(
-    R Function(T value) onOkUnsafe,
-    R Function(Err<T> err) onErrUnsafe,
-  );
-
   /// Returns this if it's [Ok], otherwise returns the `other` [Result].
   Result<T> okOr(Result<T> other);
 
@@ -241,15 +235,6 @@ final class Ok<T extends Object> extends Result<T> {
     } catch (error) {
       return Err(error);
     }
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  R match<R extends Object>(
-    R Function(T value) onOkUnsafe,
-    R Function(Err<T> err) onErrUnsafe,
-  ) {
-    return onOkUnsafe(this.value);
   }
 
   @override
@@ -427,15 +412,6 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(
-    R Function(T value) onUnsafeOk,
-    R Function(Err<T> err) onUnsafeErr,
-  ) {
-    return onUnsafeErr(this);
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
   Result<T> okOr(Result<T> other) => other;
 
   @override
@@ -478,6 +454,7 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   @override
   @protected
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrap() {
     throw this;

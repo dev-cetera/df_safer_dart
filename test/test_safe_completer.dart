@@ -17,7 +17,7 @@ void main() {
       expect(completer.isCompleted, isTrue, reason: 'Completer should be marked as completed');
       final result = await completer.resolvable().value;
       expect(result, isA<Ok<int>>());
-      expect(result.unwrap(), 42);
+      expect(UNSAFE(() => result.unwrap()), 42);
     });
 
     // THIS IS THE CORRECTED TEST
@@ -46,7 +46,7 @@ void main() {
         reason: 'Completer should be completed after awaiting the result',
       );
       expect(result, isA<Ok<String>>());
-      expect(result.unwrap(), 'hello world');
+      expect(UNSAFE(() => result.unwrap()), 'hello world');
     });
 
     test('should complete with an error when resolve() is called with an Err', () async {
@@ -92,7 +92,8 @@ void main() {
 
       final result = await resolvable.value;
       expect((result as Err).error, isA<Exception>());
-      expect((result.err().unwrap() as Exception).toString(), 'Exception: Network Failure');
+      expect((UNSAFE(() => result.err().unwrap()) as Exception).toString(),
+          'Exception: Network Failure');
     });
 
     test('should prevent double completion and return an Err on the second attempt', () async {
@@ -108,13 +109,13 @@ void main() {
 
       // Assert
       expect(secondAttemptResult, isA<Sync<String>>());
-      final result = secondAttemptResult.sync().unwrap().value;
+      final result = UNSAFE(() => secondAttemptResult.sync().unwrap().value);
 
       expect(result, isA<Err>(), reason: 'Second completion should result in an Err');
       expect((result as Err).error, 'SafeCompleter<String> is already completed!');
 
       // Verify that the original value remains unchanged
-      final originalValue = await completer.resolvable().unwrap();
+      final originalValue = await UNSAFE(() => completer.resolvable().unwrap());
       expect(originalValue, 'first value');
     });
 
@@ -129,7 +130,7 @@ void main() {
       // Assert
       final result = await stringCompleter.resolvable().value;
       expect(result, isA<Ok<String>>());
-      expect(result.unwrap(), 'Value is 123');
+      expect(UNSAFE(() => result.unwrap()), 'Value is 123');
     });
 
     test('should complete with an error if transf() causes a type cast failure', () async {

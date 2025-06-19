@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import 'dart:async' show FutureOr;
 
 import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
@@ -131,7 +133,9 @@ class SafeSequencer<T extends Object> {
       _current = Async(() async {
         final awaitedValue = await value;
         if (awaitedValue.isErr()) {
-          _onPrevErr?.call(awaitedValue.err().unwrap().transfErr());
+   
+            _onPrevErr?.call(awaitedValue.err().unwrap().transfErr());
+         
           if (_eagerError) {
             return _current;
           }
@@ -145,7 +149,7 @@ class SafeSequencer<T extends Object> {
       }).flatten();
     } else {
       if (value.isErr()) {
-        _onPrevErr?.call(value.err().unwrap().transfErr());
+          _onPrevErr?.call(value.err().unwrap().transfErr());
         if (_eagerError) {
           return _transfCurrent<T>(_current);
         }

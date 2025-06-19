@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 part of 'monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -20,6 +22,8 @@ part of 'monad.dart';
 /// The [value] of a [Sync] is never a [Future] while the value of an [Async]
 /// is always a [Future].
 sealed class Resolvable<T extends Object> extends Monad<T> {
+  @protected
+  @unsafeOrError
   const Resolvable.unsafe(this.value);
 
   /// Combines 2 [Resolvable] monads into 1 containing a tuple of their values
@@ -150,12 +154,6 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   Resolvable<Object> foldResult(
     @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
-  );
-
-  /// Exhaustively handles the inner [Ok] and [Err] cases, returning a value `R`.
-  FutureOr<R> match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
   );
 
   /// Unsafely converts this [Resolvable] to a [Sync]. Throws if it's an [Async].
@@ -295,6 +293,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   final Result<T> value;
 
   @protected
+  @unsafeOrError
   const Sync.unsafe(this.value) : super.unsafe(value);
 
   /// Creates a [Sync] with a pre-computed [Result].
@@ -411,15 +410,6 @@ final class Sync<T extends Object> extends Resolvable<T> {
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   ) {
     return Sync.unsafe(value.fold(onOk, onErr));
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  FutureOr<R> match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
-  ) {
-    return value.match(onOk, onErr);
   }
 
   @override
@@ -586,6 +576,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   final Future<Result<T>> value;
 
   @protected
+  @unsafeOrError
   const Async.unsafe(this.value) : super.unsafe(value);
 
   /// Creates an [Async] with a pre-computed [Future] of a [Result].
@@ -716,15 +707,6 @@ final class Async<T extends Object> extends Resolvable<T> {
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   ) {
     return this.resultMap((e) => e.fold(onOk, onErr));
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Future<R> match<R extends Object>(
-    R Function(T value) onOk,
-    R Function(Err<T> err) onErr,
-  ) {
-    return value.then((e) => e.match(onOk, onErr));
   }
 
   @override

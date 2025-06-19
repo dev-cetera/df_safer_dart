@@ -10,12 +10,13 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension IterableResolvableExtension<T extends Object>
-    on Iterable<Resolvable<T>> {
+extension IterableResolvableExtension<T extends Object> on Iterable<Resolvable<T>> {
   Iterable<Sync<T>> whereSync() {
     return where((e) => e.isSync()).map((e) => e.sync().unwrap());
   }

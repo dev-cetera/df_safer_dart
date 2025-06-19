@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import 'package:meta/meta.dart' show protected;
 
 import '../monads/monad.dart';
@@ -23,27 +25,34 @@ extension FlattenResolvable2<T extends Object> on Resolvable<Resolvable<T>> {
   @protected
   Resolvable<T> flatten2() {
     switch (this) {
+      // Case 1: The outer container is a Sync.
       case Sync(value: final outerResult):
-        return outerResult.match(
-          (innerResolvable) {
-            switch (innerResolvable) {
-              case Sync(value: final innerResult):
-                return Sync.unsafe(innerResult);
-              case Async(value: final innerFutureResult):
-                return Async.unsafe(innerFutureResult);
-            }
-          },
-          (err) => Sync.unsafe(err.transfErr()),
-        );
+        switch (outerResult) {
+          // Case 1a: The outer Sync contains an Ok.
+          case Ok(value: final innerResolvable):
+            // The inner value is the next Resolvable, which we return directly.
+            return innerResolvable;
+          // Case 1b: The outer Sync contains an Err.
+          case final Err<Resolvable<T>> err:
+            // Propagate the error, wrapped in a Sync.
+            return Sync.value(err.transfErr());
+        }
+
+      // Case 2: The outer container is an Async.
       case Async(value: final outerFutureResult):
         return Async(() async {
           final outerResult = await outerFutureResult;
-          return outerResult.match(
-            (innerResolvable) {
-              return innerResolvable.unwrap();
-            },
-            (err) => throw err,
-          );
+          // After awaiting, we have a Result. Switch on it.
+          switch (outerResult) {
+            // Case 2a: The outer Async contained an Ok.
+            case Ok(value: final innerResolvable):
+              // Await the inner Resolvable and return its value.
+              return await innerResolvable.unwrap();
+            // Case 2b: The outer Async contained an Err.
+            case final Err<Resolvable<T>> err:
+              // Re-throw the error to be caught by the Async constructor.
+              throw err;
+          }
         });
     }
   }

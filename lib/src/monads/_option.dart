@@ -119,9 +119,6 @@ sealed class Option<T extends Object> extends Monad<T> {
     @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
   );
 
-  /// Exhaustively handles both [Some] and [None] cases, returning a value `R`.
-  R match<R extends Object>(R Function(T value) onSome, R Function() onNone);
-
   /// Returns this if it's [Some], otherwise returns the `other` [Option].
   Option<T> someOr(Option<T> other);
 
@@ -233,7 +230,7 @@ final class Some<T extends Object> extends Option<T> {
   Option<R> flatMap<R extends Object>(
     @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
   ) {
-    return noFuturesAllowed(unwrap());
+    return noFuturesAllowed(UNSAFE(() => unwrap()));
   }
 
   @override
@@ -257,12 +254,6 @@ final class Some<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
-    return onSome(this.value);
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
   Some<T> someOr(Option<T> other) => this;
 
   @override
@@ -270,6 +261,7 @@ final class Some<T extends Object> extends Option<T> {
   Option<T> noneOr(Option<T> other) => other;
 
   @override
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrap() => value;
 
@@ -290,7 +282,7 @@ final class Some<T extends Object> extends Option<T> {
     @noFuturesAllowed R Function(T e)? noFuturesAllowed,
   ]) {
     try {
-      final value0 = unwrap();
+      final value0 = UNSAFE(() => unwrap());
       final value1 = noFuturesAllowed?.call(value0) ?? value0 as R;
       return Ok(Option.from(value1));
     } catch (e) {
@@ -416,12 +408,6 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  R match<R extends Object>(R Function(T value) onSome, R Function() onNone) {
-    return onNone();
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
   Option<T> someOr(Option<T> other) => other;
 
   @override
@@ -430,6 +416,7 @@ final class None<T extends Object> extends Option<T> {
 
   @override
   @protected
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrap() {
     throw Err<T>('Called unwrap() on None<$T>.');

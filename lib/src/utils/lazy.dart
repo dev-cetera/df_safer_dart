@@ -10,8 +10,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import 'package:meta/meta.dart';
 
+import '../_src.g.dart';
 import '../monads/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -31,9 +34,7 @@ class Lazy<T extends Object> {
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    return (currentInstance.isNone()
-            ? currentInstance = Some(_constructor())
-            : currentInstance)
+    return (currentInstance.isNone() ? currentInstance = Some(_constructor()) : currentInstance)
         .unwrap();
   }
 

@@ -10,13 +10,31 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-/// Executes a block of code that is considered unsafe, allowing the use of
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
+
+import '/df_safer_dart.dart';
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+/// Executes a block of code that is considered UNSAFE, allowing the use of
 /// methods like `unwrap()`. This function provides no actual safety guarantees;
 /// it only serves as a marker for linter rules and to signal to developers
 /// that the contained code can throw exceptions from monad operations.
 ///
 /// Use this to explicitly acknowledge that you are handling a potentially
 /// failing operation outside the monadic context.
-T unsafe<T>(T Function() block) {
-  return block();
+T UNSAFE<T>(@mustBeAnonymous @noFuturesAllowed T Function() block) {
+  assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
+  try {
+    return block();
+  } catch (e) {
+    const Here(2).call().ifSome((e) {
+      final location = e.value.location;
+      assert(false, 'UNSAFE throw at: $location');
+    }).end();
+    rethrow;
+  }
 }
+
+@pragma('vm:prefer-inline')
+bool _isSubtype<TChild, TParent>() => <TChild>[] is List<TParent>;
