@@ -96,12 +96,12 @@ To get the full benefit of `df_safer_dart`, you must enable its custom linter ru
 1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.15.1
+  df_safer_dart: ^0.15.2
 
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.2.1
+  df_safer_dart_lints: ^0.2.2
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
