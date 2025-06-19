@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.0]
+
+- Released @ 6/2025 (UTC)
+- Improve robustness with additional linters and remove potentially problematic methods
+
 ## [0.14.12]
 
 - Released @ 6/2025 (UTC)

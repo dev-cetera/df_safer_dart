@@ -14,7 +14,8 @@
 
 import 'dart:async' show FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
+    show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
@@ -47,9 +48,9 @@ class SafeSequencer<T extends Object> {
     _TOnPrevErr<T>? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  })  : _onPrevErr = onPrevErr,
-        _eagerError = eagerError,
-        _buffer = buffer;
+  }) : _onPrevErr = onPrevErr,
+       _eagerError = eagerError,
+       _buffer = buffer;
 
   //
   //
@@ -68,14 +69,12 @@ class SafeSequencer<T extends Object> {
         final value = handler();
         switch (value) {
           case Future():
-            return Async(
-              () async {
-                // TODO: false positive linter!
-                // ignore: no_futures_allowed
-                await value;
-                return const None();
-              },
-            );
+            return Async(() async {
+              // TODO: false positive linter!
+              // ignore: no_futures_allowed
+              await value;
+              return const None();
+            });
           default:
             return const Sync.unsafe(Ok(None()));
         }
@@ -100,7 +99,8 @@ class SafeSequencer<T extends Object> {
   ///
   /// The [buffer] duration can be used to throttle the execution.
   Resolvable<Option<T>> addSafe(
-    @noFuturesAllowed Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
+    @noFuturesAllowed
+    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
     Duration? buffer,
   }) {
     final buffer1 = buffer ?? _buffer;
@@ -117,7 +117,8 @@ class SafeSequencer<T extends Object> {
             // ignore: must_await_all_futures
             Future<void>.delayed(buffer1),
           ]);
-          return (a.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>());
+          return (a.first as Resolvable<Option<T>>?) ??
+              Resolvable(() => None<T>());
         }).flatten();
       });
     }
@@ -133,9 +134,8 @@ class SafeSequencer<T extends Object> {
       _current = Async(() async {
         final awaitedValue = await value;
         if (awaitedValue.isErr()) {
-   
-            _onPrevErr?.call(awaitedValue.err().unwrap().transfErr());
-         
+          _onPrevErr?.call(awaitedValue.err().unwrap().transfErr());
+
           if (_eagerError) {
             return _current;
           }
@@ -149,12 +149,13 @@ class SafeSequencer<T extends Object> {
       }).flatten();
     } else {
       if (value.isErr()) {
-          _onPrevErr?.call(value.err().unwrap().transfErr());
+        _onPrevErr?.call(value.err().unwrap().transfErr());
         if (_eagerError) {
           return _transfCurrent<T>(_current);
         }
       }
-      _current = function(value)?.map((e) {
+      _current =
+          function(value)?.map((e) {
             _isEmpty = true;
             return e;
           }) ??

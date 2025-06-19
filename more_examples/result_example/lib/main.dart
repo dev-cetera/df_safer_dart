@@ -10,8 +10,9 @@ Sync<int> parseInt(String value) {
 }
 
 void main() {
-  final syncResult = parseInt('100') // This returns a Sync<int> holding an Ok(100)
-      .map((number) => number * 2); // .map only runs on the Ok value
+  final syncResult =
+      parseInt('100') // This returns a Sync<int> holding an Ok(100)
+          .map((number) => number * 2); // .map only runs on the Ok value
 
   final result1 = syncResult.value; // This returns a Result<int>
 
