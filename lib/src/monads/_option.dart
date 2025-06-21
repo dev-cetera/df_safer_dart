@@ -37,17 +37,17 @@ sealed class Option<T extends Object> extends Monad<T> {
   /// all are [Some].
   ///
   /// Returns [None] if any are [None]
-  static Option<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
-    Option<T1> o1,
-    Option<T2> o2,
-    Option<T3> o3,
-  ) {
+  static Option<(T1, T2, T3)> zip3<
+    T1 extends Object,
+    T2 extends Object,
+    T3 extends Object
+  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
     switch ((o1, o2, o3)) {
       case (
-          Some(value: final v1),
-          Some(value: final v2),
-          Some(value: final v3),
-        ):
+        Some(value: final v1),
+        Some(value: final v2),
+        Some(value: final v3),
+      ):
         return Some((v1, v2, v3));
       default:
         return const None();
