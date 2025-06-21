@@ -43,4 +43,4 @@ export './flatten/flatten_resolvable.dart';
 export './flatten/flatten_result.dart';
 export './flatten/flatten_resolvable_result.dart';
 export './err_model/err_model.dart';
-export './monads/monad.dart';
+export 'monads/monad.dart';

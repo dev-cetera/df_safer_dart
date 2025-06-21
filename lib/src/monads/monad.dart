@@ -25,6 +25,7 @@ import '../_src.g.dart';
 part '_option.dart';
 part '_result.dart';
 part '_resolvable.dart';
+part '_single.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -38,9 +39,10 @@ sealed class Monad<T extends Object> implements Equatable {
   /// Reduces the monad to a [Resolvable] of an [Option] of type [R].
   Resolvable<Option<R>> reduce<R extends Object>() {
     switch (this) {
+      case _Single<T> single:
+        return Ok(single.value).reduce();
       case Sync<T> sync:
-        final value = sync.value;
-        return value.reduce();
+        return sync.value.reduce();
       case Async<T> async:
         return _resolveAsync<R>(async);
       case Some<T> some:
