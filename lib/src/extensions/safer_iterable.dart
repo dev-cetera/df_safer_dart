@@ -1,6 +1,26 @@
+//.title
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+//
+// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
+// source code is governed by an MIT-style license described in the LICENSE
+// file located in this project's root directory.
+//
+// See: https://opensource.org/license/mit
+//
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+//.title~
+
+import 'dart:collection' show Queue;
+
 import '../monads/monad.dart';
 
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 extension SaferIterable<E extends Object> on Iterable<E> {
+  Option<Iterable<E>> get noneIfEmpty {
+    return Option.from(isEmpty ? null : this);
+  }
+
   Option<E> get firstOrNone {
     final it = iterator;
     if (it.moveNext()) {
@@ -85,5 +105,29 @@ extension SaferIterable<E extends Object> on Iterable<E> {
       i++;
     }
     return const None();
+  }
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+extension SaferList<E extends Object> on List<E> {
+  Option<List<E>> get noneIfEmpty {
+    return Option.from(isEmpty ? null : this);
+  }
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+extension SaferSet<E extends Object> on Set<E> {
+  Option<Set<E>> get noneIfEmpty {
+    return Option.from(isEmpty ? null : this);
+  }
+}
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+extension SaferQueue<E extends Object> on Queue<E> {
+  Option<Queue<E>> get noneIfEmpty {
+    return Option.from(isEmpty ? null : this);
   }
 }

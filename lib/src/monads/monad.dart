@@ -22,10 +22,16 @@ import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
 
 import '../_src.g.dart';
 
-part '_option.dart';
-part '_result.dart';
-part '_resolvable.dart';
-part '_single.dart';
+part 'option/_option.dart';
+part 'option/_some.dart';
+part 'option/_none.dart';
+part 'result/_result.dart';
+part 'result/_ok.dart';
+part 'result/_err.dart';
+part 'resolvable/_resolvable.dart';
+part 'resolvable/_async.dart';
+part 'resolvable/_sync.dart';
+part 'single/_single.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

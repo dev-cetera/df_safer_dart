@@ -120,7 +120,9 @@ class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TSafeCallback<T extends Object, TParam extends Object> = Resolvable<Option<T>> Function(
-    Object callbackKey, TParam param);
+  Object callbackKey,
+  TParam param,
+);
 
 class _CallbackRemover {
   final void Function() _remover;

@@ -11,7 +11,7 @@
 //.title~
 
 import '../monads/monad.dart';
-import 'typedefs.dart';
+import 'ergonomics.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
