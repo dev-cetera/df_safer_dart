@@ -20,7 +20,8 @@ import '/src/_src.g.dart';
 Sync<None<T>> syncNone<T extends Object>() => const Sync.unsafe(Ok(None()));
 
 @pragma('vm:prefer-inline')
-Async<None<T>> asyncNone<T extends Object>() => Async.unsafe(Future.value(Ok(None<T>())));
+Async<None<T>> asyncNone<T extends Object>() =>
+    Async.unsafe(Future.value(Ok(None<T>())));
 
 @pragma('vm:prefer-inline')
 Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();

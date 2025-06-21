@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.8]
+
+- Released @ 6/2025 (UTC)
+- Add syncUnit, asyncUnit and resolvableUnit typedefs
+
 ## [0.15.7]
 
 - Released @ 6/2025 (UTC)
