@@ -33,9 +33,9 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
   Err(super.value, {int? statusCode})
-      : statusCode = Option.from(statusCode),
-        stackTrace = Trace.current(),
-        super._();
+    : statusCode = Option.from(statusCode),
+      stackTrace = Trace.current(),
+      super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -126,7 +126,8 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => value is E ? Some(value as E) : const None();
+  Option<E> matchError<E extends Object>() =>
+      value is E ? Some(value as E) : const None();
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.

@@ -22,7 +22,7 @@ sealed class Result<T extends Object> extends Monad<T> {
   /// all are [Ok].
   ///
   /// If any are [Err], applies [onErr] function to combine errors.
-  /// 
+  ///
   /// See also: [combineResult].
   static Result<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Result<T1> r1,
@@ -33,48 +33,36 @@ sealed class Result<T extends Object> extends Monad<T> {
       [r1, r2],
       onErr: onErr == null
           ? null
-          : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-              ).transfErr(),
+          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
-    return combined.map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-      ),
-    );
+    return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
 
   /// Combines 3 [Result] monads into 1 containing a tuple of their values if
   /// all are [Ok].
   ///
   /// If any are [Err], applies [onErr] function to combine errors.
-  /// 
+  ///
   /// See also: [combineResult].
-  static Result<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Result<(T1, T2, T3)>
+  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
     Result<T3> r3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResult<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-                l[2].transf<T3>(),
-              ).transfErr(),
+              l[0].transf<T1>(),
+              l[1].transf<T2>(),
+              l[2].transf<T3>(),
+            ).transfErr(),
     );
-    return combined.map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-        l[2] as T3,
-      ),
-    );
+    return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
 
   const Result._(super.value);

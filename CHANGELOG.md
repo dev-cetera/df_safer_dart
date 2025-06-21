@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.9]
+
+- Released @ 6/2025 (UTC)
+- Improve file structure, add functions to combine monads, add noneIfEmpty
+
 ## [0.15.8]
 
 - Released @ 6/2025 (UTC)

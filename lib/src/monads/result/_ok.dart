@@ -44,7 +44,8 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
+  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')

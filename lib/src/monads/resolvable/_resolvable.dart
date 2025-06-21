@@ -39,27 +39,15 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   static Resolvable<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2, [
-    @noFuturesAllowed
-    Err<(T1, T2)> Function(
-      Result<T1>,
-      Result<T2>,
-    )? onErr,
+    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2],
       onErr: onErr == null
           ? null
-          : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-              ).transfErr(),
+          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
-    return combined.map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-      ),
-    );
+    return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
 
   /// Combines 3 [Resolvable] monads into 1 containing a tuple of their values
@@ -68,34 +56,25 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResolvable].
-  static Resolvable<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Resolvable<(T1, T2, T3)>
+  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
     @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(
-      Result<T1>,
-      Result<T2>,
-      Result<T3>,
-    )? onErr,
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-                l[2].transf<T3>(),
-              ).transfErr(),
+              l[0].transf<T1>(),
+              l[1].transf<T2>(),
+              l[2].transf<T3>(),
+            ).transfErr(),
     );
-    return combined.map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-        l[2] as T3,
-      ),
-    );
+    return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
 
   /// Creates a [Sync] or [Async] depending on the return type of
@@ -106,7 +85,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {

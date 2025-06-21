@@ -27,12 +27,7 @@ sealed class Option<T extends Object> extends Monad<T> {
     Option<T1> o1,
     Option<T2> o2,
   ) {
-    return combineOption<Object>([o1, o2]).map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-      ),
-    );
+    return combineOption<Object>([o1, o2]).map((l) => (l[0] as T1, l[1] as T2));
   }
 
   /// Combines 3 [Option] monads into 1 containing a tuple of their values if
@@ -41,18 +36,16 @@ sealed class Option<T extends Object> extends Monad<T> {
   /// Returns [None] if any are [None].
   ///
   /// See also: [combineOption].
-  static Option<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
-    Option<T1> o1,
-    Option<T2> o2,
-    Option<T3> o3,
-  ) {
-    return combineOption<Object>([o1, o2, o3]).map(
-      (l) => (
-        l[0] as T1,
-        l[1] as T2,
-        l[2] as T3,
-      ),
-    );
+  static Option<(T1, T2, T3)> zip3<
+    T1 extends Object,
+    T2 extends Object,
+    T3 extends Object
+  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
+    return combineOption<Object>([
+      o1,
+      o2,
+      o3,
+    ]).map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
 
   const Option._(super.value);
