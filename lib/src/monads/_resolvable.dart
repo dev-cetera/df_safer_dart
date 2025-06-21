@@ -51,18 +51,20 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
-  static Resolvable<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Resolvable<(T1, T2, T3)>
+  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     switch ((r1, r2, r3)) {
       case (
-          Sync(value: final v1),
-          Sync(value: final v2),
-          Sync(value: final v3),
-        ):
+        Sync(value: final v1),
+        Sync(value: final v2),
+        Sync(value: final v3),
+      ):
         return Sync.zip3(
           Sync.unsafe(v1),
           Sync.unsafe(v2),
@@ -87,7 +89,9 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -270,11 +274,13 @@ final class Sync<T extends Object> extends Resolvable<T> {
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
-  static Sync<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Sync<(T1, T2, T3)>
+  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Sync<T1> s1,
     Sync<T2> s2,
     Sync<T3> s3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     return Sync(() {
       final r1 = s1.value;
@@ -307,8 +313,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(Result<T> super.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe();
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe();
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -377,8 +383,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
-  ) =>
-      this;
+  ) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -565,11 +570,13 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
-  static Async<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Async<(T1, T2, T3)>
+  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Async<T1> s1,
     Async<T2> s2,
     Async<T3> s3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     return Async(() async {
       final r1 = await s1.value;
@@ -602,8 +609,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(Future<Result<T>> super.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe();
+    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.unsafe();
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -613,7 +620,9 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    Future<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {

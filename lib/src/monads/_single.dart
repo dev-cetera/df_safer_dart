@@ -28,7 +28,9 @@ final class _Single<T extends Object> extends Monad<T> {
   }
 
   @override
-  Result<_Single<R>> transf<R extends Object>([R Function(T e)? noFuturesAllowed]) {
+  Result<_Single<R>> transf<R extends Object>([
+    R Function(T e)? noFuturesAllowed,
+  ]) {
     try {
       return Ok(_Single._(value as R));
     } catch (e) {

@@ -4,6 +4,7 @@
 
 - Released @ 6/2025 (UTC)
 - Remove confusing consts and typedefs
+- Add _Single monad for testing purposes
 
 ## [0.15.6]
 
