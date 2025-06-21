@@ -12,7 +12,8 @@
 
 import 'dart:async' show Completer, FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
+    show noFuturesAllowed;
 
 import '../monads/monad.dart';
 
@@ -87,10 +88,14 @@ class SafeCompleter<T extends Object> {
     final completer = SafeCompleter<R>();
     resolvable().map((e) {
       try {
-        final result = noFuturesAllowed != null ? noFuturesAllowed(e) : (e as R);
+        final result = noFuturesAllowed != null
+            ? noFuturesAllowed(e)
+            : (e as R);
         completer.resolve(Sync<R>.unsafe(Ok(result))).end();
       } catch (e) {
-        completer.resolve(Sync.unsafe(Err('Failed to transform type $T to $R.'))).end();
+        completer
+            .resolve(Sync.unsafe(Err('Failed to transform type $T to $R.')))
+            .end();
       }
       return e;
     }).end();

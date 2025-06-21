@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.5]
+
+- Released @ 6/2025 (UTC)
+- Further improve seamlessness
+
 ## [0.15.3]
 
 - Released @ 6/2025 (UTC)
