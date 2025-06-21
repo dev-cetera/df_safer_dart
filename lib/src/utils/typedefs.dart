@@ -16,17 +16,23 @@ import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-const NONE = None<Unit>();
-
 @pragma('vm:prefer-inline')
 Sync<None<T>> syncNone<T extends Object>() => const Sync.unsafe(Ok(None()));
 
 @pragma('vm:prefer-inline')
-Async<None<T>> asyncNone<T extends Object>() =>
-    Async.unsafe(Future.value(Ok(None<T>())));
+Async<None<T>> asyncNone<T extends Object>() => Async.unsafe(Future.value(Ok(None<T>())));
 
 @pragma('vm:prefer-inline')
 Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();
+
+@pragma('vm:prefer-inline')
+Sync<Unit> syncUnit() => Sync.unsafe(Ok(Unit()));
+
+@pragma('vm:prefer-inline')
+Async<Unit> asyncUnit() => Async.unsafe(Future.value(Ok(Unit())));
+
+@pragma('vm:prefer-inline')
+Resolvable<Unit> resolvableUnit() => syncUnit();
 
 typedef TReduced<T extends Object> = Resolvable<Option<T>>;
 typedef TOptionResult<T extends Object> = Option<Result<T>>;
