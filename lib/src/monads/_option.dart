@@ -26,7 +26,10 @@ sealed class Option<T extends Object> extends Monad<T> {
     Option<T2> o2,
   ) {
     switch ((o1, o2)) {
-      case (Some(value: final v1), Some(value: final v2)):
+      case (
+          Some(value: final v1),
+          Some(value: final v2),
+        ):
         return Some((v1, v2));
       default:
         return const None();
@@ -37,24 +40,24 @@ sealed class Option<T extends Object> extends Monad<T> {
   /// all are [Some].
   ///
   /// Returns [None] if any are [None]
-  static Option<(T1, T2, T3)> zip3<
-    T1 extends Object,
-    T2 extends Object,
-    T3 extends Object
-  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
+  static Option<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Option<T1> o1,
+    Option<T2> o2,
+    Option<T3> o3,
+  ) {
     switch ((o1, o2, o3)) {
       case (
-        Some(value: final v1),
-        Some(value: final v2),
-        Some(value: final v3),
-      ):
+          Some(value: final v1),
+          Some(value: final v2),
+          Some(value: final v3),
+        ):
         return Some((v1, v2, v3));
       default:
         return const None();
     }
   }
 
-  const Option._();
+  const Option._(super.value);
 
   /// Creates an [Option] from a nullable value.
   ///
@@ -169,16 +172,22 @@ sealed class Option<T extends Object> extends Monad<T> {
   @override
   @pragma('vm:prefer-inline')
   Option<void> asVoid() => this;
+
+  @override
+  @nonVirtual
+  @pragma('vm:prefer-inline')
+  void end() {}
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A [Monad] that represents an [Option] that contains a [value].
 final class Some<T extends Object> extends Option<T> {
-  /// The contained value.
-  final T value;
+  @override
+  @pragma('vm:prefer-inline')
+  T get value => super.value as T;
 
-  const Some(this.value) : super._();
+  const Some(T super.value) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -318,21 +327,17 @@ final class Some<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   Some<void> asVoid() => this;
-
-  @pragma('vm:prefer-inline')
-  @override
-  List<Object?> get props => [this.value];
-
-  @pragma('vm:prefer-inline')
-  @override
-  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A [Monad] that represents an [Option] that does not contain a value.
 final class None<T extends Object> extends Option<T> {
-  const None() : super._();
+  @override
+  @pragma('vm:prefer-inline')
+  Unit get value => super.value as Unit;
+
+  const None() : super._(Unit.instance);
 
   @override
   @pragma('vm:prefer-inline')
@@ -470,12 +475,4 @@ final class None<T extends Object> extends Option<T> {
   @override
   @pragma('vm:prefer-inline')
   None<void> asVoid() => this;
-
-  @override
-  @pragma('vm:prefer-inline')
-  List<Object?> get props => [];
-
-  @override
-  @pragma('vm:prefer-inline')
-  bool? get stringify => false;
 }

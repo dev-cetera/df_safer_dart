@@ -19,7 +19,11 @@ import 'package:equatable/equatable.dart';
 final class Unit implements Equatable {
   const Unit._();
 
+  @pragma('vm:prefer-inline')
+  factory Unit() => instance;
+
   static const Unit instance = Unit._();
+  static const Unit i = instance;
 
   @override
   List<Object?> get props => [];
@@ -30,3 +34,7 @@ final class Unit implements Equatable {
   @override
   bool? get stringify => false;
 }
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+const UNIT = Unit.instance;

@@ -31,7 +31,9 @@ part '_resolvable.dart';
 /// The foundational sealed class for all monadic types like [Option], [Result],
 /// and [Resolvable].
 sealed class Monad<T extends Object> implements Equatable {
-  const Monad();
+  final Object value;
+
+  const Monad(this.value);
 
   /// Reduces the monad to a [Resolvable] of an [Option] of type [R].
   Resolvable<Option<R>> reduce<R extends Object>() {
@@ -126,11 +128,16 @@ sealed class Monad<T extends Object> implements Equatable {
   Async<Monad<T>> wrapAsync();
 
   /// Transforms the contained value to `void`.
-  @pragma('vm:prefer-inline')
   Monad<void> asVoid();
 
   /// Suppresses the linter error `must_use_monad`.
-  @nonVirtual
+  FutureOr<void> end();
+
+  @override
   @pragma('vm:prefer-inline')
-  void end() {}
+  List<Object?> get props => [value];
+
+  @override
+  @pragma('vm:prefer-inline')
+  bool? get stringify => false;
 }

@@ -24,14 +24,25 @@ sealed class Result<T extends Object> extends Monad<T> {
   /// If any are [Err], applies [onErr] function to combine errors.
   static Result<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Result<T1> r1,
-    Result<T2> r2,
-    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>) onErr,
-  ) {
+    Result<T2> r2, [
+    @noFuturesAllowed
+    Err<(T1, T2)> Function(
+      Result<T1>,
+      Result<T2>,
+    )? onErr,
+  ]) {
     switch ((r1, r2)) {
-      case (Ok(value: final v1), Ok(value: final v2)):
+      case (
+          Ok(value: final v1),
+          Ok(value: final v2),
+        ):
         return Ok((v1, v2));
       default:
-        return onErr(r1, r2);
+        if (onErr != null) {
+          return onErr(r1, r2);
+        } else {
+          return [r1, r2].whereType<Err>().first.transfErr();
+        }
     }
   }
 
@@ -39,23 +50,34 @@ sealed class Result<T extends Object> extends Monad<T> {
   /// all are [Ok].
   ///
   /// If any are [Err], applies [onErr] function to combine errors.
-  static Result<(T1, T2, T3)>
-  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Result<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
-    Result<T3> r3,
+    Result<T3> r3, [
     @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>) onErr,
-  ) {
+    Err<(T1, T2, T3)> Function(
+      Result<T1>,
+      Result<T2>,
+      Result<T3>,
+    )? onErr,
+  ]) {
     switch ((r1, r2, r3)) {
-      case (Ok(value: final v1), Ok(value: final v2), Ok(value: final v3)):
+      case (
+          Ok(value: final v1),
+          Ok(value: final v2),
+          Ok(value: final v3),
+        ):
         return Ok((v1, v2, v3));
       default:
-        return onErr(r1, r2, r3);
+        if (onErr != null) {
+          return onErr(r1, r2, r3);
+        } else {
+          return [r1, r2, r3].whereType<Err>().first.transfErr();
+        }
     }
   }
 
-  const Result._();
+  const Result._(super.value);
 
   /// Returns `this` as a base [Result] type.
   @pragma('vm:prefer-inline')
@@ -150,6 +172,11 @@ sealed class Result<T extends Object> extends Monad<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<void> asVoid() => this;
+
+  @override
+  @nonVirtual
+  @pragma('vm:prefer-inline')
+  void end() {}
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -157,10 +184,11 @@ sealed class Result<T extends Object> extends Monad<T> {
 /// A [Monad] that represents the success case of a [Result], containing a
 /// [value].
 final class Ok<T extends Object> extends Result<T> {
-  /// The contained value.
-  final T value;
+  @override
+  @pragma('vm:prefer-inline')
+  T get value => super.value as T;
 
-  const Ok(this.value) : super._();
+  const Ok(T super.value) : super._();
 
   @override
   @pragma('vm:prefer-inline')
@@ -183,8 +211,7 @@ final class Ok<T extends Object> extends Result<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) =>
-      this;
+  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
 
   @override
   @pragma('vm:prefer-inline')
@@ -292,41 +319,41 @@ final class Ok<T extends Object> extends Result<T> {
   @override
   @pragma('vm:prefer-inline')
   Ok<void> asVoid() => this;
-
-  @override
-  @pragma('vm:prefer-inline')
-  List<Object?> get props => [this.value];
-
-  @override
-  @pragma('vm:prefer-inline')
-  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A [Monad] that represents the failure case of a [Result], containing an
-/// [error].
+/// error [value].
 final class Err<T extends Object> extends Result<T> implements Exception {
-  /// The contained error object.
-  final Object error;
-
   /// An optional HTTP status code associated with the error.
   final Option<int> statusCode;
 
   /// The stack trace captured when the [Err] was created.
   final Trace stackTrace;
 
-  /// Creates a new [Err] from [error] and an optional [statusCode].
-  Err(this.error, {int? statusCode})
-    : statusCode = Option.from(statusCode),
-      stackTrace = Trace.current(),
-      super._();
+  @override
+  @protected
+  @pragma('vm:prefer-inline')
+  Object get value => super.value;
+
+  @pragma('vm:prefer-inline')
+  Object get error => value;
+
+  /// Creates a new [Err] from [value] and an optional [statusCode].
+  Err(super.value, {int? statusCode})
+      : statusCode = Option.from(statusCode),
+        stackTrace = Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
-    return Err(error ?? 'Unknown error!', statusCode: model.statusCode);
+    return Err(
+      error ?? 'Unknown error!',
+      statusCode: model.statusCode,
+    );
   }
 
   @override
@@ -411,20 +438,19 @@ final class Err<T extends Object> extends Result<T> implements Exception {
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      error is E ? Some(error as E) : const None();
+  Option<E> matchError<E extends Object>() => value is E ? Some(value as E) : const None();
 
   /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
   /// contained `error`.
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(error, statusCode: statusCode.orNull());
+    return Err(value, statusCode: statusCode.orNull());
   }
 
   /// Converts this [Err] to a data model for serialization.
   ErrModel toModel() {
     final type = 'Err<${T.toString()}>';
-    final error = _safeToString(this.error);
+    final error = _safeToString(value);
     return ErrModel(
       type: type,
       error: error,
@@ -505,14 +531,6 @@ final class Err<T extends Object> extends Result<T> implements Exception {
     final encoder = const JsonEncoder.withIndent('  ');
     return encoder.convert(toJson());
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  List<Object?> get props => [error, statusCode];
-
-  @override
-  @pragma('vm:prefer-inline')
-  bool? get stringify => false;
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
