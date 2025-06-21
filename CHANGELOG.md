@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.7]
+
+- Released @ 6/2025 (UTC)
+- Remove confusing consts and typedefs
+
 ## [0.15.6]
 
 - Released @ 6/2025 (UTC)
