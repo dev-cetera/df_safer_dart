@@ -48,7 +48,7 @@ sealed class Monad<T extends Object> implements Equatable {
       case Some<T> some:
         return _resolveValue(some.value);
       case None<T> _:
-        return const Sync.unsafe(Ok(None()));
+        return syncNone();
       case Ok<T> ok:
         return _resolveValue(ok.value);
       case Err<T> err:
