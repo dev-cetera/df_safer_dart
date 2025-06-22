@@ -14,7 +14,8 @@
 
 import 'dart:async' show FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
+    show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
@@ -47,9 +48,9 @@ class SafeSequencer<T extends Object> {
     _TOnPrevErr<T>? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  })  : _onPrevErr = onPrevErr,
-        _eagerError = eagerError,
-        _buffer = buffer;
+  }) : _onPrevErr = onPrevErr,
+       _eagerError = eagerError,
+       _buffer = buffer;
 
   //
   //
@@ -104,18 +105,15 @@ class SafeSequencer<T extends Object> {
   ///
   /// The [buffer] duration can be used to throttle the execution.
   Resolvable<Option<T>> addSafe(
-    @noFuturesAllowed Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
+    @noFuturesAllowed
+    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
     Duration? buffer,
     _TOnPrevErr<T>? onPrevErr,
     bool? eagerError,
   }) {
     final buffer1 = buffer ?? _buffer;
     if (buffer1 == null) {
-      return _enqueue(
-        handler,
-        onPrevErr,
-        eagerError,
-      );
+      return _enqueue(handler, onPrevErr, eagerError);
     } else {
       return _enqueue(
         (previous) {
@@ -128,7 +126,8 @@ class SafeSequencer<T extends Object> {
               // ignore: must_await_all_futures
               Future<void>.delayed(buffer1),
             ]);
-            return (a.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>());
+            return (a.first as Resolvable<Option<T>>?) ??
+                Resolvable(() => None<T>());
           }).flatten();
         },
         onPrevErr,

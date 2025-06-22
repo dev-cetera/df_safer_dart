@@ -20,10 +20,8 @@ void main() {
         print('ERROR!!!');
       },
     )
-    ..addSafe(
-      (prev) {
-        print(prev);
-        return const Sync.unsafe(Ok(Some(1)));
-      },
-    ).end();
+    ..addSafe((prev) {
+      print(prev);
+      return const Sync.unsafe(Ok(Some(1)));
+    }).end();
 }
