@@ -14,8 +14,7 @@
 
 import 'dart:async' show FutureOr;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
-    show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
@@ -48,9 +47,9 @@ class SafeSequencer<T extends Object> {
     _TOnPrevErr<T>? onPrevErr,
     bool eagerError = false,
     Duration? buffer,
-  }) : _onPrevErr = onPrevErr,
-       _eagerError = eagerError,
-       _buffer = buffer;
+  })  : _onPrevErr = onPrevErr,
+        _eagerError = eagerError,
+        _buffer = buffer;
 
   //
   //
@@ -63,7 +62,12 @@ class SafeSequencer<T extends Object> {
   /// Adds a [handler] to the queue that processes the previous value.
   ///
   /// The [buffer] duration can be used to throttle the execution.
-  FutureOr<void> add(FutureOr<void> Function() handler, {Duration? buffer}) {
+  FutureOr<void> add(
+    FutureOr<void> Function() handler, {
+    Duration? buffer,
+    _TOnPrevErr<T>? onPrevErr,
+    bool? eagerError,
+  }) {
     final result = addSafe(
       (_) {
         final value = handler();
@@ -80,7 +84,8 @@ class SafeSequencer<T extends Object> {
         }
       },
       buffer: buffer,
-      //
+      onPrevErr: onPrevErr,
+      eagerError: eagerError,
     ).value;
     if (result is Future<Result<Option<T>>>) {
       return result.then<void>((e) {
@@ -99,48 +104,60 @@ class SafeSequencer<T extends Object> {
   ///
   /// The [buffer] duration can be used to throttle the execution.
   Resolvable<Option<T>> addSafe(
-    @noFuturesAllowed
-    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
+    @noFuturesAllowed Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
     Duration? buffer,
+    _TOnPrevErr<T>? onPrevErr,
+    bool? eagerError,
   }) {
     final buffer1 = buffer ?? _buffer;
     if (buffer1 == null) {
-      return _enqueue(handler);
+      return _enqueue(
+        handler,
+        onPrevErr,
+        eagerError,
+      );
     } else {
-      return _enqueue((previous) {
-        return Resolvable(() async {
-          final a = await Future.wait<dynamic>([
-            // TODO: false positive linter!
-            // ignore: must_await_all_futures
-            Future<Resolvable<Option<T>>?>.value(handler(previous)),
-            // TODO: false positive linter!
-            // ignore: must_await_all_futures
-            Future<void>.delayed(buffer1),
-          ]);
-          return (a.first as Resolvable<Option<T>>?) ??
-              Resolvable(() => None<T>());
-        }).flatten();
-      });
+      return _enqueue(
+        (previous) {
+          return Resolvable(() async {
+            final a = await Future.wait<dynamic>([
+              // TODO: false positive linter!
+              // ignore: must_await_all_futures
+              Future<Resolvable<Option<T>>?>.value(handler(previous)),
+              // TODO: false positive linter!
+              // ignore: must_await_all_futures
+              Future<void>.delayed(buffer1),
+            ]);
+            return (a.first as Resolvable<Option<T>>?) ?? Resolvable(() => None<T>());
+          }).flatten();
+        },
+        onPrevErr,
+        eagerError,
+      );
     }
   }
 
-  /// Enqueue a [function] without buffering.
+  /// Enqueue a [handler] without buffering.
   Resolvable<Option<T>> _enqueue(
-    Resolvable<Option<T>>? Function(Result<Option<T>> previous) function,
+    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler,
+    _TOnPrevErr<T>? onPrevErr,
+    bool? eagerError,
   ) {
+    final eagerError1 = eagerError ?? _eagerError;
     _isEmpty = false;
     final value = _current.value;
     if (value is Future<Result<Option<T>>>) {
       _current = Async(() async {
         final awaitedValue = await value;
         if (awaitedValue.isErr()) {
-          _onPrevErr?.call(awaitedValue.err().unwrap().transfErr());
-
-          if (_eagerError) {
+          final err = awaitedValue.err().unwrap().transfErr<T>();
+          _onPrevErr?.call(err);
+          onPrevErr?.call(err);
+          if (eagerError1) {
             return _current;
           }
         }
-        final temp = function(awaitedValue);
+        final temp = handler(awaitedValue);
         if (temp == null) {
           return _current;
         }
@@ -149,17 +166,20 @@ class SafeSequencer<T extends Object> {
       }).flatten();
     } else {
       if (value.isErr()) {
-        _onPrevErr?.call(value.err().unwrap().transfErr());
-        if (_eagerError) {
+        final err = value.err().unwrap().transfErr<T>();
+        _onPrevErr?.call(err);
+        onPrevErr?.call(err);
+        if (eagerError1) {
           return _transfCurrent<T>(_current);
         }
       }
-      _current =
-          function(value)?.map((e) {
-            _isEmpty = true;
-            return e;
-          }) ??
-          _current;
+      _current = Sync(() {
+        return handler(value)?.map((e) {
+              _isEmpty = true;
+              return e;
+            }) ??
+            _current;
+      }).flatten();
     }
     return _transfCurrent<T>(_current);
   }
