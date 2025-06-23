@@ -12,11 +12,11 @@
 
 import 'dart:async';
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ToResolvableExtension<T extends Object> on FutureOr<T> {
+extension $ToResolvableExtension<T extends Object> on FutureOr<T> {
   @pragma('vm:prefer-inline')
   Resolvable<T> toResolvable({
     Err<T> Function(Object?)? onError,
@@ -26,7 +26,7 @@ extension ToResolvableExtension<T extends Object> on FutureOr<T> {
   }
 }
 
-extension ToAsyncExtension<T extends Object> on Future<T> {
+extension $ToAsyncExtension<T extends Object> on Future<T> {
   @pragma('vm:prefer-inline')
   Async<T> toAsync({
     Err<T> Function(Object?)? onError,
@@ -40,7 +40,7 @@ extension ToAsyncExtension<T extends Object> on Future<T> {
   }
 }
 
-extension ToSync<T extends Object> on T {
+extension $ToSync<T extends Object> on T {
   @pragma('vm:prefer-inline')
   Sync<T> toSync({
     Err<T> Function(Object?)? onError,

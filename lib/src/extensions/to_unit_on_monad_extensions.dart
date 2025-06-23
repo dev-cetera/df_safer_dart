@@ -10,91 +10,91 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 import '../utils/unit.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 // Void.
 
-extension ToUnitOnVoidMonad on Monad<void> {
+extension $ToUnitOnVoidMonad on Monad<void> {
   Monad<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidOption on Option<void> {
+extension $ToUnitOnVoidOption on Option<void> {
   Option<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidSome on Some<void> {
+extension $ToUnitOnVoidSome on Some<void> {
   Some<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidNone on None<void> {
+extension $ToUnitOnVoidNone on None<void> {
   None<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidResolvable on Resolvable<void> {
+extension $ToUnitOnVoidResolvable on Resolvable<void> {
   Resolvable<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidSync on Sync<void> {
+extension $ToUnitOnVoidSync on Sync<void> {
   Sync<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidAsync on Async<void> {
+extension $ToUnitOnVoidAsync on Async<void> {
   Async<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidResult on Result<void> {
+extension $ToUnitOnVoidResult on Result<void> {
   Result<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidOk on Ok<void> {
+extension $ToUnitOnVoidOk on Ok<void> {
   Ok<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnVoidErr on Err<void> {
+extension $ToUnitOnVoidErr on Err<void> {
   Err<Unit> toUnit() => map((_) => Unit());
 }
 
 // Object.
 
-extension ToUnitOnObjectMonad on Monad<Object> {
+extension $ToUnitOnObjectMonad on Monad<Object> {
   Monad<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectOption on Option<Object> {
+extension $ToUnitOnObjectOption on Option<Object> {
   Option<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectSome on Some<Object> {
+extension $ToUnitOnObjectSome on Some<Object> {
   Some<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectNone on None<Object> {
+extension $ToUnitOnObjectNone on None<Object> {
   None<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectResolvable on Resolvable<Object> {
+extension $ToUnitOnObjectResolvable on Resolvable<Object> {
   Resolvable<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectSync on Sync<Object> {
+extension $ToUnitOnObjectSync on Sync<Object> {
   Sync<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectAsync on Async<Object> {
+extension $ToUnitOnObjectAsync on Async<Object> {
   Async<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectResult on Result<Object> {
+extension $ToUnitOnObjectResult on Result<Object> {
   Result<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectOk on Ok<Object> {
+extension $ToUnitOnObjectOk on Ok<Object> {
   Ok<Unit> toUnit() => map((_) => Unit());
 }
 
-extension ToUnitOnObjectErr on Err<Object> {
+extension $ToUnitOnObjectErr on Err<Object> {
   Err<Unit> toUnit() => map((_) => Unit());
 }

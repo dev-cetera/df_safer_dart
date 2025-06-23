@@ -14,7 +14,7 @@ import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ResolvableSomeSwapX<T extends Object> on Resolvable<Some<T>> {
+extension $ResolvableSomeSwapX<T extends Object> on Resolvable<Some<T>> {
   @pragma('vm:prefer-inline')
   Some<Resolvable<T>> swap() {
     if (this is Sync<Some<T>>) {
@@ -24,12 +24,12 @@ extension ResolvableSomeSwapX<T extends Object> on Resolvable<Some<T>> {
   }
 }
 
-extension ResolvableNoneSwapX<T extends Object> on Resolvable<None<T>> {
+extension $ResolvableNoneSwapX<T extends Object> on Resolvable<None<T>> {
   @pragma('vm:prefer-inline')
   None<Resolvable<T>> swap() => const None();
 }
 
-extension ResolvableOkSwapX<T extends Object> on Resolvable<Ok<T>> {
+extension $ResolvableOkSwapX<T extends Object> on Resolvable<Ok<T>> {
   @pragma('vm:prefer-inline')
   Ok<Resolvable<T>> swap() {
     return Ok(map((e) => e.unwrap()));

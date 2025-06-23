@@ -12,8 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
-    show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
@@ -44,15 +43,13 @@ class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
   //
   //
 
-  bool callbackExists(dynamic callbackKey) =>
-      _callbacks.containsKey(callbackKey);
+  bool callbackExists(dynamic callbackKey) => _callbacks.containsKey(callbackKey);
 
   //
   //
   //
 
-  bool removeCallback(Object callbackKey) =>
-      _callbacks.remove(callbackKey) != null;
+  bool removeCallback(Object callbackKey) => _callbacks.remove(callbackKey) != null;
 
   //
   //
@@ -76,7 +73,7 @@ class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
         Err('No callback associated with $callbackKey exists!'),
       );
     }
-    return _seq.addSafe((prev) {
+    return _seq.pushTask((prev) {
       if (prev.isErr()) {
         onError?.call(prev.err().unwrap());
         if (eagerError) {
@@ -109,7 +106,7 @@ class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
             eagerError: eagerError,
             onError: onError,
           ).end();
-          _seq.addSafe((e) {
+          _seq.pushTask((e) {
             results[callbackKey] = e;
             return syncNone();
           }).end();
@@ -122,8 +119,10 @@ class SafeSequencerCallbacks<T extends Object, TParam extends Object> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-typedef TSafeCallback<T extends Object, TParam extends Object> =
-    Resolvable<Option<T>> Function(Object callbackKey, TParam param);
+typedef TSafeCallback<T extends Object, TParam extends Object> = Resolvable<Option<T>> Function(
+  Object callbackKey,
+  TParam param,
+);
 
 class _CallbackRemover {
   final void Function() _remover;

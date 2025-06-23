@@ -12,185 +12,130 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-import 'dart:async' show FutureOr;
+import 'dart:collection' show Queue;
 
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
-    show noFuturesAllowed;
+import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart' show noFuturesAllowed;
 
 import '/df_safer_dart.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A queue that manages the execution of functions sequentially, allowing for
-/// optional throttling.
 class SafeSequencer<T extends Object> {
-  //
-  //
-  //
-
-  final _TOnPrevErr<T>? _onPrevErr;
+  final _TOnPrevErr? _onPrevErr;
   final bool _eagerError;
-  final Duration? _buffer;
-
-  /// The current value or future in the queue.
   Resolvable<Option<T>> get current => _current;
   late var _current = Resolvable<Option<T>>(() => const None());
-
-  /// Indicates whether the queue is empty or processing.
-  bool get isEmpty => _isEmpty;
-  bool _isEmpty = true;
-
-  //
-  //
-  //
+  bool _isExecutingHandler = false;
+  final _reentrantQueue = Queue<_Task<T>>();
 
   SafeSequencer({
-    _TOnPrevErr<T>? onPrevErr,
+    _TOnPrevErr? onPrevErr,
     bool eagerError = false,
-    Duration? buffer,
-  }) : _onPrevErr = onPrevErr,
-       _eagerError = eagerError,
-       _buffer = buffer;
+  })  : _onPrevErr = onPrevErr,
+        _eagerError = eagerError;
 
-  //
-  //
-  //
-
-  /// Retrieves the last value in the queue.
   @pragma('vm:prefer-inline')
-  Resolvable<Option<T>> get last => addSafe((e) => Sync.unsafe(e));
+  Resolvable<Option<T>> get last => pushTask((e) => Sync.unsafe(e));
 
-  /// Adds a [handler] to the queue that processes the previous value.
-  ///
-  /// The [buffer] duration can be used to throttle the execution.
-  FutureOr<void> add(
-    FutureOr<void> Function() handler, {
-    Duration? buffer,
-    _TOnPrevErr<T>? onPrevErr,
+  /// Pushes a new task onto the end of the sequence.
+  Resolvable<Option<T>> pushTask(
+    @noFuturesAllowed _THandler<T> handler, {
+    _TOnPrevErr? onPrevErr,
     bool? eagerError,
   }) {
-    final result = addSafe(
-      (_) {
-        final value = handler();
-        switch (value) {
-          case Future():
-            return Async(() async {
-              // TODO: false positive linter!
-              // ignore: no_futures_allowed
-              await value;
-              return const None();
-            });
-          default:
-            return syncNone();
-        }
-      },
-      buffer: buffer,
+    final task = _Task<T>(
+      handler: handler,
       onPrevErr: onPrevErr,
       eagerError: eagerError,
-    ).value;
-    if (result is Future<Result<Option<T>>>) {
-      return result.then<void>((e) {
-        if (e.isErr()) {
-          throw e;
-        }
-      });
-    } else {
-      if (result.isErr()) {
-        throw result;
-      }
+    );
+    if (_isExecutingHandler) {
+      _reentrantQueue.add(task);
+      return _current;
     }
+    // Chain the new task onto the sequence.
+    return _chainTask(task);
   }
 
-  /// Adds a [handler] to the queue that processes the previous value.
-  ///
-  /// The [buffer] duration can be used to throttle the execution.
-  Resolvable<Option<T>> addSafe(
-    @noFuturesAllowed
-    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler, {
-    Duration? buffer,
-    _TOnPrevErr<T>? onPrevErr,
-    bool? eagerError,
-  }) {
-    final buffer1 = buffer ?? _buffer;
-    if (buffer1 == null) {
-      return _enqueue(handler, onPrevErr, eagerError);
-    } else {
-      return _enqueue(
-        (previous) {
-          return Resolvable(() async {
-            final a = await Future.wait<dynamic>([
-              // TODO: false positive linter!
-              // ignore: must_await_all_futures
-              Future<Resolvable<Option<T>>?>.value(handler(previous)),
-              // TODO: false positive linter!
-              // ignore: must_await_all_futures
-              Future<void>.delayed(buffer1),
-            ]);
-            return (a.first as Resolvable<Option<T>>?) ??
-                Resolvable(() => None<T>());
-          }).flatten();
-        },
-        onPrevErr,
-        eagerError,
-      );
-    }
-  }
-
-  /// Enqueue a [handler] without buffering.
-  Resolvable<Option<T>> _enqueue(
-    Resolvable<Option<T>>? Function(Result<Option<T>> previous) handler,
-    _TOnPrevErr<T>? onPrevErr,
-    bool? eagerError,
-  ) {
-    final eagerError1 = eagerError ?? _eagerError;
-    _isEmpty = false;
+  /// The **Scheduler**. Its role is to determine *when* to execute the next
+  /// task, handling the sync/async nature of the sequence's current state.
+  Resolvable<Option<T>> _chainTask(_Task<T> task) {
     final value = _current.value;
+
     if (value is Future<Result<Option<T>>>) {
-      _current = Async(() async {
-        final awaitedValue = await value;
-        if (awaitedValue.isErr()) {
-          final err = awaitedValue.err().unwrap().transfErr<T>();
-          _onPrevErr?.call(err);
-          onPrevErr?.call(err);
-          if (eagerError1) {
-            return _current;
-          }
-        }
-        final temp = handler(awaitedValue);
-        if (temp == null) {
+      // Async Path: Schedule the next step to execute after the current Future completes.
+      _current = Async(() async => _executeStep(task, await value)).flatten();
+    } else {
+      // Sync Path: Execute the next step immediately with the current value.
+      _current = _executeStep(task, value);
+    }
+    return _current;
+  }
+
+  /// The **Executor**. Its role is to take the resolved value from the previous
+  /// step and run the logic for the current task.
+  Resolvable<Option<T>> _executeStep(
+    _Task<T> task,
+    Result<Option<T>> previousResult,
+  ) {
+    // Check if the previous step resulted in an error.
+    switch (previousResult) {
+      case Err err:
+        _onPrevErr?.call(err);
+        task.onPrevErr?.call(err);
+        // If eager error is enabled, halt the chain by returning the current
+        // state (which holds the error we just received) instead of executing
+        // the next handler.
+        if (task.eagerError ?? _eagerError) {
           return _current;
         }
-        _isEmpty = true;
-        return temp;
-      }).flatten();
-    } else {
-      if (value.isErr()) {
-        final err = value.err().unwrap().transfErr<T>();
-        _onPrevErr?.call(err);
-        onPrevErr?.call(err);
-        if (eagerError1) {
-          return _transfCurrent<T>(_current);
-        }
-      }
-      _current = Sync(() {
-        return handler(value)?.map((e) {
-              _isEmpty = true;
-              return e;
-            }) ??
-            _current;
-      }).flatten();
+      default:
+      // No error, or not in eager mode, so proceed to execution.
     }
-    return _transfCurrent<T>(_current);
+    // Execute the handler for the current task.
+    return _executeHandler(task.handler, previousResult) ?? _current;
+  }
+
+  /// Safely executes the handler, managing re-entrant state.
+  Resolvable<Option<T>>? _executeHandler(
+    _THandler<T> handler,
+    Result<Option<T>> previousValue,
+  ) {
+    _isExecutingHandler = true;
+    try {
+      return handler(previousValue);
+    } finally {
+      _isExecutingHandler = false;
+      _processReentrantQueue();
+    }
+  }
+
+  /// Processes tasks that were queued while a handler was executing.
+  void _processReentrantQueue() {
+    while (_reentrantQueue.isNotEmpty) {
+      final task = _reentrantQueue.removeFirst();
+      pushTask(
+        task.handler,
+        onPrevErr: task.onPrevErr,
+        eagerError: task.eagerError,
+      ).end();
+    }
   }
 }
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-@pragma('vm:prefer-inline')
-Resolvable<Option<T>> _transfCurrent<T extends Object>(
-  Resolvable<Option<Object>> input,
-) {
-  return input.transf((e) => e.transf<T>().unwrap());
-}
+typedef _THandler<T extends Object> = Resolvable<Option<T>>? Function(Result<Option<T>> previous);
 
-typedef _TOnPrevErr<T extends Object> = void Function(Err<T> err);
+typedef _TOnPrevErr = void Function(Err err);
+
+final class _Task<T extends Object> {
+  final _THandler<T> handler;
+  final _TOnPrevErr? onPrevErr;
+  final bool? eagerError;
+
+  const _Task({
+    required this.handler,
+    required this.onPrevErr,
+    required this.eagerError,
+  });
+}

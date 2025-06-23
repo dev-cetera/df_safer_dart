@@ -16,7 +16,7 @@ import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension SyncAsyncSwapX<T extends Object> on Sync<Async<T>> {
+extension $SyncAsyncSwapX<T extends Object> on Sync<Async<T>> {
   @pragma('vm:prefer-inline')
   Async<Sync<T>> swap() {
     switch (value) {
@@ -32,7 +32,7 @@ extension SyncAsyncSwapX<T extends Object> on Sync<Async<T>> {
   }
 }
 
-extension SyncResolvableSwapX<T extends Object> on Sync<Resolvable<T>> {
+extension $SyncResolvableSwapX<T extends Object> on Sync<Resolvable<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> swap() {
     switch (value) {
@@ -53,7 +53,7 @@ extension SyncResolvableSwapX<T extends Object> on Sync<Resolvable<T>> {
   }
 }
 
-extension SyncOptionSwapX<T extends Object> on Sync<Option<T>> {
+extension $SyncOptionSwapX<T extends Object> on Sync<Option<T>> {
   @pragma('vm:prefer-inline')
   Option<Sync<T>> swap() {
     switch (value) {
@@ -70,17 +70,17 @@ extension SyncOptionSwapX<T extends Object> on Sync<Option<T>> {
   }
 }
 
-extension SyncSomeSwapX<T extends Object> on Sync<Some<T>> {
+extension $SyncSomeSwapX<T extends Object> on Sync<Some<T>> {
   @pragma('vm:prefer-inline')
   Some<Sync<T>> swap() => map((e) => e.unwrap()).wrapSome();
 }
 
-extension SyncNoneSwapX<T extends Object> on Sync<None<T>> {
+extension $SyncNoneSwapX<T extends Object> on Sync<None<T>> {
   @pragma('vm:prefer-inline')
   None<Sync<T>> swap() => const None();
 }
 
-extension SyncResultSwapX<T extends Object> on Sync<Result<T>> {
+extension $SyncResultSwapX<T extends Object> on Sync<Result<T>> {
   @pragma('vm:prefer-inline')
   Result<Sync<T>> swap() {
     switch (value) {
@@ -97,12 +97,12 @@ extension SyncResultSwapX<T extends Object> on Sync<Result<T>> {
   }
 }
 
-extension SyncOkSwapX<T extends Object> on Sync<Ok<T>> {
+extension $SyncOkSwapX<T extends Object> on Sync<Ok<T>> {
   @pragma('vm:prefer-inline')
   Ok<Sync<T>> swap() => Ok(Sync.unsafe(Ok(value.unwrap().unwrap())));
 }
 
-extension SyncErrSwapX<T extends Object> on Sync<Err<T>> {
+extension $SyncErrSwapX<T extends Object> on Sync<Err<T>> {
   @pragma('vm:prefer-inline')
   Err<Sync<T>> swap() => value.unwrap().transfErr<Sync<T>>();
 }

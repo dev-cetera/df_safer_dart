@@ -12,7 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-part of '../monad.dart';
+part of '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -24,7 +24,7 @@ part of '../monad.dart';
 ///
 /// Await all Futures in the constructor [Async.new] to ensure errors are
 /// properly caught and propagated.
-final class Async<T extends Object> extends Resolvable<T> {
+final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T> {
   /// Combines 2 [Async] monads into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
@@ -38,9 +38,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2],
-      onErr: onErr == null
-          ? null
-          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -51,23 +49,21 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineAsync].
-  static Async<(T1, T2, T3)>
-  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Async<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Async<T1> a1,
     Async<T2> a2,
     Async<T3> a3, [
-    @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2, a3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -86,8 +82,8 @@ final class Async<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Async.value(Future<Result<T>> super.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe();
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe();
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -97,9 +93,7 @@ final class Async<T extends Object> extends Resolvable<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -173,8 +167,8 @@ final class Async<T extends Object> extends Resolvable<T> {
         case Ok():
           final b = noFuturesAllowed(a);
           switch (b) {
-            case Ok(value: final v):
-              return v;
+            case Ok(value: final okValue):
+              return okValue;
             case Err():
               throw b;
           }
@@ -240,8 +234,8 @@ final class Async<T extends Object> extends Resolvable<T> {
     return Async(() async {
       final awaitedValue = await value;
       switch (awaitedValue) {
-        case Ok(value: final v):
-          return v;
+        case Ok(value: final okValue):
+          return okValue;
         case Err():
           return (await other.value).unwrap();
       }
@@ -293,8 +287,8 @@ final class Async<T extends Object> extends Resolvable<T> {
     return Async(() async {
       final okOrErr = (await value).transf<R>(noFuturesAllowed);
       switch (okOrErr) {
-        case Ok(value: final v):
-          return v;
+        case Ok(value: final okValue):
+          return okValue;
         case Err():
           throw okOrErr;
       }

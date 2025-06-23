@@ -14,7 +14,7 @@
 
 import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

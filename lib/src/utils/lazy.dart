@@ -15,7 +15,7 @@
 import 'package:meta/meta.dart';
 
 import '../_src.g.dart';
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

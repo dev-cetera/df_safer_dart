@@ -12,7 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-part of '../monad.dart';
+part of '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -43,9 +43,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2],
-      onErr: onErr == null
-          ? null
-          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -56,23 +54,21 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResolvable].
-  static Resolvable<(T1, T2, T3)>
-  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Resolvable<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
-    @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -85,9 +81,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
     @noFuturesAllowed Err<T> Function(Object? error)? onError,
     @noFuturesAllowed void Function()? onFinalize,
   }) {
@@ -127,17 +121,6 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
   );
 
-  /// Unsafely gets the [Sync] instance. Throws if not a [Sync].
-  @unsafeOrError
-  @pragma('vm:prefer-inline')
-  Sync<T> unwrapSync() => sync().unwrap();
-
-  /// Unsafely gets the [Async] instance. Throws if not an [Async].
-  /// @unsafeOrError
-  @unsafeOrError
-  @pragma('vm:prefer-inline')
-  Async<T> unwrapAsync() => async().unwrap();
-
   /// Maps the inner [Result] of this [Resolvable] using `mapper`.
   Resolvable<R> resultMap<R extends Object>(
     @noFuturesAllowed Result<R> Function(Result<T> value) noFuturesAllowed,
@@ -160,6 +143,30 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
     @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
   );
+
+  /// Ensures that resolving this value takes at least a specified [duration].
+  /// If [duration] is null, this method returns the original value immediately.
+  Resolvable<T> withMinDuration(Duration? duration) {
+    if (duration == null) {
+      return this;
+    }
+    return Async<Result<T>>(() async {
+      return _withMinDuration(value, duration);
+    }).flatten();
+  }
+
+  FutureOr<R> _withMinDuration<R extends Object>(
+    FutureOr<R> input,
+    Duration? duration,
+  ) {
+    if (duration == null) {
+      return input;
+    }
+    return Future.wait([
+      Future.value(input),
+      Future<void>.delayed(duration),
+    ]).then((e) => e.first as R);
+  }
 
   /// Unsafely converts this [Resolvable] to a [Sync]. Throws if it's an [Async].
   Sync<T> toSync();

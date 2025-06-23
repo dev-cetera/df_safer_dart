@@ -1,17 +1,18 @@
+// ignore_for_file: must_use_unsafe_wrapper_or_error
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {
   UNSAFE:
   SafeSequencer(eagerError: true)
-    ..addSafe((prev) {
+    ..pushTask((prev) {
       print(prev);
       return const Sync.unsafe(Ok(Some(1)));
     })
-    ..addSafe((prev) {
+    ..pushTask((prev) {
       print(prev);
       throw Err('Oh no!');
     })
-    ..addSafe(
+    ..pushTask(
       (prev) {
         return const Sync.unsafe(Ok(Some(1)));
       },
@@ -20,7 +21,7 @@ void main() {
         print('ERROR!!!');
       },
     )
-    ..addSafe((prev) {
+    ..pushTask((prev) {
       print(prev);
       return const Sync.unsafe(Ok(Some(1)));
     }).end();

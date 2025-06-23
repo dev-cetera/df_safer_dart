@@ -15,7 +15,7 @@ import 'dart:async' show Completer, FutureOr;
 import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart'
     show noFuturesAllowed;
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -69,8 +69,8 @@ class SafeCompleter<T extends Object> {
     return Resolvable(() {
       // Use a switch on the Option '_value' for clear and safe state checking.
       switch (_value) {
-        case Some(value: final v):
-          return v;
+        case Some(value: final okValue):
+          return okValue;
         case None():
           return _completer.future;
       }

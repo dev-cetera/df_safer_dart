@@ -12,11 +12,11 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
+extension $IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
   Iterable<Some<T>> whereSome() {
     return where((e) => e.isSome()).map((e) => e.some().unwrap());
   }
@@ -26,8 +26,7 @@ extension IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
   }
 }
 
-extension IterableFutureOptionExtension<T extends Object>
-    on Iterable<Future<Option<T>>> {
+extension $IterableFutureOptionExtension<T extends Object> on Iterable<Future<Option<T>>> {
   Future<Iterable<Some<T>>> whereSome() {
     return Future.wait(this).then((e) => e.whereSome());
   }
@@ -37,14 +36,13 @@ extension IterableFutureOptionExtension<T extends Object>
   }
 }
 
-extension IterableSomeExtension<T extends Object> on Iterable<Some<T>> {
+extension $IterableSomeExtension<T extends Object> on Iterable<Some<T>> {
   Iterable<T> unwrapAll() {
     return whereSome().map((e) => e.value);
   }
 }
 
-extension FutureIterableSomeExtension<T extends Object>
-    on Future<Iterable<Some<T>>> {
+extension $FutureIterableSomeExtension<T extends Object> on Future<Iterable<Some<T>>> {
   Future<Iterable<T>> unwrapAll() {
     return then((e) => e.unwrapAll());
   }

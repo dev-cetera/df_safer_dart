@@ -10,21 +10,10 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import '../monads/monad.dart';
+part of '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension SaferMap1<K, V> on Map<K, V> {
-  Option<Map<K, V>> get noneIfEmpty {
-    return Option.from(isEmpty ? null : this);
-  }
-}
-
-extension SaferMap2<K, V extends Object> on Map<K, V> {
-  Option<V> getOption(K key) {
-    if (containsKey(key)) {
-      return Some(this[key]!);
-    }
-    return const None();
-  }
+sealed class AsyncImpl<T extends Object> {
+  Future<Object> get value;
 }

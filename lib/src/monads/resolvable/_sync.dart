@@ -12,7 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-part of '../monad.dart';
+part of '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -24,7 +24,7 @@ part of '../monad.dart';
 ///
 /// Do not use any Futures in the constructor [Sync.new] to ensure errors are
 /// properly caught and propagated.
-final class Sync<T extends Object> extends Resolvable<T> {
+final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> {
   /// Combines 2 [Sync] monads into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
@@ -38,9 +38,7 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ]) {
     final combined = combineSync<Object>(
       [s1, s2],
-      onErr: onErr == null
-          ? null
-          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -51,23 +49,21 @@ final class Sync<T extends Object> extends Resolvable<T> {
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineSync].
-  static Sync<(T1, T2, T3)>
-  zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Sync<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Sync<T1> s1,
     Sync<T2> s2,
     Sync<T3> s3, [
-    @noFuturesAllowed
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineSync<Object>(
       [s1, s2, s3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -86,8 +82,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   ///
   /// [T] must never be a [Future].
   Sync.value(Result<T> super.value)
-    : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.unsafe();
+      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.unsafe();
 
   /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
   ///
@@ -156,7 +152,8 @@ final class Sync<T extends Object> extends Resolvable<T> {
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
     @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
-  ) => this;
+  ) =>
+      this;
 
   @override
   @pragma('vm:prefer-inline')

@@ -12,11 +12,11 @@
 
 import 'package:meta/meta.dart' show protected;
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension FlattenOption2<T extends Object> on Option<Option<T>> {
+extension $FlattenOption2<T extends Object> on Option<Option<T>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten2();
 
@@ -31,7 +31,7 @@ extension FlattenOption2<T extends Object> on Option<Option<T>> {
   }
 }
 
-extension FlattenOption3<T extends Object> on Option<Option<Option<T>>> {
+extension $FlattenOption3<T extends Object> on Option<Option<Option<T>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten3();
 
@@ -40,8 +40,7 @@ extension FlattenOption3<T extends Object> on Option<Option<Option<T>>> {
   Option<T> flatten3() => flatten2().flatten2();
 }
 
-extension FlattenOption4<T extends Object>
-    on Option<Option<Option<Option<T>>>> {
+extension $FlattenOption4<T extends Object> on Option<Option<Option<Option<T>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten4();
 
@@ -50,8 +49,7 @@ extension FlattenOption4<T extends Object>
   Option<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenOption5<T extends Object>
-    on Option<Option<Option<Option<Option<T>>>>> {
+extension $FlattenOption5<T extends Object> on Option<Option<Option<Option<Option<T>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten5();
 
@@ -60,8 +58,7 @@ extension FlattenOption5<T extends Object>
   Option<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenOption6<T extends Object>
-    on Option<Option<Option<Option<Option<Option<T>>>>>> {
+extension $FlattenOption6<T extends Object> on Option<Option<Option<Option<Option<Option<T>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten6();
 
@@ -70,7 +67,7 @@ extension FlattenOption6<T extends Object>
   Option<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenOption7<T extends Object>
+extension $FlattenOption7<T extends Object>
     on Option<Option<Option<Option<Option<Option<Option<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten7();
@@ -80,7 +77,7 @@ extension FlattenOption7<T extends Object>
   Option<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenOption8<T extends Object>
+extension $FlattenOption8<T extends Object>
     on Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten8();
@@ -90,11 +87,8 @@ extension FlattenOption8<T extends Object>
   Option<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenOption9<T extends Object>
-    on
-        Option<
-          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
-        > {
+extension $FlattenOption9<T extends Object>
+    on Option<Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten9();
 

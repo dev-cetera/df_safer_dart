@@ -2,16 +2,16 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {
   final seq = SafeSequencer();
-  seq.addSafe((_) {
+  seq.pushTask((_) {
     return doWait().toResolvable();
   }).end();
-  seq.addSafe((_) {
+  seq.pushTask((_) {
     return doNotWait().toResolvable();
   }).end();
-  seq.addSafe((_) {
+  seq.pushTask((_) {
     return doWait().toResolvable();
   }).end();
-  seq.addSafe((_) {
+  seq.pushTask((_) {
     return doNotWait().toResolvable();
   }).end();
 }

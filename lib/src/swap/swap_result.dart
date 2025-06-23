@@ -14,7 +14,7 @@ import '/src/_src.g.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ResultSyncSwapX<T extends Object> on Result<Sync<T>> {
+extension $ResultSyncSwapX<T extends Object> on Result<Sync<T>> {
   @pragma('vm:prefer-inline')
   Sync<Result<T>> swap() {
     if (this is Ok<Sync<T>>) {
@@ -24,7 +24,7 @@ extension ResultSyncSwapX<T extends Object> on Result<Sync<T>> {
   }
 }
 
-extension ResultAsyncSwapX<T extends Object> on Result<Async<T>> {
+extension $ResultAsyncSwapX<T extends Object> on Result<Async<T>> {
   @pragma('vm:prefer-inline')
   Async<Result<T>> swap() {
     if (this is Ok<Async<T>>) {
@@ -34,7 +34,7 @@ extension ResultAsyncSwapX<T extends Object> on Result<Async<T>> {
   }
 }
 
-extension ResultResolvableSwapX<T extends Object> on Result<Resolvable<T>> {
+extension $ResultResolvableSwapX<T extends Object> on Result<Resolvable<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<Result<T>> swap() {
     if (this is Ok<Resolvable<T>>) {
@@ -44,7 +44,7 @@ extension ResultResolvableSwapX<T extends Object> on Result<Resolvable<T>> {
   }
 }
 
-extension ResultOptionSwapX<T extends Object> on Result<Option<T>> {
+extension $ResultOptionSwapX<T extends Object> on Result<Option<T>> {
   @pragma('vm:prefer-inline')
   Option<Result<T>> swap() {
     if (this is Ok<Option<T>>) {
@@ -54,7 +54,7 @@ extension ResultOptionSwapX<T extends Object> on Result<Option<T>> {
   }
 }
 
-extension ResultSomeSwapX<T extends Object> on Result<Some<T>> {
+extension $ResultSomeSwapX<T extends Object> on Result<Some<T>> {
   @pragma('vm:prefer-inline')
   Some<Result<T>> swap() {
     if (this is Ok<Some<T>>) {
@@ -64,7 +64,7 @@ extension ResultSomeSwapX<T extends Object> on Result<Some<T>> {
   }
 }
 
-extension ResultNoneSwapX<T extends Object> on Result<None<T>> {
+extension $ResultNoneSwapX<T extends Object> on Result<None<T>> {
   @pragma('vm:prefer-inline')
   Option<Result<T>> swap() {
     if (this is Ok<None<T>>) {
@@ -74,7 +74,7 @@ extension ResultNoneSwapX<T extends Object> on Result<None<T>> {
   }
 }
 
-extension ResultOkSwapX<T extends Object> on Result<Ok<T>> {
+extension $ResultOkSwapX<T extends Object> on Result<Ok<T>> {
   @pragma('vm:prefer-inline')
   Ok<Result<T>> swap() {
     if (this is Ok<Ok<T>>) {
@@ -84,7 +84,7 @@ extension ResultOkSwapX<T extends Object> on Result<Ok<T>> {
   }
 }
 
-extension ResultErrSwapX<T extends Object> on Result<Err<T>> {
+extension $ResultErrSwapX<T extends Object> on Result<Err<T>> {
   @pragma('vm:prefer-inline')
   Result<T> swap() {
     if (this is Ok<Err<T>>) {

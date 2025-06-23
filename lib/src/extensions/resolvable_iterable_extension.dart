@@ -12,12 +12,11 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension IterableResolvableExtension<T extends Object>
-    on Iterable<Resolvable<T>> {
+extension $IterableResolvableExtension<T extends Object> on Iterable<Resolvable<T>> {
   Iterable<Sync<T>> whereSync() {
     return where((e) => e.isSync()).map((e) => e.sync().unwrap());
   }
@@ -31,13 +30,13 @@ extension IterableResolvableExtension<T extends Object>
   }
 }
 
-extension IterableSyncExtension<T extends Object> on Iterable<Sync<T>> {
+extension $IterableSyncExtension<T extends Object> on Iterable<Sync<T>> {
   Iterable<Result<T>> mapToResults() {
     return whereSync().map((e) => e.value);
   }
 }
 
-extension IterableAsyncExtension<T extends Object> on Iterable<Async<T>> {
+extension $IterableAsyncExtension<T extends Object> on Iterable<Async<T>> {
   Iterable<Future<Result<T>>> mapToResults() {
     return whereAsync().map((e) => e.value);
   }

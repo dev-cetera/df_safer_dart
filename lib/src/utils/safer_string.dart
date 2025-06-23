@@ -10,34 +10,29 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-import 'dart:convert';
-
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension SaferString on String {
+extension $SaferString on String {
+  // Returns this string wrapped in a [Some] if it's not empty,
+  /// otherwise returns [None].
   Option<String> get noneIfEmpty {
     return Option.from(isEmpty ? null : this);
   }
 
-  Option<int> toIntOrNone() {
-    return Option.from(int.tryParse(this));
-  }
+  /// Returns the first character as a [Some], or [None] if the string is empty.
+  Option<String> get firstOrNone => isEmpty ? const None() : Some(this[0]);
 
-  Option<double> toDoubleOrNone() {
-    return Option.from(double.tryParse(this));
-  }
+  /// Returns the last character as a [Some], or [None] if the string is empty.
+  Option<String> get lastOrNone => isEmpty ? const None() : Some(this[length - 1]);
 
-  Option<bool> toBoolOrNone() {
-    return Option.from(bool.tryParse(this, caseSensitive: false));
-  }
-
-  Result<T> decodeJson<T extends Object>() {
-    try {
-      return Ok(jsonDecode(this) as T);
-    } catch (e) {
-      return Err(e);
+  /// Returns the character at the given [index] as a [Some], or [None] if the
+  /// index is out of bounds.
+  Option<String> elementAtOrNone(int index) {
+    if (index < 0 || index >= length) {
+      return const None();
     }
+    return Some(this[index]);
   }
 }

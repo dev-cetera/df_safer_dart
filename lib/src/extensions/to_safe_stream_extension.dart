@@ -11,12 +11,12 @@
 //.title~
 
 import 'dart:async';
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// An extension on [Stream] to provide a safe way to handle stream events.
-extension ToSafeStreamExtension<T extends Object> on Stream<T> {
+extension $ToSafeStreamExtension<T extends Object> on Stream<T> {
   /// Transforms a [Stream<T>] into a [Stream<Result<T>>].
   ///
   /// Each data event from the original stream is wrapped in an [Ok<T>].

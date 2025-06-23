@@ -12,11 +12,11 @@
 
 import 'package:meta/meta.dart' show protected;
 
-import '../monads/monad.dart';
+import '../monads/monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension FlattenResult2<T extends Object> on Result<Result<T>> {
+extension $FlattenResult2<T extends Object> on Result<Result<T>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten2();
 
@@ -31,7 +31,7 @@ extension FlattenResult2<T extends Object> on Result<Result<T>> {
   }
 }
 
-extension FlattenResult3<T extends Object> on Result<Result<Result<T>>> {
+extension $FlattenResult3<T extends Object> on Result<Result<Result<T>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten3();
 
@@ -40,8 +40,7 @@ extension FlattenResult3<T extends Object> on Result<Result<Result<T>>> {
   Result<T> flatten3() => flatten2().flatten2();
 }
 
-extension FlattenResult4<T extends Object>
-    on Result<Result<Result<Result<T>>>> {
+extension $FlattenResult4<T extends Object> on Result<Result<Result<Result<T>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten4();
 
@@ -50,8 +49,7 @@ extension FlattenResult4<T extends Object>
   Result<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenResult5<T extends Object>
-    on Result<Result<Result<Result<Result<T>>>>> {
+extension $FlattenResult5<T extends Object> on Result<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten5();
 
@@ -60,8 +58,7 @@ extension FlattenResult5<T extends Object>
   Result<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenResult6<T extends Object>
-    on Result<Result<Result<Result<Result<Result<T>>>>>> {
+extension $FlattenResult6<T extends Object> on Result<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten6();
 
@@ -70,7 +67,7 @@ extension FlattenResult6<T extends Object>
   Result<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenResult7<T extends Object>
+extension $FlattenResult7<T extends Object>
     on Result<Result<Result<Result<Result<Result<Result<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten7();
@@ -80,7 +77,7 @@ extension FlattenResult7<T extends Object>
   Result<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenResult8<T extends Object>
+extension $FlattenResult8<T extends Object>
     on Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten8();
@@ -90,11 +87,8 @@ extension FlattenResult8<T extends Object>
   Result<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenResult9<T extends Object>
-    on
-        Result<
-          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
-        > {
+extension $FlattenResult9<T extends Object>
+    on Result<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Result<T> flatten() => flatten9();
 
