@@ -33,18 +33,22 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(@noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed) {
-    try {
-      noFuturesAllowed(this);
-      return this;
-    } catch (error) {
-      return Err(error);
-    }
+  Result<T> ifOk(
+    @noFuturesAllowed void Function(Ok<T> self, Ok<T> ok) noFuturesAllowed,
+  ) {
+    return Sync(() {
+      noFuturesAllowed(this, this);
+      return value;
+    }).value;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) => this;
+  Result<T> ifErr(
+    @noFuturesAllowed void Function(Ok<T> self, Err<T> err) noFuturesAllowed,
+  ) {
+    return this;
+  }
 
   @override
   @pragma('vm:prefer-inline')
@@ -86,8 +90,11 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   ) {
     try {
       return onOk(this) ?? this;
-    } catch (error) {
-      return Err(error);
+    } catch (error, stackTrace) {
+      return Err(
+        error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -123,33 +130,57 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
       final a = unwrap();
       final b = noFuturesAllowed?.call(a) ?? a as R;
       return Ok(b);
-    } catch (e) {
-      assert(false, e);
-      return Err('Cannot transform $T to $R.');
+    } catch (error, stackTrace) {
+      assert(false, error);
+      return Err(
+        'Cannot transform $T to $R.',
+        stackTrace: stackTrace,
+      );
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Ok<T>> wrapSome() => Some(this);
+  Some<Ok<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Ok<T>> wrapOk() => Ok(this);
+  Ok<Ok<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<Ok<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<Ok<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Ok<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<Ok<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Ok<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<Ok<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  Ok<Some<T>> wrapValueInSome() => map((e) => Some(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Ok<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   Ok<void> asVoid() => this;
 }

@@ -3,26 +3,27 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {
   UNSAFE:
-  SafeSequencer(eagerError: true)
-    ..pushTask((prev) {
+  TaskSequencer(eagerError: true)
+    ..then((prev) {
       print(prev);
-      return const Sync.unsafe(Ok(Some(1)));
+      return Sync.okValue(const Some(1));
     })
-    ..pushTask((prev) {
+    ..then((prev) {
       print(prev);
       throw Err('Oh no!');
     })
-    ..pushTask(
+    ..then(
       (prev) {
-        return const Sync.unsafe(Ok(Some(1)));
+        return Sync.okValue(const Some(2));
       },
       eagerError: false,
-      onPrevErr: (err) {
+      onPrevError: (err) {
         print('ERROR!!!');
+        return syncNone();
       },
     )
-    ..pushTask((prev) {
+    ..then((prev) {
       print(prev);
-      return const Sync.unsafe(Ok(Some(1)));
+      return Sync.okValue(const Some(3));
     }).end();
 }

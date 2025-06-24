@@ -72,18 +72,30 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @pragma('vm:prefer-inline')
   Future<Result<T>> get value => super.value as Future<Result<T>>;
 
-  @protected
   @unsafeOrError
-  const Async.unsafe(Future<Result<T>> super.value) : super.unsafe();
+  Async.result(super.value)
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.result();
 
-  /// Creates an [Async] with a pre-computed [Future] of a [Result].
-  ///
-  /// # IMPORTANT
-  ///
-  /// [T] must never be a [Future].
-  Async.value(Future<Result<T>> super.value)
-      : assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.unsafe();
+  @unsafeOrError
+  Async.ok(super.ok)
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.ok();
+
+  @unsafeOrError
+  Async.okValue(FutureOr<T> okValue)
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.ok(Future.value(okValue).then((e) => Ok(e)));
+
+  @unsafeOrError
+  Async.err(super.err)
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.err();
+
+  @unsafeOrError
+  Async.errValue(FutureOr<({Object error, int? statusCode})> error)
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.err(Future.value(error).then((e) => Err(e.error, statusCode: e.statusCode)));
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -94,23 +106,26 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   /// caught and propagated.
   factory Async(
     @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
-    @noFuturesAllowed Err<T> Function(Object? error)? onError,
-    @noFuturesAllowed void Function()? onFinalize,
+    @noFuturesAllowed TOnErrorCallback<T>? onError,
+    @noFuturesAllowed TVoidCallback? onFinalize,
   }) {
-    assert(!_isSubtype<T, Future<Object>>(), '$T must never be a Future.');
-    return Async.unsafe(() async {
+    assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
+    return Async.result(() async {
       try {
         return Ok<T>(await mustAwaitAllFutures());
-      } on Err catch (e) {
-        return e.transfErr<T>();
-      } catch (error) {
+      } on Err catch (err) {
+        return err.transfErr<T>();
+      } catch (error, stackTrace) {
         try {
           if (onError == null) {
             rethrow;
           }
-          return onError(error);
-        } catch (error) {
-          return Err<T>(error);
+          return onError(error, stackTrace);
+        } catch (error, stackTrace) {
+          return Err<T>(
+            error,
+            stackTrace: stackTrace,
+          );
         }
       } finally {
         onFinalize?.call();
@@ -129,7 +144,9 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Err<Sync<T>> sync() {
-    return Err('Called sync() on Async<$T>.');
+    return Err(
+      'Called sync() on Async<$T>.',
+    );
   }
 
   @override
@@ -139,7 +156,11 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Async<T> ifSync(
-    @noFuturesAllowed void Function(Sync<T> async) noFuturesAllowed,
+    @noFuturesAllowed
+    void Function(
+      Async<T> self,
+      Sync<T> async,
+    ) noFuturesAllowed,
   ) {
     return this;
   }
@@ -147,14 +168,58 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Async<T> ifAsync(
-    @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
+    @noFuturesAllowed
+    void Function(
+      Async<T> self,
+      Async<T> async,
+    ) noFuturesAllowed,
   ) {
-    try {
-      noFuturesAllowed(this);
+    return Sync(() {
+      noFuturesAllowed(this, this);
       return this;
-    } catch (error) {
-      return Async.unsafe(Future.value(Err(error)));
-    }
+    }).flatten().toAsync();
+  }
+
+  @override
+  Resolvable<T> ifOk(
+    @noFuturesAllowed
+    void Function(
+      Async<T> self,
+      Ok<T> ok,
+    ) noFuturesAllowed,
+  ) {
+    return Async(() async {
+      final awaitedValue = await value;
+      return switch (awaitedValue) {
+        Ok<T> ok => Resolvable(
+            () {
+              noFuturesAllowed(this, ok);
+              return awaitedValue;
+            },
+          ).flatten(),
+        Err() => this,
+      };
+    }).flatten();
+  }
+
+  @override
+  Resolvable<T> ifErr(
+    @noFuturesAllowed
+    void Function(
+      Async<T> self,
+      Err<T> err,
+    ) noFuturesAllowed,
+  ) {
+    return Async(() async {
+      final awaitedValue = await value;
+      return switch (awaitedValue) {
+        Ok() => this,
+        Err<T> err => Sync(() {
+            noFuturesAllowed(this, err);
+            return awaitedValue;
+          }).flatten()
+      };
+    }).flatten();
   }
 
   @override
@@ -192,8 +257,13 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   ) {
     try {
       return onAsync(this) ?? this;
-    } catch (error) {
-      return Async.unsafe(Future.value(Err(error)));
+    } catch (error, stackTrace) {
+      return Async.err(
+        Err(
+          error,
+          stackTrace: stackTrace,
+        ),
+      );
     }
   }
 
@@ -272,12 +342,33 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   FutureOr<T> unwrapOr(T fallback) => value.then((e) => e.unwrapOr(fallback));
 
+  /// Prefer using [then] for [Async].
   @override
   @pragma('vm:prefer-inline')
   Async<R> map<R extends Object>(
     @noFuturesAllowed R Function(T value) noFuturesAllowed,
   ) {
-    return Async.unsafe(value.then((e) => e.map(noFuturesAllowed)));
+    return then(noFuturesAllowed);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<R> then<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  ) {
+    return Async.result(value.then((e) => e.map(noFuturesAllowed)));
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<R> whenComplete<R extends Object>(
+    @noFuturesAllowed Resolvable<R> Function(Sync<T> resolved) noFuturesAllowed,
+  ) {
+    return Async(() async {
+      final result = (await value);
+      result.unwrap(); // unwrap to throw if value has an Err.
+      return Resolvable(() => noFuturesAllowed(Sync<T>.result(result)));
+    }).flatten().toAsync();
   }
 
   @override
@@ -297,25 +388,46 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Async<T>> wrapSome() => Some(this);
+  Some<Async<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Async<T>> wrapOk() => Ok(this);
+  Ok<Async<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<Async<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<Async<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Async<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<Async<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Async<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<Async<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  Async<Some<T>> wrapValueInSome() => map((e) => Some(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   Async<void> asVoid() => this;
 
@@ -325,8 +437,3 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
     return value.then((e) => e.end()).catchError((_) {});
   }
 }
-
-// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-@pragma('vm:prefer-inline')
-bool _isSubtype<TChild, TParent>() => <TChild>[] is List<TParent>;

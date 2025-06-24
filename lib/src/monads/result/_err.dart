@@ -10,6 +10,8 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 part of '../monad/monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -32,16 +34,32 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   Object get error => value;
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
-  Err(super.value, {int? statusCode})
-      : statusCode = Option.from(statusCode),
-        stackTrace = Trace.current(),
+  Err(
+    super.value, {
+    int? statusCode,
+    StackTrace? stackTrace,
+  })  : statusCode = Option.from(statusCode),
+        stackTrace = stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
         super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
   factory Err.fromModel(ErrModel model) {
     final error = model.error;
-    return Err(error ?? 'Unknown error!', statusCode: model.statusCode);
+    return Err(
+      error ?? 'Error',
+      stackTrace: _tryParseStackTrace(model.stackTrace),
+      statusCode: model.statusCode,
+    );
+  }
+
+  static StackTrace? _tryParseStackTrace(List<String>? lines) {
+    if (lines == null) return null;
+    try {
+      return Trace.parse(lines.join('\n')).original;
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -54,19 +72,21 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifOk(@noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed) {
+  Err<T> ifOk(
+    @noFuturesAllowed void Function(Err<T> self, Ok<T> ok) noFuturesAllowed,
+  ) {
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed) {
-    try {
-      noFuturesAllowed(this);
+  Err<T> ifErr(
+    @noFuturesAllowed void Function(Err<T> self, Err<T> err) noFuturesAllowed,
+  ) {
+    return Sync(() {
+      noFuturesAllowed(this, this);
       return this;
-    } catch (error) {
-      return Err(error);
-    }
+    }).value.flatten().err().unwrap();
   }
 
   @override
@@ -111,8 +131,11 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   ) {
     try {
       return onErr(this) ?? this;
-    } catch (error) {
-      return Err(error);
+    } catch (error, stackTrace) {
+      return Err(
+        error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -132,7 +155,10 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   /// contained `error`.
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(value, statusCode: statusCode.orNull());
+    return Err(
+      value,
+      statusCode: statusCode.orNull(),
+    );
   }
 
   /// Converts this [Err] to a data model for serialization.
@@ -190,25 +216,46 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Err<T>> wrapSome() => Some(this);
+  Some<Err<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Err<T>> wrapOk() => Ok(this);
+  Ok<Err<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<Err<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<Err<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Err<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<Err<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Err<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<Err<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  Err<Some<T>> wrapValueInSome() => transfErr();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<Ok<T>> wrapValueInOk() => transfErr();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<Resolvable<T>> wrapValueInResolvable() => transfErr();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<Sync<T>> wrapValueInSync() => transfErr();
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<Async<T>> wrapValyeInAsync() => transfErr();
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   Err<void> asVoid() => this;
 
@@ -226,8 +273,8 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 String _safeToString(Object? obj) {
   try {
     return obj.toString();
-  } catch (e) {
-    assert(false, e);
+  } catch (error) {
+    assert(false, error);
     return '${obj.runtimeType}@${obj.hashCode.toRadixString(16)}';
   }
 }

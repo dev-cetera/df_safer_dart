@@ -30,7 +30,6 @@ void main() {
         expect(result.unwrap(), 42);
       });
 
-      // THIS IS THE CORRECTED TEST
       test('should complete successfully with an asynchronous value', () async {
         // Arrange
         final completer = SafeCompleter<String>();
@@ -70,7 +69,7 @@ void main() {
           final error = Err<int>('A deliberate test error');
 
           // Act
-          completer.resolve(Sync.value(error)).end();
+          completer.resolve(Sync.err(error)).end();
 
           // Assert
           expect(completer.isCompleted, isTrue);
@@ -84,7 +83,6 @@ void main() {
         },
       );
 
-      // THIS IS THE CORRECTED TEST
       test('should complete with an error from a failing future', () async {
         // Arrange
         final completer = SafeCompleter<double>();
@@ -109,7 +107,7 @@ void main() {
         final result = await resolvable.value;
         expect((result as Err).error, isA<Exception>());
         expect(
-          (result.err().unwrap() as Exception).toString(),
+          (result.err().unwrap().error as Exception).toString(),
           'Exception: Network Failure',
         );
       });
@@ -182,7 +180,7 @@ void main() {
           expect(result, isA<Err>());
           expect(
             (result as Err).error,
-            'Failed to transform type int to double.',
+            isA<TypeError>(), 
           );
         },
       );

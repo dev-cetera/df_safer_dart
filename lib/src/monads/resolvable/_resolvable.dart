@@ -28,7 +28,15 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @protected
   @unsafeOrError
-  const Resolvable.unsafe(FutureOr<Result<T>> super.value);
+  const Resolvable.result(FutureOr<Result<T>> super.value);
+
+  @protected
+  @unsafeOrError
+  const Resolvable.ok(FutureOr<Ok<T>> super.value);
+
+  @protected
+  @unsafeOrError
+  const Resolvable.err(FutureOr<Err<T>> super.value);
 
   /// Combines 2 [Resolvable] monads into 1 containing a tuple of their values
   /// if all resolve to [Ok].
@@ -82,8 +90,8 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// caught and propagated.
   factory Resolvable(
     @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
-    @noFuturesAllowed Err<T> Function(Object? error)? onError,
-    @noFuturesAllowed void Function()? onFinalize,
+    @noFuturesAllowed TOnErrorCallback<T>? onError,
+    @noFuturesAllowed TVoidCallback? onFinalize,
   }) {
     final result = mustAwaitAllFutures();
     if (result is Future<T>) {
@@ -111,14 +119,40 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Returns an [Ok] on [Async], or an [Err] on [Sync].
   Result<Async<T>> async();
 
-  /// Performs a side-effect if this is a [Sync].
+  /// Performs a side-effect if this is [Sync].
   Resolvable<T> ifSync(
-    @noFuturesAllowed void Function(Sync<T> sync) noFuturesAllowed,
+    @noFuturesAllowed
+    void Function(
+      Resolvable<T> self,
+      Sync<T> sync,
+    ) noFuturesAllowed,
   );
 
-  /// Performs a side-effect if this is an [Async].
+  /// Performs a side-effect if this is [Async].
   Resolvable<T> ifAsync(
-    @noFuturesAllowed void Function(Async<T> async) noFuturesAllowed,
+    @noFuturesAllowed
+    void Function(
+      Resolvable<T> self,
+      Async<T> async,
+    ) noFuturesAllowed,
+  );
+
+  /// Performs a side-effect if this is [Ok].
+  Resolvable<T> ifOk(
+    @noFuturesAllowed
+    void Function(
+      Resolvable<T> self,
+      Ok<T> ok,
+    ) noFuturesAllowed,
+  );
+
+  /// Performs a side-effect if this is [Err].
+  Resolvable<T> ifErr(
+    @noFuturesAllowed
+    void Function(
+      Resolvable<T> self,
+      Err<T> err,
+    ) noFuturesAllowed,
   );
 
   /// Maps the inner [Result] of this [Resolvable] using `mapper`.
@@ -202,9 +236,19 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   @override
   FutureOr<T> unwrapOr(T fallback);
 
+  /// Prefer using [then] for [Resolvable].
+  @protected
   @override
   Resolvable<R> map<R extends Object>(
     @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  );
+
+  Resolvable<R> then<R extends Object>(
+    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+  );
+
+  Resolvable<R> whenComplete<R extends Object>(
+    @noFuturesAllowed Resolvable<R> Function(Sync<T> resolved) noFuturesAllowed,
   );
 
   @override
@@ -214,25 +258,46 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Resolvable<T>> wrapSome() => Some(this);
+  Some<Resolvable<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Resolvable<T>> wrapOk() => Ok(this);
+  Ok<Resolvable<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<Resolvable<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<Resolvable<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Resolvable<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<Resolvable<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Resolvable<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<Resolvable<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Some<T>> wrapValueInSome() => map((e) => Some(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   Resolvable<void> asVoid() => this;
 }

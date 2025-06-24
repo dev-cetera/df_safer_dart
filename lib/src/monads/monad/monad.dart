@@ -12,15 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-import 'dart:async' show FutureOr;
-import 'dart:convert' show JsonEncoder;
-import 'package:equatable/equatable.dart' show Equatable;
-import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
-
-import 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';
-
-import '../../_src.g.dart';
+import '/_common.dart';
 
 part '../option/_option.dart';
 part '../option/_some.dart';
@@ -44,19 +36,19 @@ sealed class Monad<T extends Object> implements Equatable {
 
   const Monad(this.value);
 
-  /// Reduces any nested [Monad] structure into a single [TReducedMonad].
+  /// Reduces any nested [Monad] structure into a single [TResolvableOption].
   ///
   /// This flattens all [Monad] layers (`Option`, `Result`, `Resolvable`) into
   /// a final container that is always a `Resolvable` holding an `Option`.
   /// An [Err] state at any level will result in a failed `Resolvable`.
-  TReducedMonad<R> reduce<R extends Object>() {
+  TResolvableOption<R> reduce<R extends Object>() {
     return switch (this) {
       Some(value: final someValue) => Resolvable(() => Some(someValue as R)),
       Some(value: Monad<Object> monadValue) => monadValue.reduce<R>(),
       None() => syncNone<R>(),
       Ok(value: final someValue) => Resolvable(() => Some(someValue as R)),
       Ok(value: Monad<Object> monadValue) => monadValue.reduce<R>(),
-      Err(error: final error) => Sync.unsafe(Err(error)),
+      Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
           final result = await futureResult;
@@ -108,12 +100,12 @@ sealed class Monad<T extends Object> implements Equatable {
         onNone: () => Err('The Monad resolved to a None (empty) state!'),
       );
       if (value is Future) {
-        return Err(
+        throw Err(
           'The Monad contains an asynchronous value! Use rawAsync instead.',
         );
       }
       if (value is Err) {
-        return value;
+        throw value;
       }
       return value;
     });
@@ -136,7 +128,7 @@ sealed class Monad<T extends Object> implements Equatable {
         onNone: () => Err('The Monad resolved to a None (empty) state!'),
       );
       if (value is Err) {
-        return value;
+        throw value;
       }
       return value;
     });
@@ -226,19 +218,34 @@ sealed class Monad<T extends Object> implements Equatable {
   ]);
 
   /// Wraps this [Monad] in a [Some].
-  Some<Monad<T>> wrapSome();
+  Some<Monad<T>> wrapInSome();
 
-  /// Wraps this [Monad] in an [Ok].
-  Ok<Monad<T>> wrapOk();
+  /// Wraps this [Monad] in  [Ok].
+  Ok<Monad<T>> wrapInOk();
 
-  /// Wraps this [Monad] in a [Resolvable].
-  Resolvable<Monad<T>> wrapResolvable();
+  /// Wraps this [Monad] in [Resolvable].
+  Resolvable<Monad<T>> wrapInResolvable();
 
-  /// Wraps this [Monad] in a [Sync].
-  Sync<Monad<T>> wrapSync();
+  /// Wraps this [Monad] in [Sync].
+  Sync<Monad<T>> wrapInSync();
 
-  /// Wraps this [Monad] in an [Async].
-  Async<Monad<T>> wrapAsync();
+  /// Wraps this [Monad] in [Async].
+  Async<Monad<T>> wrapInAsync();
+
+  /// Wraps this [value] in  [Some].
+  Monad<Some<T>> wrapValueInSome();
+
+  /// Wraps this [value] in  [Ok].
+  Monad<Ok<T>> wrapValueInOk();
+
+  /// Wraps this [value] in  [Resolvable].
+  Monad<Resolvable<T>> wrapValueInResolvable();
+
+  /// Wraps this [value] in  [Sync].
+  Monad<Sync<T>> wrapValueInSync();
+
+  /// Wraps this [value] in  [Async].
+  Monad<Async<T>> wrapValyeInAsync();
 
   /// Transforms the contained value to `void`.
   Monad<void> asVoid();

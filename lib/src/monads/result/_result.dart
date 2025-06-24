@@ -74,10 +74,14 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   bool isErr();
 
   /// Performs a side-effect with the contained value if this is an [Ok].
-  Result<T> ifOk(@noFuturesAllowed void Function(Ok<T> ok) noFuturesAllowed);
+  Result<T> ifOk(
+    @noFuturesAllowed void Function(Result<T> self, Ok<T> ok) noFuturesAllowed,
+  );
 
   /// Performs a side-effect with the contained error if this is an [Err].
-  Result<T> ifErr(@noFuturesAllowed void Function(Err<T> err) noFuturesAllowed);
+  Result<T> ifErr(
+    @noFuturesAllowed void Function(Result<T> self, Err<T> err) noFuturesAllowed,
+  );
 
   /// Safely gets the [Err] instance.
   /// Returns a [Some] on [Err], or a [None] on [Ok].
@@ -135,25 +139,46 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<Result<T>> wrapSome() => Some(this);
+  Some<Result<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<Result<T>> wrapOk() => Ok(this);
+  Ok<Result<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<Result<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<Result<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<Result<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<Result<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<Result<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<Result<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  Result<Some<T>> wrapValueInSome() => map((e) => Some(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   Result<void> asVoid() => this;
 

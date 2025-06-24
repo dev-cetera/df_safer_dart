@@ -33,7 +33,9 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<Some<T>> some() {
-    return Err('Called some() on None<$T>.');
+    return Err(
+      'Called some() on None<$T>.',
+    );
   }
 
   @override
@@ -42,21 +44,29 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> ifSome(
-    @noFuturesAllowed void Function(Some<T> some) noFuturesAllowed,
+  Result<None<T>> ifSome(
+    @noFuturesAllowed
+    void Function(
+      None<T> self,
+      Some<T> some,
+    ) noFuturesAllowed,
   ) {
     return Ok(this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<None<T>> ifNone(@noFuturesAllowed void Function() noFuturesAllowed) {
-    try {
-      noFuturesAllowed();
-      return Ok(this);
-    } catch (error) {
-      return Err(error);
-    }
+  Result<None<T>> ifNone(
+    @noFuturesAllowed
+    void Function(
+      Option<T> self,
+      None<T> none,
+    ) noFuturesAllowed,
+  ) {
+    return Sync(() {
+      noFuturesAllowed(this, this);
+      return this;
+    }).value;
   }
 
   @override
@@ -93,8 +103,11 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
   ) {
     try {
       return Ok(onNone(this) ?? this);
-    } catch (error) {
-      return Err(error);
+    } catch (error, stackTrace) {
+      return Err(
+        error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -137,25 +150,46 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<None<T>> wrapSome() => Some(this);
+  Some<None<T>> wrapInSome() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<None<T>> wrapOk() => Ok(this);
+  Ok<None<T>> wrapInOk() => Ok(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Resolvable<None<T>> wrapResolvable() => Resolvable(() => this);
+  Resolvable<None<T>> wrapInResolvable() => Resolvable(() => this);
 
   @override
   @pragma('vm:prefer-inline')
-  Sync<None<T>> wrapSync() => Sync.unsafe(Ok(this));
+  Sync<None<T>> wrapInSync() => Sync.okValue(this);
 
   @override
   @pragma('vm:prefer-inline')
-  Async<None<T>> wrapAsync() => Async.unsafe(Future.value(Ok(this)));
+  Async<None<T>> wrapInAsync() => Async.okValue(this);
 
   @override
+  @pragma('vm:prefer-inline')
+  None<Some<T>> wrapValueInSome() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Ok<T>> wrapValueInOk() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Resolvable<T>> wrapValueInResolvable() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Sync<T>> wrapValueInSync() => const None();
+
+  @override
+  @pragma('vm:prefer-inline')
+  None<Async<T>> wrapValyeInAsync() => const None();
+
+  @override
+  @visibleForTesting
   @pragma('vm:prefer-inline')
   None<void> asVoid() => this;
 }
