@@ -16,87 +16,42 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class SequencedTaskBatch<T extends Object> {
-  //
-  //
-  //
+/// Manages a collection of [Task] objects that are intended to be executed
+/// sequentially using a [TaskSequencer].
+class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
+  final TaskSequencer<T> _sequencer;
+
+  @override
+  bool get isExecuting => _sequencer.isExecuting;
 
   SequencedTaskBatch({
     TaskSequencer<T>? sequencer,
-  }) : _sequencer = sequencer ?? TaskSequencer<T>();
+  })  : _sequencer = sequencer ?? TaskSequencer<T>(),
+        super(); // Call base constructor
 
   factory SequencedTaskBatch.from(
     SequencedTaskBatch<T> other, {
     TaskSequencer<T>? sequencer,
   }) {
-    return SequencedTaskBatch<T>(sequencer: sequencer).._tasks = Queue.from(other._tasks);
+    // If a sequencer is provided, use it, otherwise, use the 'other's sequencer
+    // or create a new one if 'other' also didn't have a specific one (though TaskSequencer default is new())
+    final effectiveSequencer =
+        sequencer ?? (other._sequencer); // Or just TaskSequencer<T>() if preferred
+    final newBatch = SequencedTaskBatch<T>(sequencer: effectiveSequencer);
+    newBatch.tasks = Queue.from(other.tasks); 
+    return newBatch;
   }
 
-  final TaskSequencer<T> _sequencer;
-  var _tasks = Queue<Task<T>>.from([]);
+  // The 'add' method from _TaskBatchBase can be inherited directly if its
+  // parameter handling for eagerError/minTaskDuration is acceptable.
+  // If SequencedTaskBatch needs to inject defaults based on _sequencer properties,
+  // it would override 'add' like ConcurrentTaskBatch does.
+  // For now, let's assume TaskSequencer's `then` method handles these defaults.
 
-  void add(
-    @noFuturesAllowed TTaskHandler<T> handler, {
-    @noFuturesAllowed TOnTaskError? onError,
-    bool? eagerError,
-    Duration? minTaskDuration,
-  }) {
-    final task = Task(
-      handler: handler,
-      onError: onError,
-      eagerError: eagerError,
-      minTaskDuration: minTaskDuration,
-    );
-    addTask(task);
-  }
-
-  void addTask(Task<T> task) {
-    _ifNotExecuting(() => _tasks.add(task));
-  }
-
-  bool removeTask(Task<T> task) {
-    return _ifNotExecuting(() => _tasks.remove(task)) ?? false;
-  }
-
-  void addAllTasks(Iterable<Task<T>> tasks) {
-    _ifNotExecuting(() => _tasks.addAll(tasks));
-  }
-
-  bool clearTasks() {
-    return _ifNotExecuting(() {
-          _tasks.clear();
-          return true;
-        }) ??
-        false;
-  }
-
-  bool removeFirstTask() {
-    return _ifNotExecuting(() {
-          _tasks.removeFirst();
-          return true;
-        }) ??
-        false;
-  }
-
-  bool removeLastTask() {
-    return _ifNotExecuting(() {
-          _tasks.removeLast();
-          return true;
-        }) ??
-        false;
-  }
-
-  R? _ifNotExecuting<R>(R Function() caller) {
-    assert(_sequencer.isNotExecuting);
-    if (_sequencer.isNotExecuting) {
-      return caller();
-    }
-    return null;
-  }
-
+  @override
   TResolvableOption<T> executeTasks() {
-    while (_tasks.isNotEmpty) {
-      _executeTask(_tasks.removeFirst()).end();
+    while (tasks.isNotEmpty) {
+      _executeTask(tasks.removeFirst()).end();
     }
     return _sequencer.completion;
   }
@@ -105,7 +60,8 @@ class SequencedTaskBatch<T extends Object> {
     return _sequencer.then(
       task.handler,
       onPrevError: task.onError,
-      eagerError: task.eagerError,
+      eagerError: task.eagerError, // Pass through task's eagerError setting
+      minTaskDuration: task.minTaskDuration, // Pass through task's duration setting
     );
   }
 }

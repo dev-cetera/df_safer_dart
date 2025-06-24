@@ -9,13 +9,14 @@
 
 export './unit/unit.dart';
 export './unit/to_unit_on_monad_extensions.dart';
+export './tools/task_batch_base.dart';
 export './tools/safe_completer.dart';
 export './tools/concurrent_task_batch.dart';
 export './tools/task_sequencer.dart';
 export './tools/to_safe_stream_extension.dart';
-export 'tools/let_or_none/let_or_none_collections.dart';
-export 'tools/let_or_none/let_or_none_map.dart';
-export 'tools/let_or_none/let_or_none.dart';
+export './tools/let_or_none/let_or_none_collections.dart';
+export './tools/let_or_none/let_or_none_map.dart';
+export './tools/let_or_none/let_or_none.dart';
 export './tools/sequenced_task_batch.dart';
 export './odd/here.dart';
 export './odd/debug.dart';
