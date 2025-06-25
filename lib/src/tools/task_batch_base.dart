@@ -14,130 +14,123 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// Provides a foundational structure for managing a collection of tasks.
+///
+/// This class handles queue management and provides guards to prevent unsafe
+/// modifications. Subclasses are responsible for implementing the execution
+/// strategy (e.g., sequential or concurrent).
 abstract class TaskBatchBase<T extends Object> {
-  /// The queue of tasks to be processed.
-  /// Tasks are generally expected to be processed in FIFO order.
+  /// A protected queue of tasks awaiting processing, typically in FIFO order.
   @protected
-  var tasks = Queue<Task<T>>.from([]);
+  var tasks = Queue<Task<T>>();
 
-  /// Creates a new task batch.
   TaskBatchBase();
 
-  /// Abstract getter that subclasses must implement to indicate if
-  /// tasks are currently being executed.
+  /// Indicates if the batch is actively processing tasks.
   ///
-  /// This is used by modification methods to prevent changes during execution.
+  /// This is used as a guard to prevent queue modifications during execution.
   bool get isExecuting;
 
-  /// Returns `true` if tasks are not currently being executed.
   bool get isNotExecuting => !isExecuting;
 
-  /// Abstract method that subclasses must implement to define how
-  /// the batch of tasks is executed.
+  /// Defines the task execution strategy for the batch.
   ///
-  /// Returns a [TResolvableOption] representing the outcome of the
-  /// batch execution.
+  /// Returns a [TResolvableOption] that completes with the batch's final result.
   TResolvableOption<T> executeTasks();
 
-  /// Adds a new task to the batch by providing its handler and optional configurations.
+  /// A convenience method to construct a [Task] and add it to the queue.
   ///
-  /// This is a convenience method that constructs a [Task] object internally.
-  ///
-  /// - [handler]: The function to execute for this task. It receives the
-  ///   result of the previous task (or an initial state) and should return a
-  ///   [TResolvableOption<T>].
+  /// - [handler]: The function to execute for this task.
   /// - [onError]: An optional error handler specific to this task.
-  /// - [eagerError]: Specifies the error handling behavior for this task.
-  ///   Subclasses might use their own defaults if this is `null`.
-  /// - [minTaskDuration]: Specifies a minimum duration for this task.
-  ///   Subclasses might use their own defaults if this is `null`.
+  /// - [eagerError]: Overrides the default error handling for this task.
+  /// - [minTaskDuration]: Overrides the default minimum duration for this task.
   ///
-  /// Throws an [AssertionError] if called while [isExecuting] is true.
+  /// Throws an [AssertionError] if the batch is currently executing.
   void add(
     @noFutures TTaskHandler<T> handler, {
     @noFutures TOnTaskError? onError,
-    bool? eagerError, // Subclasses might provide defaults
-    Duration? minTaskDuration, // Subclasses might provide defaults
+    bool? eagerError,
+    Duration? minTaskDuration,
   }) {
-    // Subclasses might override this to inject their specific defaults for
-    // eagerError or minTaskDuration if they have instance-level settings.
+    // Subclasses can override this to inject their specific defaults.
     final task = Task(
       handler: handler,
       onError: onError,
-      eagerError: eagerError, // Relies on Task's default or what's passed
+      eagerError: eagerError,
       minTaskDuration: minTaskDuration,
     );
     addTask(task);
   }
 
-  /// Adds a pre-configured [Task] object to the end of the task queue.
+  /// Adds a pre-configured [Task] to the end of the queue.
   ///
-  /// Throws an [AssertionError] if called while [isExecuting] is true.
+  /// Throws an [AssertionError] if the batch is currently executing.
   void addTask(Task<T> task) {
     _ifNotExecuting(() => tasks.add(task));
+  }
+
+  /// Adds multiple [Task] objects to the end of the queue.
+  ///
+  /// Throws an [AssertionError] if the batch is currently executing.
+  void addAllTasks(Iterable<Task<T>> newTasks) {
+    _ifNotExecuting(() => tasks.addAll(newTasks));
   }
 
   /// Removes a specific [task] from the queue.
   ///
   /// Returns `true` if the task was found and removed, `false` otherwise.
-  /// Returns `null` (and asserts) if called while [isExecuting] is true.
   bool removeTask(Task<T> task) {
     return _ifNotExecuting(() => tasks.remove(task)) ?? false;
   }
 
-  /// Adds multiple [Task] objects to the end of the task queue.
-  ///
-  /// Throws an [AssertionError] if called while [isExecuting] is true.
-  void addAllTasks(Iterable<Task<T>> newTasks) {
-    _ifNotExecuting(() => tasks.addAll(newTasks));
-  }
-
   /// Clears all tasks from the queue.
   ///
-  /// Returns `true` if tasks were cleared.
-  /// Returns `null` (and asserts) if called while [isExecuting] is true.
+  /// Returns `true` if the queue was not empty before clearing, `false` otherwise.
   bool clearTasks() {
     return _ifNotExecuting(() {
-          tasks.clear();
-          return true;
+          final wasNotEmpty = tasks.isNotEmpty;
+          if (wasNotEmpty) {
+            tasks.clear();
+          }
+          return wasNotEmpty;
         }) ??
         false;
   }
 
   /// Removes the first task from the queue.
   ///
-  /// Returns `true` if a task was removed.
-  /// Returns `null` (and asserts) if the batch was empty or if called
-  /// during execution. Throws [StateError] if the queue is empty when called.
+  /// Returns `true` if a task was removed, `false` if the queue was empty.
   bool removeFirstTask() {
     return _ifNotExecuting(() {
-          tasks.removeFirst(); // Can throw StateError if empty
-          return true;
+          if (tasks.isNotEmpty) {
+            tasks.removeFirst();
+            return true;
+          }
+          return false;
         }) ??
         false;
   }
 
   /// Removes the last task from the queue.
   ///
-  /// Returns `true` if a task was removed.
-  /// Returns `null` (and asserts) if the batch was empty or if called
-  /// during execution. Throws [StateError] if the queue is empty when called.
+  /// Returns `true` if a task was removed, `false` if the queue was empty.
   bool removeLastTask() {
     return _ifNotExecuting(() {
-          tasks.removeLast(); // Can throw StateError if empty
-          return true;
+          if (tasks.isNotEmpty) {
+            tasks.removeLast();
+            return true;
+          }
+          return false;
         }) ??
         false;
   }
 
-  /// Internal helper to ensure modifications to the task queue are not made
-  /// while tasks are being executed.
+  /// A guard that runs [caller] only if [isNotExecuting] is true.
   ///
-  /// Asserts that `isNotExecuting` is `true`.
-  /// If not executing, it calls the [caller] function and returns its result.
-  /// Otherwise, it returns `null`.
+  /// Asserts against modification during execution and returns `null` if the
+  /// guard condition is not met, preventing the call.
   R? _ifNotExecuting<R>(R Function() caller) {
-    assert(isNotExecuting, 'Cannot modify TaskBatch while tasks are executing.');
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
     if (isNotExecuting) {
       return caller();
     }

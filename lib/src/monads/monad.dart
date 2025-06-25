@@ -14,27 +14,27 @@
 
 import '/_common.dart';
 
-part '../option/_option.dart';
-part '../option/_some.dart';
-part '../option/_none.dart';
-part '../result/_result.dart';
-part '../result/_ok.dart';
-part '../result/_err.dart';
-part '../resolvable/_resolvable.dart';
-part '../resolvable/_async.dart';
-part '../resolvable/_sync.dart';
+part 'option/_option.dart';
+part 'option/_some.dart';
+part 'option/_none.dart';
+part 'result/_result.dart';
+part 'result/_ok.dart';
+part 'result/_err.dart';
+part 'resolvable/_resolvable.dart';
+part 'resolvable/_async.dart';
+part 'resolvable/_sync.dart';
 
-part '../impl/_sync_impl.dart';
-part '../impl/_async_impl.dart';
+part 'impl/_sync_impl.dart';
+part 'impl/_async_impl.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// The foundational sealed class for all monadic types like [Option], [Result],
 /// and [Resolvable].
 sealed class Monad<T extends Object> implements Equatable {
-  final FutureOr<Object> value;
-
   const Monad(this.value);
+
+  final FutureOr<Object> value;
 
   /// Reduces any nested [Monad] structure into a single [TResolvableOption].
   ///
@@ -217,39 +217,6 @@ sealed class Monad<T extends Object> implements Equatable {
   Monad transf<R extends Object>([
     @noFutures R Function(T e)? noFutures,
   ]);
-
-  /// Wraps this [Monad] in a [Some].
-  Some<Monad<T>> wrapInSome();
-
-  /// Wraps this [Monad] in  [Ok].
-  Ok<Monad<T>> wrapInOk();
-
-  /// Wraps this [Monad] in [Resolvable].
-  Resolvable<Monad<T>> wrapInResolvable();
-
-  /// Wraps this [Monad] in [Sync].
-  Sync<Monad<T>> wrapInSync();
-
-  /// Wraps this [Monad] in [Async].
-  Async<Monad<T>> wrapInAsync();
-
-  /// Wraps this [value] in  [Some].
-  Monad<Some<T>> wrapValueInSome();
-
-  /// Wraps this [value] in  [Ok].
-  Monad<Ok<T>> wrapValueInOk();
-
-  /// Wraps this [value] in  [Resolvable].
-  Monad<Resolvable<T>> wrapValueInResolvable();
-
-  /// Wraps this [value] in  [Sync].
-  Monad<Sync<T>> wrapValueInSync();
-
-  /// Wraps this [value] in  [Async].
-  Monad<Async<T>> wrapValyeInAsync();
-
-  /// Transforms the contained value to `void`.
-  Monad<void> asVoid();
 
   /// Suppresses the linter error `must_use_monad`.
   FutureOr<void> end();

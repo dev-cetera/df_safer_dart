@@ -10,19 +10,21 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
-
 import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// Manages and executes a batch of tasks concurrently.
+/// A task batch that executes its collection of tasks concurrently.
+///
+/// All tasks are started at the same time and run in parallel. The batch-level
+/// `onError` and `eagerError` settings control how failures are handled across
+/// the entire set of parallel operations.
 class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   final Duration? _minTaskDuration;
-  final bool _eagerError; // Batch-level default for eagerError
-  final TOnTaskError? _onError; // Batch-level default onError
+  final bool _eagerError;
+  final TOnTaskError? _onError;
 
-  bool _internalIsExecuting = false; // Renamed to avoid conflict
+  bool _internalIsExecuting = false;
 
   @override
   bool get isExecuting => _internalIsExecuting;
@@ -34,20 +36,20 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   })  : _eagerError = eagerError,
         _minTaskDuration = minTaskDuration,
         _onError = onError,
-        super(); // Call base constructor
+        super();
 
+  /// Creates a new batch from an existing one, copying its configuration and tasks.
   factory ConcurrentTaskBatch.from(ConcurrentTaskBatch<T> other) {
     final newBatch = ConcurrentTaskBatch<T>(
       eagerError: other._eagerError,
       minTaskDuration: other._minTaskDuration,
       onError: other._onError,
     );
-    newBatch.tasks = Queue.from(other.tasks); // Copy tasks
+    newBatch.tasks = Queue.from(other.tasks);
     return newBatch;
   }
 
-  /// Adds a new task to the batch, using batch-level defaults if specific
-  /// parameters are not provided.
+  /// Adds a task, applying batch-level defaults for any unspecified parameters.
   @override
   void add(
     @noFutures TTaskHandler<T> handler, {
@@ -57,31 +59,32 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   }) {
     final task = Task(
       handler: handler,
-      onError: onError, // Task-specific onError
-      eagerError: eagerError ?? _eagerError, // Use batch default if null
-      minTaskDuration: minTaskDuration, // Task-specific, no batch default here directly for 'Task'
+      onError: onError,
+      eagerError: eagerError ?? _eagerError,
+      minTaskDuration: minTaskDuration,
     );
-    addTask(task); // Calls base.addTask
+    addTask(task);
   }
 
+  /// Executes all tasks in the queue concurrently using a custom wait utility.
+  ///
+  /// The tasks are started in parallel, and this method returns a [Resolvable]
+  /// that will complete once all tasks have finished.
   @override
   TResolvableOption<T> executeTasks() {
-    // Ensure tasks is accessible, might need to make it protected in base or use a getter
     final itemFactories = tasks.map(
       (task) => () => task
-          .handler(Ok(None<T>())) // Concurrent tasks run independently initially
+          .handler(Ok(None<T>()))
           .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
           .value,
     );
     _internalIsExecuting = true;
     return Resolvable(
       () => waitF<Option<T>>(
-        // Assuming waitF is a utility you have
         itemFactories,
-        (_) => const None(), // Default value for each task if it succeeds with None
-        eagerError: _eagerError, // Global eager error for the batch of futures
+        (_) => const None(),
+        eagerError: _eagerError,
         onError: (error, stackTrace) {
-          // This is for errors from waitF itself, or uncaught ones if eagerError=false
           return _onError
               ?.call(
                 Err(
@@ -94,7 +97,7 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
       ),
     ).whenComplete((e) {
       _internalIsExecuting = false;
-      return e; // Return the result of the whenComplete (which is the original result)
+      return e;
     });
   }
 }

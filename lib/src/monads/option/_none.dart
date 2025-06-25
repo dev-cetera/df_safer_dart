@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-part of '../monad/monad.dart';
+part of '../monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -147,49 +147,4 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
   ]) {
     return const Ok(None());
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<None<T>> wrapInSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<None<T>> wrapInOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Resolvable<None<T>> wrapInResolvable() => Resolvable(() => this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<None<T>> wrapInSync() => Sync.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<None<T>> wrapInAsync() => Async.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Some<T>> wrapValueInSome() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Ok<T>> wrapValueInOk() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Resolvable<T>> wrapValueInResolvable() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Sync<T>> wrapValueInSync() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Async<T>> wrapValyeInAsync() => const None();
-
-  @override
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  None<void> asVoid() => this;
 }

@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-part of '../monad/monad.dart';
+part of '../monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -138,49 +138,4 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
       );
     }
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Ok<T>> wrapInSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Ok<T>> wrapInOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Resolvable<Ok<T>> wrapInResolvable() => Resolvable(() => this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<Ok<T>> wrapInSync() => Sync.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<Ok<T>> wrapInAsync() => Async.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Some<T>> wrapValueInSome() => map((e) => Some(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
-
-  @override
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  Ok<void> asVoid() => this;
 }

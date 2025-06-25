@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-part of '../monad/monad.dart';
+part of '../monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -24,7 +24,7 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   /// If any are [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResult].
-  static Result<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
+  static Result<(T1, T2)> combine2<T1 extends Object, T2 extends Object>(
     Result<T1> r1,
     Result<T2> r2, [
     @noFutures Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
@@ -42,7 +42,7 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   /// If any are [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResult].
-  static Result<(T1, T2, T3)> zip3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Result<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
     Result<T3> r3, [
@@ -136,51 +136,6 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   Result<R> transf<R extends Object>([
     @noFutures R Function(T e)? noFutures,
   ]);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Result<T>> wrapInSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Result<T>> wrapInOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Resolvable<Result<T>> wrapInResolvable() => Resolvable(() => this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<Result<T>> wrapInSync() => Sync.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<Result<T>> wrapInAsync() => Async.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<Some<T>> wrapValueInSome() => map((e) => Some(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
-
-  @override
-  @pragma('vm:prefer-inline')
-  Result<Async<T>> wrapValyeInAsync() => map((e) => Async.okValue(e));
-
-  @override
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  Result<void> asVoid() => this;
 
   @override
   @nonVirtual

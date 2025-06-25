@@ -14,53 +14,66 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+/// A wrapper around Dart's [Completer] that prevents it from being completed
+/// more than once.
+///
+/// It provides a monadic API for resolving a value and safely accessing the
+/// result via a [Resolvable]. This is useful for managing one-off asynchronous
+/// operations where multiple callers might attempt to set the result.
 class SafeCompleter<T extends Object> {
-  //
-  //
-  //
-
   final _completer = Completer<T>();
+
+  // Caches the value once completed to avoid relying solely on the completer's
+  // future, allowing synchronous access if the value is already available.
   Option<FutureOr<T>> _value = const None();
+
+  // A guard to prevent re-entrant calls to `resolve`.
   bool _isCompleting = false;
 
-  //
-  //
-  //
-
-  /// Completes the operation with the provided [resolvable].
+  /// Safely resolves the completer with the outcome of a [Resolvable].
+  ///
+  /// If the completer is already completed or is in the process of completing,
+  /// this method will return an [Err] and have no effect.
   Resolvable<T> resolve(Resolvable<T> resolvable) {
     if (_isCompleting) {
       return Sync.err(Err('SafeCompleter<$T> is already resolving!'));
     }
     _isCompleting = true;
+
     if (isCompleted) {
       _isCompleting = false;
       return Sync.err(Err('SafeCompleter<$T> is already completed!'));
     }
 
-    return resolvable.ifOk((self, ok) {
+    // `ifOk` and `ifErr` are used to handle the two possible outcomes of the
+    // resolvable, ensuring the completer is correctly handled in both cases.
+    return resolvable.ifOk((_, ok) {
       final okValue = ok.unwrap();
       _value = Some(okValue);
       _completer.complete(okValue);
-      _isCompleting = false;
-    }).ifErr((self, err) {
+    }).ifErr((_, err) {
       _completer.completeError(err);
+    }).whenComplete((_) {
+      // Ensure the lock is always released.
       _isCompleting = false;
+      return resolvable;
     });
   }
 
-  /// Completes the operation with the provided [value].
+  /// A convenience method to complete with a direct value or future.
   @pragma('vm:prefer-inline')
   Resolvable<T> complete(FutureOr<T> value) {
     return resolve(Resolvable(() => value));
   }
 
-  /// Returns a [Resolvable] that will complete when this [SafeCompleter] is
-  /// completed.
+  /// Returns a [Resolvable] that provides access to the completer's result.
+  ///
+  /// If the completer has already been resolved synchronously, this will
+  /// return a [Sync] with the value. Otherwise, it returns an [Async]
+  /// containing the completer's future.
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() {
     return Resolvable(() {
-      // Use a switch on the Option '_value' for clear and safe state checking.
       switch (_value) {
         case Some(value: final okValue):
           return okValue;
@@ -70,33 +83,32 @@ class SafeCompleter<T extends Object> {
     });
   }
 
-  /// Checks if the value has been set or if the [SafeCompleter] is completed.
+  /// Indicates whether the completer has been fulfilled with a value or error.
   @pragma('vm:prefer-inline')
   bool get isCompleted => _completer.isCompleted || _value.isSome();
 
-  /// Transforms the type of the value managed by this [SafeCompleter].
+  /// Creates a new [SafeCompleter] by transforming the future value of this one.
+  ///
+  /// When this completer finishes, its value will be passed to the [noFutures]
+  /// function (or cast if null), and the result will be used to resolve the
+  /// new completer.
   SafeCompleter<R> transf<R extends Object>([
     @noFutures R Function(T e)? noFutures,
   ]) {
-    final completer = SafeCompleter<R>();
+    final newCompleter = SafeCompleter<R>();
     resolvable().then((e) {
       try {
         final result = noFutures != null ? noFutures(e) : (e as R);
-        completer.resolve(Sync.okValue(result)).end();
+        newCompleter.complete(result).end();
       } catch (error, stackTrace) {
-        completer
+        newCompleter
             .resolve(
-              Sync.err(
-                Err(
-                  error,
-                  stackTrace: stackTrace,
-                ),
-              ),
+              Sync.err(Err(error, stackTrace: stackTrace)),
             )
             .end();
       }
       return e;
     }).end();
-    return completer;
+    return newCompleter;
   }
 }

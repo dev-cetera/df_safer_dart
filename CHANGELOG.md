@@ -59,7 +59,7 @@
 ## [0.14.11]
 
 - Released @ 6/2025 (UTC)
-- feat: Add zip2, Unit and extensions to enrich library
+- feat: Add combine2, Unit and extensions to enrich library
 
 ## [0.14.10]
 

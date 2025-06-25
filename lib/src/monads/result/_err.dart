@@ -12,7 +12,7 @@
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
 
-part of '../monad/monad.dart';
+part of '../monad.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -213,51 +213,6 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   ]) {
     return transfErr<R>();
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Err<T>> wrapInSome() => Some(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<Err<T>> wrapInOk() => Ok(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Resolvable<Err<T>> wrapInResolvable() => Resolvable(() => this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<Err<T>> wrapInSync() => Sync.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Async<Err<T>> wrapInAsync() => Async.okValue(this);
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<Some<T>> wrapValueInSome() => transfErr();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<Ok<T>> wrapValueInOk() => transfErr();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<Resolvable<T>> wrapValueInResolvable() => transfErr();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<Sync<T>> wrapValueInSync() => transfErr();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Err<Async<T>> wrapValyeInAsync() => transfErr();
-
-  @override
-  @visibleForTesting
-  @pragma('vm:prefer-inline')
-  Err<void> asVoid() => this;
 
   @override
   @unsafeOrError
