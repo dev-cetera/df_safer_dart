@@ -95,6 +95,7 @@ sealed class Monad<T extends Object> implements Equatable {
   /// ```
   Sync rawSync() {
     return Sync(() {
+      // ignore: no_futures
       final value = raw(
         onErr: (err) => err,
         onNone: () => Err('The Monad resolved to a None (empty) state!'),
@@ -204,17 +205,17 @@ sealed class Monad<T extends Object> implements Equatable {
   FutureOr<T> unwrapOr(T fallback);
 
   /// Transforms the contained value using the mapper function
-  /// [noFuturesAllowed] while preserving the [Monad]'s structure.
+  /// [noFutures] while preserving the [Monad]'s structure.
   Monad<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   );
 
   /// Transforms the [Monad]'s generic type from `T` to `R`.
   ///
-  /// Uses the transformer function [noFuturesAllowed] if provided, otherwise
+  /// Uses the transformer function [noFutures] if provided, otherwise
   /// attempts a direct cast.
   Monad transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]);
 
   /// Wraps this [Monad] in a [Some].

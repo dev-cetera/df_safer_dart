@@ -73,7 +73,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @override
   @pragma('vm:prefer-inline')
   Err<T> ifOk(
-    @noFuturesAllowed void Function(Err<T> self, Ok<T> ok) noFuturesAllowed,
+    @noFutures void Function(Err<T> self, Ok<T> ok) noFutures,
   ) {
     return this;
   }
@@ -81,10 +81,10 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @override
   @pragma('vm:prefer-inline')
   Err<T> ifErr(
-    @noFuturesAllowed void Function(Err<T> self, Err<T> err) noFuturesAllowed,
+    @noFutures void Function(Err<T> self, Err<T> err) noFutures,
   ) {
     return Sync(() {
-      noFuturesAllowed(this, this);
+      noFutures(this, this);
       return this;
     }).value.flatten().err().unwrap();
   }
@@ -104,30 +104,30 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @override
   @pragma('vm:prefer-inline')
   Result<R> flatMap<R extends Object>(
-    @noFuturesAllowed Result<R> Function(T value) noFuturesAllowed,
+    @noFutures Result<R> Function(T value) noFutures,
   ) {
     return transfErr();
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> mapOk(@noFuturesAllowed Ok<T> Function(Ok<T> ok) noFuturesAllowed) {
+  Err<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures) {
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
   Err<T> mapErr(
-    @noFuturesAllowed Err<T> Function(Err<T> err) noFuturesAllowed,
+    @noFutures Err<T> Function(Err<T> err) noFutures,
   ) {
-    return noFuturesAllowed(this);
+    return noFutures(this);
   }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Object> fold(
-    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
-    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
+    @noFutures Result<Object>? Function(Ok<T> ok) onOk,
+    @noFutures Result<Object>? Function(Err<T> err) onErr,
   ) {
     try {
       return onErr(this) ?? this;
@@ -200,7 +200,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @override
   @pragma('vm:prefer-inline')
   Err<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   ) {
     return transfErr();
   }
@@ -209,7 +209,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @protected
   @pragma('vm:prefer-inline')
   Err<R> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]) {
     return transfErr<R>();
   }

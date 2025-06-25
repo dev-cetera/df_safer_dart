@@ -76,12 +76,12 @@ class SafeCompleter<T extends Object> {
 
   /// Transforms the type of the value managed by this [SafeCompleter].
   SafeCompleter<R> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]) {
     final completer = SafeCompleter<R>();
     resolvable().then((e) {
       try {
-        final result = noFuturesAllowed != null ? noFuturesAllowed(e) : (e as R);
+        final result = noFutures != null ? noFutures(e) : (e as R);
         completer.resolve(Sync.okValue(result)).end();
       } catch (error, stackTrace) {
         completer

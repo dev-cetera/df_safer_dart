@@ -85,20 +85,20 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
 
   /// Performs a side-effect with the contained value if this is a [Some].
   Result<Option<T>> ifSome(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Option<T> self,
       Some<T> some,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Performs a side-effect if this is a [None].
   Result<Option<T>> ifNone(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Option<T> self,
       None<T> none,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Returns the contained value or `null`.
@@ -106,25 +106,25 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
 
   /// Transforms the inner [Some] instance if this is a [Some].
   Option<T> mapSome(
-    @noFuturesAllowed Some<T> Function(Some<T> some) noFuturesAllowed,
+    @noFutures Some<T> Function(Some<T> some) noFutures,
   );
 
   /// Maps an `Option<T>` to `Option<R>` by applying a function that returns
   /// another [Option].
   Option<R> flatMap<R extends Object>(
-    @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
+    @noFutures Option<R> Function(T value) noFutures,
   );
 
-  /// Returns [None] if the predicate [noFuturesAllowed] returns `false`.
+  /// Returns [None] if the predicate [noFutures] returns `false`.
   /// Otherwise, returns the original [Option].
-  Option<T> filter(@noFuturesAllowed bool Function(T value) noFuturesAllowed);
+  Option<T> filter(@noFutures bool Function(T value) noFutures);
 
   /// Folds the two cases of this [Option] into a single [Result].
   ///
   /// The `onSome` and `onNone` functions must return a new [Option].
   Result<Option<Object>> fold(
-    @noFuturesAllowed Option<Object>? Function(Some<T> some) onSome,
-    @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
+    @noFutures Option<Object>? Function(Some<T> some) onSome,
+    @noFutures Option<Object>? Function(None<T> none) onNone,
   );
 
   /// Returns this if it's [Some], otherwise returns the `other` [Option].
@@ -142,12 +142,12 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
 
   @override
   Option<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   );
 
   @override
   Result<Option<R>> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]);
 
   @override

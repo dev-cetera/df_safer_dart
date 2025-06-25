@@ -22,7 +22,7 @@ class TaskSequencer<T extends Object> {
   //
 
   TaskSequencer({
-    @noFuturesAllowed TOnTaskError? onPrevError,
+    @noFutures TOnTaskError? onPrevError,
     bool eagerError = false,
     Duration? minTaskDuration,
   })  : _onPrevError = onPrevError,
@@ -57,8 +57,8 @@ class TaskSequencer<T extends Object> {
   //
 
   TResolvableOption<T> then(
-    @noFuturesAllowed TTaskHandler<T> handler, {
-    @noFuturesAllowed TOnTaskError? onPrevError,
+    @noFutures TTaskHandler<T> handler, {
+    @noFutures TOnTaskError? onPrevError,
     bool? eagerError,
     Duration? minTaskDuration,
   }) {
@@ -139,9 +139,9 @@ typedef TTaskHandler<T extends Object> = TResolvableOption<T> Function(TResultOp
 typedef TOnTaskError = Resolvable Function(Err err);
 
 final class Task<T extends Object> {
-  @noFuturesAllowed
+  @noFutures
   final TTaskHandler<T> handler;
-  @noFuturesAllowed
+  @noFutures
   final TOnTaskError? onError;
   final bool? eagerError;
   final Duration? minTaskDuration;

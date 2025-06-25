@@ -23,7 +23,7 @@ import '/_common.dart';
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
 Resolvable<List<Option<T>>> combineMonad<T extends Object>(
   Iterable<Monad<T>> monads, {
-  @noFuturesAllowed Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
+  @noFutures Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
 }) {
   final reduced = monads.map((e) => e.reduce<T>());
   return combineResolvable<Option<T>>(reduced, onErr: onErr);
@@ -36,7 +36,7 @@ Resolvable<List<Option<T>>> combineMonad<T extends Object>(
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
 Resolvable<List<T>> combineResolvable<T extends Object>(
   Iterable<Resolvable<T>> resolvables, {
-  @noFuturesAllowed Err<List<T>> Function(List<Result<T>> allResults)? onErr,
+  @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
   if (resolvables.isEmpty) {
     return Sync.okValue([]);
@@ -59,7 +59,7 @@ Resolvable<List<T>> combineResolvable<T extends Object>(
 /// errors.
 Sync<List<T>> combineSync<T extends Object>(
   Iterable<Sync<T>> syncs, {
-  @noFuturesAllowed Err<List<T>> Function(List<Result<T>> allResults)? onErr,
+  @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
   if (syncs.isEmpty) {
     return Sync.okValue([]);
@@ -83,7 +83,7 @@ Sync<List<T>> combineSync<T extends Object>(
 /// the [onErr] function to combine errors.
 Async<List<T>> combineAsync<T extends Object>(
   Iterable<Async<T>> asyncs, {
-  @noFuturesAllowed Err<List<T>> Function(List<Result<T>> allResults)? onErr,
+  @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
   if (asyncs.isEmpty) {
     return Async.okValue([]);
@@ -122,7 +122,7 @@ Option<List<T>> combineOption<T extends Object>(Iterable<Option<T>> options) {
 /// If any [Result] is an [Err], applies the [onErr] function to combine errors.
 Result<List<T>> combineResult<T extends Object>(
   Iterable<Result<T>> results, {
-  @noFuturesAllowed Err<List<T>> Function(List<Result<T>> allResults)? onErr,
+  @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
   final successes = <T>[];
   final asList = results.toList();

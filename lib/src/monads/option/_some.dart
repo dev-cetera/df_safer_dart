@@ -45,14 +45,14 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> ifSome(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Some<T> self,
       Some<T> none,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return Sync(() {
-      noFuturesAllowed(this, this);
+      noFutures(this, this);
       return this;
     }).value;
   }
@@ -60,11 +60,11 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> ifNone(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Some<T> self,
       None<T> none,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return Ok(this);
   }
@@ -76,30 +76,30 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Some<T> mapSome(
-    @noFuturesAllowed Some<T> Function(Some<T> some) noFuturesAllowed,
+    @noFutures Some<T> Function(Some<T> some) noFutures,
   ) {
-    return noFuturesAllowed(this);
+    return noFutures(this);
   }
 
   @override
   @pragma('vm:prefer-inline')
   Option<R> flatMap<R extends Object>(
-    @noFuturesAllowed Option<R> Function(T value) noFuturesAllowed,
+    @noFutures Option<R> Function(T value) noFutures,
   ) {
-    return noFuturesAllowed(UNSAFE(() => unwrap()));
+    return noFutures(UNSAFE(() => unwrap()));
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Option<T> filter(@noFuturesAllowed bool Function(T value) noFuturesAllowed) {
-    return noFuturesAllowed(value) ? this : const None();
+  Option<T> filter(@noFutures bool Function(T value) noFutures) {
+    return noFutures(value) ? this : const None();
   }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Option<Object>> fold(
-    @noFuturesAllowed Option<Object>? Function(Some<T> some) onSome,
-    @noFuturesAllowed Option<Object>? Function(None<T> none) onNone,
+    @noFutures Option<Object>? Function(Some<T> some) onSome,
+    @noFutures Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
       return Ok(onSome(this) ?? this);
@@ -128,19 +128,19 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Some<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   ) {
-    return Some(noFuturesAllowed(value));
+    return Some(noFutures(value));
   }
 
   @override
   Result<Option<R>> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]) {
     try {
       UNSAFE:
       final value0 = unwrap();
-      final value1 = noFuturesAllowed?.call(value0) ?? value0 as R;
+      final value1 = noFutures?.call(value0) ?? value0 as R;
       return Ok(Option.from(value1));
     } catch (error, stackTrace) {
       assert(false, error);

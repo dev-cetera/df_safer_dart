@@ -47,7 +47,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   static Resolvable<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2, [
-    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
+    @noFutures Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2],
@@ -66,7 +66,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2, r3],
@@ -90,8 +90,8 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// caught and propagated.
   factory Resolvable(
     @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
-    @noFuturesAllowed TOnErrorCallback<T>? onError,
-    @noFuturesAllowed TVoidCallback? onFinalize,
+    @noFutures TOnErrorCallback<T>? onError,
+    @noFutures TVoidCallback? onFinalize,
   }) {
     final result = mustAwaitAllFutures();
     if (result is Future<T>) {
@@ -121,43 +121,43 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Performs a side-effect if this is [Sync].
   Resolvable<T> ifSync(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Resolvable<T> self,
       Sync<T> sync,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Performs a side-effect if this is [Async].
   Resolvable<T> ifAsync(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Resolvable<T> self,
       Async<T> async,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Performs a side-effect if this is [Ok].
   Resolvable<T> ifOk(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Resolvable<T> self,
       Ok<T> ok,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Performs a side-effect if this is [Err].
   Resolvable<T> ifErr(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Resolvable<T> self,
       Err<T> err,
-    ) noFuturesAllowed,
+    ) noFutures,
   );
 
   /// Maps the inner [Result] of this [Resolvable] using `mapper`.
   Resolvable<R> resultMap<R extends Object>(
-    @noFuturesAllowed Result<R> Function(Result<T> value) noFuturesAllowed,
+    @noFutures Result<R> Function(Result<T> value) noFutures,
   );
 
   /// Maps the contained [Ok] value using a function that returns a `FutureOr`.
@@ -167,15 +167,15 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
 
   /// Handles [Sync] and [Async] cases to produce a new [Resolvable].
   Resolvable<Object> fold(
-    @noFuturesAllowed Resolvable<Object>? Function(Sync<T> sync) onSync,
-    @noFuturesAllowed Resolvable<Object>? Function(Async<T> async) onAsync,
+    @noFutures Resolvable<Object>? Function(Sync<T> sync) onSync,
+    @noFutures Resolvable<Object>? Function(Async<T> async) onAsync,
   );
 
   /// Exhaustively handles the inner [Ok] and [Err] cases, returning a new
   /// [Resolvable].
   Resolvable<Object> foldResult(
-    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
-    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
+    @noFutures Result<Object>? Function(Ok<T> ok) onOk,
+    @noFutures Result<Object>? Function(Err<T> err) onErr,
   );
 
   /// Ensures that resolving this value takes at least a specified [duration].
@@ -240,20 +240,20 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   @protected
   @override
   Resolvable<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   );
 
   Resolvable<R> then<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   );
 
   Resolvable<R> whenComplete<R extends Object>(
-    @noFuturesAllowed Resolvable<R> Function(Sync<T> resolved) noFuturesAllowed,
+    @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   );
 
   @override
   Resolvable<R> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]);
 
   @override

@@ -50,8 +50,8 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   /// parameters are not provided.
   @override
   void add(
-    @noFuturesAllowed TTaskHandler<T> handler, {
-    @noFuturesAllowed TOnTaskError? onError,
+    @noFutures TTaskHandler<T> handler, {
+    @noFutures TOnTaskError? onError,
     bool? eagerError,
     Duration? minTaskDuration,
   }) {

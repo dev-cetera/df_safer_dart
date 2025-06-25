@@ -34,7 +34,7 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   static Sync<(T1, T2)> zip2<T1 extends Object, T2 extends Object>(
     Sync<T1> s1,
     Sync<T2> s2, [
-    @noFuturesAllowed Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
+    @noFutures Err<(T1, T2)> Function(Result<T1>, Result<T2>)? onErr,
   ]) {
     final combined = combineSync<Object>(
       [s1, s2],
@@ -53,7 +53,7 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
     Sync<T1> s1,
     Sync<T2> s2,
     Sync<T3> s3, [
-    @noFuturesAllowed Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineSync<Object>(
       [s1, s2, s3],
@@ -92,21 +92,21 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
       : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.err(Err(error, statusCode: statusCode));
 
-  /// Creates a [Sync] executing a synchronous function [noFuturesAllowed].
+  /// Creates a [Sync] executing a synchronous function [noFutures].
   ///
   /// # IMPORTANT:
   ///
-  /// Do not use any Futures in [noFuturesAllowed] to ensure errors are be
+  /// Do not use any Futures in [noFutures] to ensure errors are be
   /// caught and propagated.
   factory Sync(
-    @mustBeAnonymous @noFuturesAllowed T Function() noFuturesAllowed, {
-    @noFuturesAllowed TOnErrorCallback<T>? onError,
-    @noFuturesAllowed TVoidCallback? onFinalize,
+    @mustBeAnonymous @noFutures T Function() noFutures, {
+    @noFutures TOnErrorCallback<T>? onError,
+    @noFutures TVoidCallback? onFinalize,
   }) {
     assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     return Sync.result(() {
       try {
-        return Ok(noFuturesAllowed());
+        return Ok(noFutures());
       } on Err catch (err) {
         return err.transfErr<T>();
       } catch (error, stackTrace) {
@@ -150,14 +150,14 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<T> ifSync(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Sync<T> self,
       Sync<T> sync,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return Sync(() {
-      noFuturesAllowed(this, this);
+      noFutures(this, this);
       return this;
     }).flatten().sync().unwrap();
   }
@@ -165,26 +165,26 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<T> ifAsync(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Sync<T> self,
       Async<T> async,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return this;
   }
 
   @override
   Resolvable<T> ifOk(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Sync<T> self,
       Ok<T> ok,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return switch (value) {
       Ok<T> ok => Resolvable(() {
-          noFuturesAllowed(this, ok);
+          noFutures(this, ok);
           return value;
         }).flatten(),
       Err() => this,
@@ -193,17 +193,17 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
 
   @override
   Resolvable<T> ifErr(
-    @noFuturesAllowed
+    @noFutures
     void Function(
       Sync<T> self,
       Err<T> err,
-    ) noFuturesAllowed,
+    ) noFutures,
   ) {
     return switch (value) {
       Ok() => this,
       Err<T> err => Sync(
           () {
-            noFuturesAllowed(this, err);
+            noFutures(this, err);
             return value;
           },
         ).flatten(),
@@ -213,9 +213,9 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> resultMap<R extends Object>(
-    @noFuturesAllowed Result<R> Function(Result<T> value) noFuturesAllowed,
+    @noFutures Result<R> Function(Result<T> value) noFutures,
   ) {
-    return Sync(() => noFuturesAllowed(value).unwrap());
+    return Sync(() => noFutures(value).unwrap());
   }
 
   @override
@@ -228,8 +228,8 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
 
   @override
   Resolvable<Object> fold(
-    @noFuturesAllowed Resolvable<Object>? Function(Sync<T> sync) onSync,
-    @noFuturesAllowed Resolvable<Object>? Function(Async<T> async) onAsync,
+    @noFutures Resolvable<Object>? Function(Sync<T> sync) onSync,
+    @noFutures Resolvable<Object>? Function(Async<T> async) onAsync,
   ) {
     try {
       return onSync(this) ?? this;
@@ -246,8 +246,8 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<Object> foldResult(
-    @noFuturesAllowed Result<Object>? Function(Ok<T> ok) onOk,
-    @noFuturesAllowed Result<Object>? Function(Err<T> err) onErr,
+    @noFutures Result<Object>? Function(Ok<T> ok) onOk,
+    @noFutures Result<Object>? Function(Err<T> err) onErr,
   ) {
     return Sync.result(value.fold(onOk, onErr));
   }
@@ -313,9 +313,9 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   ) {
-    return Sync(() => value.map((e) => noFuturesAllowed(e)).unwrap());
+    return Sync(() => value.map((e) => noFutures(e)).unwrap());
   }
 
   /// Prefer using [map] for [Sync].
@@ -323,28 +323,28 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
   @override
   @pragma('vm:prefer-inline')
   Sync<R> then<R extends Object>(
-    @noFuturesAllowed R Function(T value) noFuturesAllowed,
+    @noFutures R Function(T value) noFutures,
   ) {
-    return map(noFuturesAllowed);
+    return map(noFutures);
   }
 
   @override
   @pragma('vm:prefer-inline')
   Resolvable<R> whenComplete<R extends Object>(
-    @noFuturesAllowed Resolvable<R> Function(Sync<T> resolved) noFuturesAllowed,
+    @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   ) {
     return Sync(() {
       value.unwrap(); // unwrap to throw if value has an Err.
-      return Resolvable(() => noFuturesAllowed(this));
+      return Resolvable(() => noFutures(this));
     }).flatten();
   }
 
   @override
   Sync<R> transf<R extends Object>([
-    @noFuturesAllowed R Function(T e)? noFuturesAllowed,
+    @noFutures R Function(T e)? noFutures,
   ]) {
     return Sync(() {
-      final okOrErr = value.transf<R>(noFuturesAllowed);
+      final okOrErr = value.transf<R>(noFutures);
       if (okOrErr.isErr()) {
         throw okOrErr;
       }

@@ -54,8 +54,8 @@ abstract class TaskBatchBase<T extends Object> {
   ///
   /// Throws an [AssertionError] if called while [isExecuting] is true.
   void add(
-    @noFuturesAllowed TTaskHandler<T> handler, {
-    @noFuturesAllowed TOnTaskError? onError,
+    @noFutures TTaskHandler<T> handler, {
+    @noFutures TOnTaskError? onError,
     bool? eagerError, // Subclasses might provide defaults
     Duration? minTaskDuration, // Subclasses might provide defaults
   }) {

@@ -21,7 +21,7 @@ import '/_common.dart';
 ///
 /// Use this to explicitly acknowledge that you are handling a potentially
 /// failing operation outside the monadic context.
-T UNSAFE<T>(@mustBeAnonymous @noFuturesAllowed T Function() block) {
+T UNSAFE<T>(@mustBeAnonymous @noFutures T Function() block) {
   assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
   try {
     return block();

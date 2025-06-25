@@ -19,8 +19,8 @@ import '/_common.dart';
 extension ToResolvableExt<T extends Object> on FutureOr<T> {
   @pragma('vm:prefer-inline')
   Resolvable<T> toResolvable({
-    @noFuturesAllowed TOnErrorCallback<T>? onError,
-    @noFuturesAllowed TVoidCallback? onFinalize,
+    @noFutures TOnErrorCallback<T>? onError,
+    @noFutures TVoidCallback? onFinalize,
   }) {
     return Resolvable(() => this, onError: onError, onFinalize: onFinalize);
   }
@@ -29,8 +29,8 @@ extension ToResolvableExt<T extends Object> on FutureOr<T> {
 extension ToAsyncExt<T extends Object> on Future<T> {
   @pragma('vm:prefer-inline')
   Async<T> toAsync({
-    @noFuturesAllowed TOnErrorCallback<T>? onError,
-    @noFuturesAllowed TVoidCallback? onFinalize,
+    @noFutures TOnErrorCallback<T>? onError,
+    @noFutures TVoidCallback? onFinalize,
   }) {
     assert(
       !isSubtype<T, Future<Object>>(),
@@ -43,8 +43,8 @@ extension ToAsyncExt<T extends Object> on Future<T> {
 extension ToSync<T extends Object> on T {
   @pragma('vm:prefer-inline')
   Sync<T> toSync({
-    @noFuturesAllowed TOnErrorCallback<T>? onError,
-    @noFuturesAllowed TVoidCallback? onFinalize,
+    @noFutures TOnErrorCallback<T>? onError,
+    @noFutures TVoidCallback? onFinalize,
   }) {
     assert(
       !isSubtype<T, Future<Object>>(),
