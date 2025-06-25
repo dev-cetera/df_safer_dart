@@ -91,17 +91,15 @@ Resolvable eliminates the mental overhead of branching logic for sync vs. async 
 
 To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is NOT OPTIONAL! It is fundamental to the library's design.
 
-🪲 **BUG:** `must_await_all_futures` can give a false negative with nested anonymous functions. We'll fix it soon! Or if anyone out there is up for the task, here's the lints package: https://github.com/dev-cetera/df_safer_dart_lints.
-
 1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.15.0
+  df_safer_dart: ^0.16.0
 
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.0
-  df_safer_dart_lints: ^0.2.0
+  df_safer_dart_lints: ^0.3.0
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
@@ -113,10 +111,11 @@ analyzer:
 custom_lint:
   rules:
     # If any rule gives you trouble, you can set them to false.
-    - must_use_monad_or_error: true
+    - futures_allowed: true
+    - no_future_monads: true
     - must_await_all_futures: true
     - must_be_anonymous: true
-    - no_futures_allowed: true
+    - must_use_monad_or_error: true
     - must_use_unsafe_wrapper_or_error: true
   errors:
     # If you're using the "UNSAFE". See API documentation.
