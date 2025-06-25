@@ -46,8 +46,8 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   SequencedTaskBatch({
     TaskSequencer<T>? sequencer,
     TOnTaskConpletedCallback<T>? onTaskCompleted,
-  })  : _onTaskCompleted = onTaskCompleted,
-        _sequencer = sequencer ?? TaskSequencer<T>();
+  }) : _onTaskCompleted = onTaskCompleted,
+       _sequencer = sequencer ?? TaskSequencer<T>();
 
   /// Creates a new batch from an existing one, sharing its configuration.
   ///
@@ -82,7 +82,8 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
       _executeTask(task)
           .then((e) {
             _executionIndex++;
-            return _onTaskCompleted?.call(task, executionProgress) ?? syncUnit();
+            return _onTaskCompleted?.call(task, executionProgress) ??
+                syncUnit();
           })
           .flatten()
           .end();

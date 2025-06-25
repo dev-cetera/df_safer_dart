@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.16.1]
+
+- Released @ 6/2025 (UTC)
+- Refactor and improve lints
+
 ## [0.16.0]
 
 - Released @ 6/2025 (UTC)
