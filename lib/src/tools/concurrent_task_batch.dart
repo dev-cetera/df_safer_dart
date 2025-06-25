@@ -27,16 +27,34 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   bool _internalIsExecuting = false;
 
   @override
+  int get executionIndex => _executionIndex;
+  int _executionIndex = 0;
+
+  @override
+  int get executionCount => tasks.length; // _executionCount will not always equal tasks.length
+  int _executionCount = 0;
+
+  @override
+  double get executionProgress {
+    if (_executionCount == 0.0) return 0.0;
+    return _executionIndex / _executionCount;
+  }
+
+  final TOnTaskConpletedCallback<T>? _onTaskCompleted;
+
+  @override
   bool get isExecuting => _internalIsExecuting;
 
   ConcurrentTaskBatch({
     bool eagerError = true,
     Duration? minTaskDuration,
     TOnTaskError? onError,
-  }) : _eagerError = eagerError,
-       _minTaskDuration = minTaskDuration,
-       _onError = onError,
-       super();
+    TOnTaskConpletedCallback<T>? onTaskCompleted,
+  })  : _onTaskCompleted = onTaskCompleted,
+        _eagerError = eagerError,
+        _minTaskDuration = minTaskDuration,
+        _onError = onError,
+        super();
 
   /// Creates a new batch from an existing one, copying its configuration and tasks.
   factory ConcurrentTaskBatch.from(ConcurrentTaskBatch<T> other) {
@@ -72,12 +90,18 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   /// that will complete once all tasks have finished.
   @override
   TResolvableOption<T> executeTasks() {
+    _executionCount = tasks.length;
+    _executionIndex = 0;
     final itemFactories = tasks.map(
-      (task) =>
-          () => task
-              .handler(Ok(None<T>()))
-              .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
-              .value,
+      (task) => () => task
+          .handler(Ok(None<T>()))
+          .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
+          .then((e) {
+            _executionIndex++;
+            return _onTaskCompleted?.call(task, executionProgress) ?? syncUnit();
+          })
+          .flatten()
+          .value,
     );
     _internalIsExecuting = true;
     return Resolvable(

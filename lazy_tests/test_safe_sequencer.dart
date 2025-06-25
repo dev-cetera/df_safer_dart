@@ -16,7 +16,7 @@ void main() {
   }).end();
 }
 
-// ignore: no_future_monads
+// ignore: no_future_monad_type_or_error
 Future<None> doWait() async {
   await Future<void>.delayed(const Duration(milliseconds: 100));
   print('A');

@@ -14,6 +14,8 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+// NOTE: See https://pub.dev/packages/synchronized
+
 /// A batch of tasks designed to be executed sequentially by a [TaskSequencer].
 ///
 /// This class holds a collection of [Task] objects and delegates their
@@ -25,8 +27,27 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   @override
   bool get isExecuting => _sequencer.isExecuting;
 
-  SequencedTaskBatch({TaskSequencer<T>? sequencer})
-    : _sequencer = sequencer ?? TaskSequencer<T>();
+  @override
+  int get executionIndex => _executionIndex;
+  int _executionIndex = 0;
+
+  @override
+  int get executionCount => tasks.length; // _executionCount will not always equal tasks.length
+  int _executionCount = 0;
+
+  @override
+  double get executionProgress {
+    if (_executionCount == 0.0) return 0.0;
+    return _executionIndex / _executionCount;
+  }
+
+  final TOnTaskConpletedCallback<T>? _onTaskCompleted;
+
+  SequencedTaskBatch({
+    TaskSequencer<T>? sequencer,
+    TOnTaskConpletedCallback<T>? onTaskCompleted,
+  })  : _onTaskCompleted = onTaskCompleted,
+        _sequencer = sequencer ?? TaskSequencer<T>();
 
   /// Creates a new batch from an existing one, sharing its configuration.
   ///
@@ -54,9 +75,17 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   /// [Resolvable] or by accessing the `completion` property of the sequencer.
   @override
   TResolvableOption<T> executeTasks() {
+    _executionCount = tasks.length;
+    _executionIndex = 0;
     while (tasks.isNotEmpty) {
       final task = tasks.removeFirst();
-      _executeTask(task).end();
+      _executeTask(task)
+          .then((e) {
+            _executionIndex++;
+            return _onTaskCompleted?.call(task, executionProgress) ?? syncUnit();
+          })
+          .flatten()
+          .end();
     }
     return _sequencer.completion;
   }

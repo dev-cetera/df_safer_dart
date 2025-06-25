@@ -33,6 +33,16 @@ abstract class TaskBatchBase<T extends Object> {
 
   bool get isNotExecuting => !isExecuting;
 
+  /// The index of the currently executing task. Zero-based.
+  int get executionIndex;
+
+  /// The total number of tasks to be executed in the current batch.
+  int get executionCount;
+
+  /// The execution progress as a value between 0.0 and 1.0.
+  /// Returns 0.0 if `executionCount` is zero.
+  double get executionProgress;
+
   /// Defines the task execution strategy for the batch.
   ///
   /// Returns a [TResolvableOption] that completes with the batch's final result.
@@ -137,3 +147,10 @@ abstract class TaskBatchBase<T extends Object> {
     return null;
   }
 }
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+typedef TOnTaskConpletedCallback<T extends Object> = Resolvable<Unit> Function(
+  Task<T> task,
+  double executionProgress,
+);
