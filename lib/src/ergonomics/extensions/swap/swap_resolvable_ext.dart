@@ -14,25 +14,24 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $StringExtension on String {
-  // Returns this string wrapped in a [Some] if it's not empty,
-  /// otherwise returns [None].
-  Option<String> get noneIfEmpty {
-    return Option.from(isEmpty ? null : this);
-  }
-
-  /// Returns the first character as a [Some], or [None] if the string is empty.
-  Option<String> get firstOrNone => isEmpty ? const None() : Some(this[0]);
-
-  /// Returns the last character as a [Some], or [None] if the string is empty.
-  Option<String> get lastOrNone => isEmpty ? const None() : Some(this[length - 1]);
-
-  /// Returns the character at the given [index] as a [Some], or [None] if the
-  /// index is out of bounds.
-  Option<String> elementAtOrNone(int index) {
-    if (index < 0 || index >= length) {
-      return const None();
+extension SwapResolvableSomeExt<T extends Object> on Resolvable<Some<T>> {
+  @pragma('vm:prefer-inline')
+  Some<Resolvable<T>> swap() {
+    if (this is Sync<Some<T>>) {
+      return (this as Sync<Some<T>>).swap();
     }
-    return Some(this[index]);
+    return (this as Async<Some<T>>).swap();
+  }
+}
+
+extension SwapResolvableNoneExt<T extends Object> on Resolvable<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Resolvable<T>> swap() => const None();
+}
+
+extension SwapResolvableOkExt<T extends Object> on Resolvable<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Resolvable<T>> swap() {
+    return Ok(then((e) => e.unwrap()));
   }
 }

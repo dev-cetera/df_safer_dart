@@ -38,9 +38,9 @@ sealed class Monad<T extends Object> implements Equatable {
 
   /// Reduces any nested [Monad] structure into a single [TResolvableOption].
   ///
-  /// This flattens all [Monad] layers (`Option`, `Result`, `Resolvable`) into
-  /// a final container that is always a `Resolvable` holding an `Option`.
-  /// An [Err] state at any level will result in a failed `Resolvable`.
+  /// This flattens all [Monad] layers ([Option], [Result], [Resolvable]) into
+  /// a final container that is always a [Resolvable] holding an [Option].
+  /// An [Err] state at any level will result in a failed [Resolvable].
   TResolvableOption<R> reduce<R extends Object>() {
     return switch (this) {
       Some(value: final someValue) => Resolvable(() => Some(someValue as R)),

@@ -14,42 +14,44 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $OkSyncSwapExtension<T extends Object> on Ok<Sync<T>> {
+extension SwapNoneSyncExt<T extends Object> on None<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Sync<None<T>> swap() => None<T>().wrapInSync();
 }
 
-extension $OkAsyncSwapExtension<T extends Object> on Ok<Async<T>> {
+extension SwapNoneAsyncExt<T extends Object> on None<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Async<None<T>> swap() => None<T>().wrapInAsync();
 }
 
-extension $OkResolvableSwapExtension<T extends Object> on Ok<Resolvable<T>> {
+extension SwapNoneResolvableExt<T extends Object> on None<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<Ok<T>> swap() => unwrap().then((e) => Ok(e));
+  Resolvable<None<T>> swap() => None<T>().wrapInResolvable();
 }
 
-extension $OkOptionSwapExtension<T extends Object> on Ok<Option<T>> {
+extension SwapNoneOptionExt<T extends Object> on None<Option<T>> {
   @pragma('vm:prefer-inline')
-  Option<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Option<None<T>> swap() => const Some(None());
 }
 
-extension $OkSomeSwapExtension<T extends Object> on Ok<Some<T>> {
+extension SwapNoneSomeExt<T extends Object> on None<Some<T>> {
   @pragma('vm:prefer-inline')
-  Some<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Some<None<T>> swap() => const Some(None());
 }
 
-extension $OkNoneSwapExtension<T extends Object> on Ok<None<T>> {
+extension SwapNoneResultExt<T extends Object> on None<Result<T>> {
   @pragma('vm:prefer-inline')
-  None<Ok<T>> swap() => const None();
+  Result<None<T>> swap() => const Ok(None());
 }
 
-extension $OkResultSwapExtension<T extends Object> on Ok<Result<T>> {
+extension SwapNoneOkExt<T extends Object> on None<Ok<T>> {
   @pragma('vm:prefer-inline')
-  Result<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Ok<None<T>> swap() => const Ok(None());
 }
 
-extension $OkErrSwapExtension<T extends Object> on Ok<Err<T>> {
+extension SwapNoneErrExt<T extends Object> on None<Err<T>> {
   @pragma('vm:prefer-inline')
-  Err<Ok<T>> swap() => unwrap().transfErr<Ok<T>>();
+  Err<None<T>> swap() {
+    return Err(const None());
+  }
 }

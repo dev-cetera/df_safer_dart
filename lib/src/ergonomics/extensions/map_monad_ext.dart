@@ -14,49 +14,50 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $MapMonad2<T extends Object> on Monad<Monad<Object>> {
+extension MapMonadExt2<T extends Object> on Monad<Monad<Object>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map2<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad3<T extends Object> on Monad<Monad<Monad<Object>>> {
+extension MapMonadExt3<T extends Object> on Monad<Monad<Monad<Object>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map3<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map2((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad4<T extends Object> on Monad<Monad<Monad<Monad<Object>>>> {
+extension MapMonadExt4<T extends Object> on Monad<Monad<Monad<Monad<Object>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map4<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map3((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad5<T extends Object> on Monad<Monad<Monad<Monad<Monad<Object>>>>> {
+extension MapMonadExt5<T extends Object> on Monad<Monad<Monad<Monad<Monad<Object>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map5<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map4((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad6<T extends Object> on Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>> {
+extension MapMonadExt6<T extends Object> on Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map6<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map5((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad7<T extends Object> on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>> {
+extension MapMonadExt7<T extends Object>
+    on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map7<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map6((e) => mapper(e as T))).reduce();
   }
 }
 
-extension $MapMonad8<T extends Object>
+extension MapMonadExt8<T extends Object>
     on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map8<R extends Object>(R Function(T) mapper) {
@@ -64,7 +65,7 @@ extension $MapMonad8<T extends Object>
   }
 }
 
-extension $MapMonad9<T extends Object>
+extension MapMonadExt9<T extends Object>
     on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map9<R extends Object>(R Function(T) mapper) {
@@ -72,7 +73,7 @@ extension $MapMonad9<T extends Object>
   }
 }
 
-extension $MapMonad10<T extends Object>
+extension MapMonadExt10<T extends Object>
     on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map10<R extends Object>(R Function(T) mapper) {
@@ -80,7 +81,7 @@ extension $MapMonad10<T extends Object>
   }
 }
 
-extension $MapMonad11<T extends Object>
+extension MapMonadExt11<T extends Object>
     on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map11<R extends Object>(R Function(T) mapper) {
@@ -88,7 +89,7 @@ extension $MapMonad11<T extends Object>
   }
 }
 
-extension $MapMonad12<T extends Object>
+extension MapMonadExt12<T extends Object>
     on Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map12<R extends Object>(R Function(T) mapper) {
@@ -96,7 +97,7 @@ extension $MapMonad12<T extends Object>
   }
 }
 
-extension $MapMonad13<T extends Object> on Monad<
+extension MapMonadExt13<T extends Object> on Monad<
     Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map13<R extends Object>(R Function(T) mapper) {
@@ -104,7 +105,7 @@ extension $MapMonad13<T extends Object> on Monad<
   }
 }
 
-extension $MapMonad14<T extends Object> on Monad<
+extension MapMonadExt14<T extends Object> on Monad<
     Monad<
         Monad<
             Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Monad<Object>>>>>>>>>>>>>> {
@@ -114,7 +115,7 @@ extension $MapMonad14<T extends Object> on Monad<
   }
 }
 
-extension $MapMonad15<T extends Object> on Monad<
+extension MapMonadExt15<T extends Object> on Monad<
     Monad<
         Monad<
             Monad<
@@ -128,7 +129,7 @@ extension $MapMonad15<T extends Object> on Monad<
   }
 }
 
-extension $MapMonad16<T extends Object> on Monad<
+extension MapMonadExt16<T extends Object> on Monad<
     Monad<
         Monad<
             Monad<
@@ -145,7 +146,7 @@ extension $MapMonad16<T extends Object> on Monad<
   }
 }
 
-extension $MapMonad17<T extends Object> on Monad<
+extension MapMonadExt17<T extends Object> on Monad<
     Monad<
         Monad<
             Monad<
@@ -166,7 +167,7 @@ extension $MapMonad17<T extends Object> on Monad<
   }
 }
 
-extension $MapMonad18<T extends Object> on Monad<
+extension MapMonadExt18<T extends Object> on Monad<
     Monad<
         Monad<
             Monad<

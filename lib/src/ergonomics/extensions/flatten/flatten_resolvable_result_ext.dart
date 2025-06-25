@@ -16,7 +16,7 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $FlattenResolvableResult2<T extends Object> on Resolvable<Result<T>> {
+extension FlattenResolvableResultExt2<T extends Object> on Resolvable<Result<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten2();
 
@@ -35,7 +35,7 @@ extension $FlattenResolvableResult2<T extends Object> on Resolvable<Result<T>> {
   }
 }
 
-extension $FlattenResolvableResulte3<T extends Object> on Resolvable<Result<Result<T>>> {
+extension FlattenResolvableResulteExt3<T extends Object> on Resolvable<Result<Result<T>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten3();
 
@@ -44,7 +44,7 @@ extension $FlattenResolvableResulte3<T extends Object> on Resolvable<Result<Resu
   Resolvable<T> flatten3() => flatten2().flatten2();
 }
 
-extension $FlattenResolvableResulte4<T extends Object> on Resolvable<Result<Result<Result<T>>>> {
+extension FlattenResolvableResulteExt4<T extends Object> on Resolvable<Result<Result<Result<T>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten4();
 
@@ -53,7 +53,7 @@ extension $FlattenResolvableResulte4<T extends Object> on Resolvable<Result<Resu
   Resolvable<T> flatten4() => flatten3().flatten2();
 }
 
-extension $FlattenResolvableResulte5<T extends Object>
+extension FlattenResolvableResulteExt5<T extends Object>
     on Resolvable<Result<Result<Result<Result<T>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten5();
@@ -63,7 +63,7 @@ extension $FlattenResolvableResulte5<T extends Object>
   Resolvable<T> flatten5() => flatten4().flatten2();
 }
 
-extension $FlattenResolvableResulte6<T extends Object>
+extension FlattenResolvableResulteExt6<T extends Object>
     on Resolvable<Result<Result<Result<Result<Result<T>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten6();
@@ -73,7 +73,7 @@ extension $FlattenResolvableResulte6<T extends Object>
   Resolvable<T> flatten6() => flatten5().flatten2();
 }
 
-extension $FlattenResolvableResulte7<T extends Object>
+extension FlattenResolvableResulteExt7<T extends Object>
     on Resolvable<Result<Result<Result<Result<Result<Result<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten7();
@@ -83,7 +83,7 @@ extension $FlattenResolvableResulte7<T extends Object>
   Resolvable<T> flatten7() => flatten6().flatten2();
 }
 
-extension $FlattenResolvableResulte8<T extends Object>
+extension FlattenResolvableResulteExt8<T extends Object>
     on Resolvable<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten8();
@@ -93,7 +93,7 @@ extension $FlattenResolvableResulte8<T extends Object>
   Resolvable<T> flatten8() => flatten7().flatten2();
 }
 
-extension $FlattenResolvableResulte9<T extends Object>
+extension FlattenResolvableResulteExt9<T extends Object>
     on Resolvable<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten9();

@@ -16,7 +16,7 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $ToResolvableExtension<T extends Object> on FutureOr<T> {
+extension ToResolvableExt<T extends Object> on FutureOr<T> {
   @pragma('vm:prefer-inline')
   Resolvable<T> toResolvable({
     @noFuturesAllowed TOnErrorCallback<T>? onError,
@@ -26,7 +26,7 @@ extension $ToResolvableExtension<T extends Object> on FutureOr<T> {
   }
 }
 
-extension $ToAsyncExtension<T extends Object> on Future<T> {
+extension ToAsyncExt<T extends Object> on Future<T> {
   @pragma('vm:prefer-inline')
   Async<T> toAsync({
     @noFuturesAllowed TOnErrorCallback<T>? onError,
@@ -40,7 +40,7 @@ extension $ToAsyncExtension<T extends Object> on Future<T> {
   }
 }
 
-extension $ToSync<T extends Object> on T {
+extension ToSync<T extends Object> on T {
   @pragma('vm:prefer-inline')
   Sync<T> toSync({
     @noFuturesAllowed TOnErrorCallback<T>? onError,
@@ -54,19 +54,19 @@ extension $ToSync<T extends Object> on T {
   }
 }
 
-extension $SyncOptionExtension<T extends Object> on Sync<Option<T>> {
+extension SyncOptionExt<T extends Object> on Sync<Option<T>> {
   @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrapSync() => unwrap().unwrap();
 }
 
-extension $AsyncOptionExtension<T extends Object> on Async<Option<T>> {
+extension AsyncOptionExt<T extends Object> on Async<Option<T>> {
   @unsafeOrError
   @pragma('vm:prefer-inline')
   Future<T> unwrapAsync() => unwrap().then((e) => e.unwrap());
 }
 
-extension $ResolvableOptionExtension<T extends Object> on Resolvable<Option<T>> {
+extension ResolvableOptionExt<T extends Object> on Resolvable<Option<T>> {
   @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrapSync() => sync().unwrap().unwrapSync();

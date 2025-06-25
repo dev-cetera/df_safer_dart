@@ -14,7 +14,7 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $OptionSyncSwapExtension<T extends Object> on Option<Sync<T>> {
+extension SwapOptionSyncExt<T extends Object> on Option<Sync<T>> {
   @pragma('vm:prefer-inline')
   Sync<Option<T>> swap() {
     if (this is Some<Sync<T>>) {
@@ -24,7 +24,7 @@ extension $OptionSyncSwapExtension<T extends Object> on Option<Sync<T>> {
   }
 }
 
-extension $OptionAsyncSwapExtension<T extends Object> on Option<Async<T>> {
+extension SwapOptionAsyncExt<T extends Object> on Option<Async<T>> {
   @pragma('vm:prefer-inline')
   Async<Option<T>> swap() {
     if (this is Some<Async<T>>) {
@@ -34,7 +34,7 @@ extension $OptionAsyncSwapExtension<T extends Object> on Option<Async<T>> {
   }
 }
 
-extension $OptionResolvableSwapExtension<T extends Object> on Option<Resolvable<T>> {
+extension SwapOptionResolvableExt<T extends Object> on Option<Resolvable<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<Option<T>> swap() {
     if (this is Some<Resolvable<T>>) {
@@ -44,7 +44,7 @@ extension $OptionResolvableSwapExtension<T extends Object> on Option<Resolvable<
   }
 }
 
-extension $OptionSomeSwapExtension<T extends Object> on Option<Some<T>> {
+extension SwapOptionSomeExt<T extends Object> on Option<Some<T>> {
   @pragma('vm:prefer-inline')
   Some<Option<T>> swap() {
     if (this is Some<Some<T>>) {
@@ -54,14 +54,14 @@ extension $OptionSomeSwapExtension<T extends Object> on Option<Some<T>> {
   }
 }
 
-extension $OptionNoneSwapExtension<T extends Object> on Option<None<T>> {
+extension SwapOptionNoneExt<T extends Object> on Option<None<T>> {
   @pragma('vm:prefer-inline')
   None<Option<T>> swap() {
     return const None();
   }
 }
 
-extension $OptionResultSwapExtension<T extends Object> on Option<Result<T>> {
+extension SwapOptionResultExt<T extends Object> on Option<Result<T>> {
   @pragma('vm:prefer-inline')
   Result<Option<T>> swap() {
     if (this is Some<Result<T>>) {
@@ -71,7 +71,7 @@ extension $OptionResultSwapExtension<T extends Object> on Option<Result<T>> {
   }
 }
 
-extension $OptionOkSwapExtension<T extends Object> on Option<Ok<T>> {
+extension SwapOptionOkExt<T extends Object> on Option<Ok<T>> {
   @pragma('vm:prefer-inline')
   Ok<Option<T>> swap() {
     if (this is Some<Result<T>>) {
@@ -81,7 +81,7 @@ extension $OptionOkSwapExtension<T extends Object> on Option<Ok<T>> {
   }
 }
 
-extension $OptionErrSwapExtension<T extends Object> on Option<Err<T>> {
+extension SwapOptionErrExt<T extends Object> on Option<Err<T>> {
   @pragma('vm:prefer-inline')
   Err<Option<T>> swap() {
     if (this is Some<Result<T>>) {

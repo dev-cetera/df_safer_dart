@@ -20,7 +20,7 @@ import '/_common.dart';
 //
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $IterableExtension<T extends Object> on Iterable<T> {
+extension IterableExt<T extends Object> on Iterable<T> {
   /// Returns this [Iterable] wrapped in a [Some] if it's not empty,
   /// otherwise returns [None].
   Option<Iterable<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
@@ -102,13 +102,13 @@ extension $IterableExtension<T extends Object> on Iterable<T> {
   }
 }
 
-extension $NoneIfEmptyOnListExtension<T extends Object> on List<T> {
+extension NoneIfEmptyOnListExt<T extends Object> on List<T> {
   /// Returns this list wrapped in a [Some] if it's not empty, otherwise
   /// returns [None].
   Option<List<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
 }
 
-extension $NoneIfEmptyOnSetExtension<T extends Object> on Set<T> {
+extension NoneIfEmptyOnSetExt<T extends Object> on Set<T> {
   /// Returns this set wrapped in a [Some] if it's not empty, otherwise returns
   /// [None].
   Option<Set<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
@@ -120,7 +120,7 @@ extension $NoneIfEmptyOnSetExtension<T extends Object> on Set<T> {
 //
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
+extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   /// Filters for [Some] elements, returning an iterable of the [Some] instances.
   Iterable<Some<T>> whereSome() => where((e) => e.isSome()).map((e) => e.some().unwrap());
 
@@ -170,7 +170,7 @@ extension $IterableOptionExtension<T extends Object> on Iterable<Option<T>> {
   }
 }
 
-extension $IterableFutureOptionExtension<T extends Object> on Iterable<Future<Option<T>>> {
+extension IterableFutureOptionExt<T extends Object> on Iterable<Future<Option<T>>> {
   /// Awaits all futures and then filters for [Some] elements.
   Future<Iterable<Some<T>>> whereSome() => Future.wait(this).then((e) => e.whereSome());
 
@@ -178,17 +178,17 @@ extension $IterableFutureOptionExtension<T extends Object> on Iterable<Future<Op
   Future<Iterable<None<T>>> whereNone() => Future.wait(this).then((e) => e.whereNone());
 }
 
-extension $IterableSomeExtension<T extends Object> on Iterable<Some<T>> {
+extension IterableSomeExt<T extends Object> on Iterable<Some<T>> {
   /// Extracts the value from every [Some] element in the iterable.
   Iterable<T> unwrapAll() => map((e) => e.value);
 }
 
-extension $FutureIterableSomeExtension<T extends Object> on Future<Iterable<Some<T>>> {
+extension FutureIterableSomeExt<T extends Object> on Future<Iterable<Some<T>>> {
   /// Awaits and then extracts the value from every [Some] element.
   Future<Iterable<T>> unwrapAll() => then((e) => e.unwrapAll());
 }
 
-extension $IterableResultExtension<T extends Object> on Iterable<Result<T>> {
+extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   /// Filters for [Ok] elements, returning an iterable of the [Ok] instances.
   Iterable<Ok<T>> whereOk() => where((e) => e.isOk()).map((e) => e.ok().unwrap());
 
@@ -242,7 +242,7 @@ extension $IterableResultExtension<T extends Object> on Iterable<Result<T>> {
   }
 }
 
-extension $IterableFutureResultExtension<T extends Object> on Iterable<Future<Result<T>>> {
+extension IterableFutureResultExt<T extends Object> on Iterable<Future<Result<T>>> {
   /// Awaits all futures and then filters for [Ok] elements.
   Future<Iterable<Ok<T>>> whereOk() => Future.wait(this).then((e) => e.whereOk());
 
@@ -250,17 +250,17 @@ extension $IterableFutureResultExtension<T extends Object> on Iterable<Future<Re
   Future<Iterable<Err<T>>> whereErr() => Future.wait(this).then((e) => e.whereErr());
 }
 
-extension $IterableOkExtension<T extends Object> on Iterable<Ok<T>> {
+extension IterableOkExt<T extends Object> on Iterable<Ok<T>> {
   /// Extracts the value from every [Ok] element in the iterable.
   Iterable<T> unwrapAll() => map((e) => e.value);
 }
 
-extension $FutureIterableOkExtension<T extends Object> on Future<Iterable<Ok<T>>> {
+extension FutureIterableOkExt<T extends Object> on Future<Iterable<Ok<T>>> {
   /// Awaits and then extracts the value from every [Ok] element.
   Future<Iterable<T>> unwrapAll() => then((e) => e.unwrapAll());
 }
 
-extension $IterableResolvableExtension<T extends Object> on Iterable<Resolvable<T>> {
+extension IterableResolvableExt<T extends Object> on Iterable<Resolvable<T>> {
   /// Filters for [Sync] elements, returning an iterable of the [Sync] instances.
   Iterable<Sync<T>> whereSync() => where((e) => e.isSync()).map((e) => e.sync().unwrap());
 
@@ -285,7 +285,7 @@ extension $IterableResolvableExtension<T extends Object> on Iterable<Resolvable<
   }
 }
 
-extension $IterableSyncExtension<T extends Object> on Iterable<Sync<T>> {
+extension IterableSyncExt<T extends Object> on Iterable<Sync<T>> {
   /// Extracts the inner [Result] from each [Sync] element.
   Iterable<Result<T>> mapToResults() => map((e) => e.value);
 
@@ -304,7 +304,7 @@ extension $IterableSyncExtension<T extends Object> on Iterable<Sync<T>> {
   }
 }
 
-extension $IterableAsyncExtension<T extends Object> on Iterable<Async<T>> {
+extension IterableAsyncExt<T extends Object> on Iterable<Async<T>> {
   /// Extracts the inner `Future<Result>` from each [Async] element.
   Iterable<Future<Result<T>>> mapToResults() => map((e) => e.value);
 }

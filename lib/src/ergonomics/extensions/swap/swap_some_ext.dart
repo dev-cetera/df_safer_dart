@@ -16,17 +16,42 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $AsyncSomeSwapExtension<T extends Object> on Async<Some<T>> {
+extension SwapSomeSyncExt<T extends Object> on Some<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Some<Async<T>> swap() => Some(map((e) => e.unwrap()));
+  Sync<Some<T>> swap() => unwrap().map((e) => Some(e));
 }
 
-extension $AsyncNoneSwapExtension<T extends Object> on Async<None<T>> {
+extension SwapSomeAsyncExt<T extends Object> on Some<Async<T>> {
   @pragma('vm:prefer-inline')
-  None<Async<T>> swap() => const None();
+  Async<Some<T>> swap() => unwrap().then((e) => Some(e));
 }
 
-extension $AsyncOkSwapExtension<T extends Object> on Async<Ok<T>> {
+extension SwapSomeResolvableExt<T extends Object> on Some<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Ok<Async<T>> swap() => Ok(map((e) => e.unwrap()));
+  Resolvable<Some<T>> swap() => unwrap().then((e) => Some(e));
+}
+
+extension SwapSomeOptionExt<T extends Object> on Some<Option<T>> {
+  @pragma('vm:prefer-inline')
+  Option<Some<T>> swap() => unwrap().map((e) => Some(e));
+}
+
+extension SwapSomeNoneExt<T extends Object> on Some<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Some<T>> swap() => const None();
+}
+
+extension SwapSomeResultExt<T extends Object> on Some<Result<T>> {
+  @pragma('vm:prefer-inline')
+  Result<Some<T>> swap() => unwrap().map((e) => Some(e));
+}
+
+extension SwapSomeOkExt<T extends Object> on Some<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Some<T>> swap() => Ok(Some(unwrap().unwrap()));
+}
+
+extension SwapSomeErrExt<T extends Object> on Some<Err<T>> {
+  @pragma('vm:prefer-inline')
+  Err<Some<T>> swap() => unwrap().transfErr<Some<T>>();
 }

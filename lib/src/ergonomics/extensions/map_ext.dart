@@ -20,7 +20,7 @@ import '/_common.dart';
 //
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $MapGeneralExtensions<K, V extends Object> on Map<K, V> {
+extension MapExt<K, V extends Object> on Map<K, V> {
   /// Returns this map wrapped in a [Some] if it's not empty,
   /// otherwise returns [None].
   Option<Map<K, V>> get noneIfEmpty {
@@ -41,7 +41,7 @@ extension $MapGeneralExtensions<K, V extends Object> on Map<K, V> {
 //
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $MapOfOptionsExtensions<K, V extends Object> on Map<K, Option<V>> {
+extension MapOfOptions<K, V extends Object> on Map<K, Option<V>> {
   /// Creates a new map containing only the entries where the value is a [Some].
   /// The values in the new map are instances of [Some<V>].
   Map<K, Some<V>> whereSome() => Map.fromEntries(
@@ -93,7 +93,7 @@ extension $MapOfOptionsExtensions<K, V extends Object> on Map<K, Option<V>> {
   }
 }
 
-extension $MapOfResultsExtensions<K, V extends Object> on Map<K, Result<V>> {
+extension MapOfResults<K, V extends Object> on Map<K, Result<V>> {
   /// Creates a new map containing only the entries where the value is an [Ok].
   /// The values in the new map are instances of [Ok<V>].
   Map<K, Ok<V>> whereOk() => Map.fromEntries(

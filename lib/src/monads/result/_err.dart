@@ -151,7 +151,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   @pragma('vm:prefer-inline')
   Option<E> matchError<E extends Object>() => value is E ? Some(value as E) : const None();
 
-  /// Transforms the `Err`'s generic type from `T` to `R` while preserving the
+  /// Transforms the [Err]'s generic type from `T` to `R` while preserving the
   /// contained `error`.
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {

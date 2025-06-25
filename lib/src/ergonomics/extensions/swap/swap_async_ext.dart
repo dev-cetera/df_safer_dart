@@ -10,39 +10,23 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// An extension on [Stream] to provide a safe way to handle stream events.
-extension $ToSafeStreamExtension<T extends Object> on Stream<T> {
-  /// Transforms a [Stream] into a [Stream].
-  ///
-  /// Each data event from the original stream is wrapped in an [Ok].
-  /// Each error event is wrapped in an [Err].
-  ///
-  /// If [cancelOnError] is `true`, the stream will be closed upon the first
-  /// error.
-  Stream<Result<T>> toSafeStream({required bool cancelOnError}) {
-    return transform(
-      StreamTransformer.fromHandlers(
-        handleData: (data, sink) {
-          sink.add(Ok(data));
-        },
-        handleError: (error, stackTrace, sink) {
-          if (error is Err) {
-            sink.add(error.transfErr());
-          } else {
-            sink.add(Err<T>(error));
-          }
-          if (cancelOnError) {
-            sink.close();
-          }
-        },
-        handleDone: (sink) {
-          sink.close();
-        },
-      ),
-    );
-  }
+extension SwapAsyncSomeExt<T extends Object> on Async<Some<T>> {
+  @pragma('vm:prefer-inline')
+  Some<Async<T>> swap() => Some(map((e) => e.unwrap()));
+}
+
+extension SwapAsyncNoneExt<T extends Object> on Async<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Async<T>> swap() => const None();
+}
+
+extension SwapAsyncOkExt<T extends Object> on Async<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Async<T>> swap() => Ok(map((e) => e.unwrap()));
 }

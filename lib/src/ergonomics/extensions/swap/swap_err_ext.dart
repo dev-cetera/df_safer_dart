@@ -14,24 +14,42 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension $ResolvableSomeSwapExtension<T extends Object> on Resolvable<Some<T>> {
+extension SwapErrSyncExt<T extends Object> on Err<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Some<Resolvable<T>> swap() {
-    if (this is Sync<Some<T>>) {
-      return (this as Sync<Some<T>>).swap();
-    }
-    return (this as Async<Some<T>>).swap();
-  }
+  Sync<Err<T>> swap() => transfErr<T>().wrapInSync();
 }
 
-extension $ResolvableNoneSwapExtension<T extends Object> on Resolvable<None<T>> {
+extension SwapErrAsyncExt<T extends Object> on Err<Async<T>> {
   @pragma('vm:prefer-inline')
-  None<Resolvable<T>> swap() => const None();
+  Async<Err<T>> swap() => transfErr<T>().wrapInAsync();
 }
 
-extension $ResolvableOkSwapExtension<T extends Object> on Resolvable<Ok<T>> {
+extension SwapErrResolvableExt<T extends Object> on Err<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Ok<Resolvable<T>> swap() {
-    return Ok(then((e) => e.unwrap()));
-  }
+  Resolvable<Err<T>> swap() => transfErr<T>().wrapInSync();
+}
+
+extension SwapErrOptionExt<T extends Object> on Err<Option<T>> {
+  @pragma('vm:prefer-inline')
+  Option<Err<T>> swap() => Some(transfErr<T>());
+}
+
+extension SwapErrSomeExt<T extends Object> on Err<Some<T>> {
+  @pragma('vm:prefer-inline')
+  Some<Err<T>> swap() => Some(transfErr<T>());
+}
+
+extension SwapErrNoneExt<T extends Object> on Err<None<T>> {
+  @pragma('vm:prefer-inline')
+  None<Err<T>> swap() => const None();
+}
+
+extension SwapErrResultExt<T extends Object> on Err<Result<T>> {
+  @pragma('vm:prefer-inline')
+  Result<Err<T>> swap() => Ok(transfErr<T>());
+}
+
+extension SwapErrOkExt<T extends Object> on Err<Ok<T>> {
+  @pragma('vm:prefer-inline')
+  Ok<Err<T>> swap() => Ok(transfErr<T>());
 }
