@@ -25,7 +25,8 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   @override
   bool get isExecuting => _sequencer.isExecuting;
 
-  SequencedTaskBatch({TaskSequencer<T>? sequencer}) : _sequencer = sequencer ?? TaskSequencer<T>();
+  SequencedTaskBatch({TaskSequencer<T>? sequencer})
+    : _sequencer = sequencer ?? TaskSequencer<T>();
 
   /// Creates a new batch from an existing one, sharing its configuration.
   ///

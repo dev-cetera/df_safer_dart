@@ -76,7 +76,8 @@ extension FlattenOkExt8<T extends Object> on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>> {
   Ok<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenOkExt9<T extends Object> on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>>> {
+extension FlattenOkExt9<T extends Object>
+    on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Ok<T> flatten() => flatten9();
 

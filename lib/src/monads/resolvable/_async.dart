@@ -24,7 +24,8 @@ part of '../monad.dart';
 ///
 /// Await all Futures in the constructor [Async.new] to ensure errors are
 /// properly caught and propagated.
-final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T> {
+final class Async<T extends Object> extends Resolvable<T>
+    implements AsyncImpl<T> {
   /// Combines 2 [Async] monads into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
@@ -38,7 +39,9 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2],
-      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null
+          ? null
+          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -49,21 +52,23 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineAsync].
-  static Async<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Async<(T1, T2, T3)>
+  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Async<T1> a1,
     Async<T2> a2,
     Async<T3> a3, [
-    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2, a3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-                l[2].transf<T3>(),
-              ).transfErr(),
+              l[0].transf<T1>(),
+              l[1].transf<T2>(),
+              l[2].transf<T3>(),
+            ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -74,28 +79,30 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
 
   @unsafeOrError
   Async.result(super.value)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.result();
+    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.result();
 
   @unsafeOrError
   Async.ok(super.ok)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.ok();
+    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.ok();
 
   @unsafeOrError
   Async.okValue(FutureOr<T> okValue)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.ok(Future.value(okValue).then((e) => Ok(e)));
+    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.ok(Future.value(okValue).then((e) => Ok(e)));
 
   @unsafeOrError
   Async.err(super.err)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.err();
+    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.err();
 
   @unsafeOrError
   Async.errValue(FutureOr<({Object error, int? statusCode})> error)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-        super.err(Future.value(error).then((e) => Err(e.error, statusCode: e.statusCode)));
+    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      super.err(
+        Future.value(error).then((e) => Err(e.error, statusCode: e.statusCode)),
+      );
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -105,7 +112,9 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    Future<T> Function() mustAwaitAllFutures, {
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
@@ -122,10 +131,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
           }
           return onError(error, stackTrace);
         } catch (error, stackTrace) {
-          return Err<T>(
-            error,
-            stackTrace: stackTrace,
-          );
+          return Err<T>(error, stackTrace: stackTrace);
         }
       } finally {
         onFinalize?.call();
@@ -144,9 +150,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Err<Sync<T>> sync() {
-    return Err(
-      'Called sync() on Async<$T>.',
-    );
+    return Err('Called sync() on Async<$T>.');
   }
 
   @override
@@ -156,11 +160,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Async<T> ifSync(
-    @noFutures
-    void Function(
-      Async<T> self,
-      Sync<T> async,
-    ) noFutures,
+    @noFutures void Function(Async<T> self, Sync<T> async) noFutures,
   ) {
     return this;
   }
@@ -168,11 +168,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   @override
   @pragma('vm:prefer-inline')
   Async<T> ifAsync(
-    @noFutures
-    void Function(
-      Async<T> self,
-      Async<T> async,
-    ) noFutures,
+    @noFutures void Function(Async<T> self, Async<T> async) noFutures,
   ) {
     return Sync(() {
       noFutures(this, this);
@@ -182,21 +178,15 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
 
   @override
   Resolvable<T> ifOk(
-    @noFutures
-    void Function(
-      Async<T> self,
-      Ok<T> ok,
-    ) noFutures,
+    @noFutures void Function(Async<T> self, Ok<T> ok) noFutures,
   ) {
     return Async(() async {
       final awaitedValue = await value;
       return switch (awaitedValue) {
-        Ok<T> ok => Resolvable(
-            () {
-              noFutures(this, ok);
-              return awaitedValue;
-            },
-          ).flatten(),
+        Ok<T> ok => Resolvable(() {
+          noFutures(this, ok);
+          return awaitedValue;
+        }).flatten(),
         Err() => this,
       };
     }).flatten();
@@ -204,20 +194,16 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
 
   @override
   Resolvable<T> ifErr(
-    @noFutures
-    void Function(
-      Async<T> self,
-      Err<T> err,
-    ) noFutures,
+    @noFutures void Function(Async<T> self, Err<T> err) noFutures,
   ) {
     return Async(() async {
       final awaitedValue = await value;
       return switch (awaitedValue) {
         Ok() => this,
         Err<T> err => Sync(() {
-            noFutures(this, err);
-            return awaitedValue;
-          }).flatten()
+          noFutures(this, err);
+          return awaitedValue;
+        }).flatten(),
       };
     }).flatten();
   }
@@ -258,12 +244,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
     try {
       return onAsync(this) ?? this;
     } catch (error, stackTrace) {
-      return Async.err(
-        Err(
-          error,
-          stackTrace: stackTrace,
-        ),
-      );
+      return Async.err(Err(error, stackTrace: stackTrace));
     }
   }
 
@@ -345,17 +326,13 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   /// Prefer using [then] for [Async].
   @override
   @pragma('vm:prefer-inline')
-  Async<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  ) {
+  Async<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
     return then(noFutures);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Async<R> then<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  ) {
+  Async<R> then<R extends Object>(@noFutures R Function(T value) noFutures) {
     return Async.result(value.then((e) => e.map(noFutures)));
   }
 
@@ -372,9 +349,7 @@ final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T
   }
 
   @override
-  Async<R> transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
-  ]) {
+  Async<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
     return Async(() async {
       final okOrErr = (await value).transf<R>(noFutures);
       switch (okOrErr) {

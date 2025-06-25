@@ -58,7 +58,8 @@ extension FlattenErrExt6<T extends Object> on Err<Err<Err<Err<Err<Err<T>>>>>> {
   Err<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenErrExt7<T extends Object> on Err<Err<Err<Err<Err<Err<Err<T>>>>>>> {
+extension FlattenErrExt7<T extends Object>
+    on Err<Err<Err<Err<Err<Err<Err<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten7();
 
@@ -67,7 +68,8 @@ extension FlattenErrExt7<T extends Object> on Err<Err<Err<Err<Err<Err<Err<T>>>>>
   Err<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenErrExt8<T extends Object> on Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>> {
+extension FlattenErrExt8<T extends Object>
+    on Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten8();
 
@@ -76,7 +78,8 @@ extension FlattenErrExt8<T extends Object> on Err<Err<Err<Err<Err<Err<Err<Err<T>
   Err<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenErrExt9<T extends Object> on Err<Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>>> {
+extension FlattenErrExt9<T extends Object>
+    on Err<Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten9();
 

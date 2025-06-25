@@ -178,10 +178,7 @@ void main() {
           // Assert
           final result = await doubleCompleter.resolvable().value;
           expect(result, isA<Err>());
-          expect(
-            (result as Err).error,
-            isA<TypeError>(), 
-          );
+          expect((result as Err).error, isA<TypeError>());
         },
       );
     });

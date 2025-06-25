@@ -33,10 +33,10 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
     bool eagerError = true,
     Duration? minTaskDuration,
     TOnTaskError? onError,
-  })  : _eagerError = eagerError,
-        _minTaskDuration = minTaskDuration,
-        _onError = onError,
-        super();
+  }) : _eagerError = eagerError,
+       _minTaskDuration = minTaskDuration,
+       _onError = onError,
+       super();
 
   /// Creates a new batch from an existing one, copying its configuration and tasks.
   factory ConcurrentTaskBatch.from(ConcurrentTaskBatch<T> other) {
@@ -73,10 +73,11 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   @override
   TResolvableOption<T> executeTasks() {
     final itemFactories = tasks.map(
-      (task) => () => task
-          .handler(Ok(None<T>()))
-          .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
-          .value,
+      (task) =>
+          () => task
+              .handler(Ok(None<T>()))
+              .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
+              .value,
     );
     _internalIsExecuting = true;
     return Resolvable(
@@ -85,14 +86,7 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
         (_) => const None(),
         eagerError: _eagerError,
         onError: (error, stackTrace) {
-          return _onError
-              ?.call(
-                Err(
-                  error,
-                  stackTrace: stackTrace,
-                ),
-              )
-              .value;
+          return _onError?.call(Err(error, stackTrace: stackTrace)).value;
         },
       ),
     ).whenComplete((e) {

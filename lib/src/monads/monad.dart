@@ -51,10 +51,10 @@ sealed class Monad<T extends Object> implements Equatable {
       Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
-          final result = await futureResult;
-          final innerResolvable = result.reduce<R>();
-          return (await innerResolvable.value).unwrap();
-        }),
+        final result = await futureResult;
+        final innerResolvable = result.reduce<R>();
+        return (await innerResolvable.value).unwrap();
+      }),
     };
   }
 
@@ -206,17 +206,13 @@ sealed class Monad<T extends Object> implements Equatable {
 
   /// Transforms the contained value using the mapper function
   /// [noFutures] while preserving the [Monad]'s structure.
-  Monad<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  );
+  Monad<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
 
   /// Transforms the [Monad]'s generic type from `T` to `R`.
   ///
   /// Uses the transformer function [noFutures] if provided, otherwise
   /// attempts a direct cast.
-  Monad transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
-  ]);
+  Monad transf<R extends Object>([@noFutures R Function(T e)? noFutures]);
 
   /// Suppresses the linter error `must_use_monad`.
   FutureOr<void> end();

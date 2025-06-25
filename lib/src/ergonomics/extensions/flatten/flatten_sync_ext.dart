@@ -56,7 +56,8 @@ extension FlattenSyncExt5<T extends Object> on Sync<Sync<Sync<Sync<Sync<T>>>>> {
   Sync<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenSyncExt6<T extends Object> on Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>> {
+extension FlattenSyncExt6<T extends Object>
+    on Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>> {
   @pragma('vm:prefer-inline')
   Sync<T> flatten() => flatten6();
 
@@ -65,7 +66,8 @@ extension FlattenSyncExt6<T extends Object> on Sync<Sync<Sync<Sync<Sync<Sync<T>>
   Sync<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenSyncExt7<T extends Object> on Sync<Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>>> {
+extension FlattenSyncExt7<T extends Object>
+    on Sync<Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Sync<T> flatten() => flatten7();
 
@@ -74,7 +76,8 @@ extension FlattenSyncExt7<T extends Object> on Sync<Sync<Sync<Sync<Sync<Sync<Syn
   Sync<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenSyncExt8<T extends Object> on Sync<Sync<Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>>>> {
+extension FlattenSyncExt8<T extends Object>
+    on Sync<Sync<Sync<Sync<Sync<Sync<Sync<Sync<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Sync<T> flatten() => flatten8();
 

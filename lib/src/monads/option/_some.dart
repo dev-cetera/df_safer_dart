@@ -37,19 +37,13 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Err<None<T>> none() {
-    return Err(
-      'Called none() on Some<$T>.',
-    );
+    return Err('Called none() on Some<$T>.');
   }
 
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> ifSome(
-    @noFutures
-    void Function(
-      Some<T> self,
-      Some<T> none,
-    ) noFutures,
+    @noFutures void Function(Some<T> self, Some<T> none) noFutures,
   ) {
     return Sync(() {
       noFutures(this, this);
@@ -60,11 +54,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> ifNone(
-    @noFutures
-    void Function(
-      Some<T> self,
-      None<T> none,
-    ) noFutures,
+    @noFutures void Function(Some<T> self, None<T> none) noFutures,
   ) {
     return Ok(this);
   }
@@ -75,9 +65,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<T> mapSome(
-    @noFutures Some<T> Function(Some<T> some) noFutures,
-  ) {
+  Some<T> mapSome(@noFutures Some<T> Function(Some<T> some) noFutures) {
     return noFutures(this);
   }
 
@@ -127,9 +115,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Some<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  ) {
+  Some<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
     return Some(noFutures(value));
   }
 
@@ -144,10 +130,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
       return Ok(Option.from(value1));
     } catch (error, stackTrace) {
       assert(false, error);
-      return Err(
-        'Cannot transform $T to $R',
-        stackTrace: stackTrace,
-      );
+      return Err('Cannot transform $T to $R', stackTrace: stackTrace);
     }
   }
 }

@@ -36,11 +36,11 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
   /// Returns [None] if any are [None].
   ///
   /// See also: [combineOption].
-  static Option<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
-    Option<T1> o1,
-    Option<T2> o2,
-    Option<T3> o3,
-  ) {
+  static Option<(T1, T2, T3)> combine3<
+    T1 extends Object,
+    T2 extends Object,
+    T3 extends Object
+  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
     return combineOption<Object>([
       o1,
       o2,
@@ -85,29 +85,19 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
 
   /// Performs a side-effect with the contained value if this is a [Some].
   Result<Option<T>> ifSome(
-    @noFutures
-    void Function(
-      Option<T> self,
-      Some<T> some,
-    ) noFutures,
+    @noFutures void Function(Option<T> self, Some<T> some) noFutures,
   );
 
   /// Performs a side-effect if this is a [None].
   Result<Option<T>> ifNone(
-    @noFutures
-    void Function(
-      Option<T> self,
-      None<T> none,
-    ) noFutures,
+    @noFutures void Function(Option<T> self, None<T> none) noFutures,
   );
 
   /// Returns the contained value or `null`.
   T? orNull();
 
   /// Transforms the inner [Some] instance if this is a [Some].
-  Option<T> mapSome(
-    @noFutures Some<T> Function(Some<T> some) noFutures,
-  );
+  Option<T> mapSome(@noFutures Some<T> Function(Some<T> some) noFutures);
 
   /// Maps an `Option<T>` to `Option<R>` by applying a function that returns
   /// another [Option].
@@ -141,9 +131,7 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
   T unwrapOr(T fallback);
 
   @override
-  Option<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  );
+  Option<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
 
   @override
   Result<Option<R>> transf<R extends Object>([

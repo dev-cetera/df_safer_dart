@@ -34,23 +34,27 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 /// - [List]  (dynamic)
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
-Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(dynamic input) {
+Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
+  dynamic input,
+) {
   if (input is Monad) {
     return switch (input.rawSync().value) {
-      Ok(value: final okValue) => letMapOrNone<K, V>(NoStackOverflowWrapper(okValue)),
+      Ok(value: final okValue) => letMapOrNone<K, V>(
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }
 
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Map<dynamic, dynamic> m => _convertMapOrNone<K, V>(m),
-    final String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(s.trim())
-        .map((d) => _convertMapOrNone<K, V>(d))
-        .flatten(),
+    final String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(
+      s.trim(),
+    ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
     final Monad m => switch (m.rawSync().value) {
-        Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
-        Err() => const None(),
-      },
+      Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
+      Err() => const None(),
+    },
     _ => const None(),
   };
 }

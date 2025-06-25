@@ -31,7 +31,9 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   ]) {
     final combined = combineResult<Object>(
       [r1, r2],
-      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null
+          ? null
+          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -42,21 +44,23 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   /// If any are [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResult].
-  static Result<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Result<(T1, T2, T3)>
+  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Result<T1> r1,
     Result<T2> r2,
     Result<T3> r3, [
-    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResult<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-                l[2].transf<T3>(),
-              ).transfErr(),
+              l[0].transf<T1>(),
+              l[1].transf<T2>(),
+              l[2].transf<T3>(),
+            ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -74,9 +78,7 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   bool isErr();
 
   /// Performs a side-effect with the contained value if this is an [Ok].
-  Result<T> ifOk(
-    @noFutures void Function(Result<T> self, Ok<T> ok) noFutures,
-  );
+  Result<T> ifOk(@noFutures void Function(Result<T> self, Ok<T> ok) noFutures);
 
   /// Performs a side-effect with the contained error if this is an [Err].
   Result<T> ifErr(
@@ -104,9 +106,7 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   Result<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures);
 
   /// Transforms the inner [Err] instance if this is an [Err].
-  Result<T> mapErr(
-    @noFutures Err<T> Function(Err<T> err) noFutures,
-  );
+  Result<T> mapErr(@noFutures Err<T> Function(Err<T> err) noFutures);
 
   /// Folds the two cases of this [Result] into a single new [Result].
   Result<Object> fold(
@@ -128,14 +128,10 @@ sealed class Result<T extends Object> extends Monad<T> implements SyncImpl<T> {
   T unwrapOr(T fallback);
 
   @override
-  Result<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  );
+  Result<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
 
   @override
-  Result<R> transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
-  ]);
+  Result<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]);
 
   @override
   @nonVirtual

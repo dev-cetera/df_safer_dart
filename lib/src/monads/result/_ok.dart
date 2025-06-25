@@ -33,9 +33,7 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(
-    @noFutures void Function(Ok<T> self, Ok<T> ok) noFutures,
-  ) {
+  Result<T> ifOk(@noFutures void Function(Ok<T> self, Ok<T> ok) noFutures) {
     return Sync(() {
       noFutures(this, this);
       return value;
@@ -44,9 +42,7 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(
-    @noFutures void Function(Ok<T> self, Err<T> err) noFutures,
-  ) {
+  Result<T> ifErr(@noFutures void Function(Ok<T> self, Err<T> err) noFutures) {
     return this;
   }
 
@@ -91,10 +87,7 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
     try {
       return onOk(this) ?? this;
     } catch (error, stackTrace) {
-      return Err(
-        error,
-        stackTrace: stackTrace,
-      );
+      return Err(error, stackTrace: stackTrace);
     }
   }
 
@@ -116,26 +109,19 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  ) {
+  Ok<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
     return Ok(noFutures(value));
   }
 
   @override
-  Result<R> transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
-  ]) {
+  Result<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
     try {
       final a = unwrap();
       final b = noFutures?.call(a) ?? a as R;
       return Ok(b);
     } catch (error, stackTrace) {
       assert(false, error);
-      return Err(
-        'Cannot transform $T to $R.',
-        stackTrace: stackTrace,
-      );
+      return Err('Cannot transform $T to $R.', stackTrace: stackTrace);
     }
   }
 }

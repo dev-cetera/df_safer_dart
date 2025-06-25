@@ -18,7 +18,8 @@ part of '../monad.dart';
 
 /// A [Monad] that represents the failure case of a [Result], containing an
 /// error [value].
-final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exception {
+final class Err<T extends Object> extends Result<T>
+    implements SyncImpl<T>, Exception {
   /// An optional HTTP status code associated with the error.
   final Option<int> statusCode;
 
@@ -34,13 +35,12 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
   Object get error => value;
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
-  Err(
-    super.value, {
-    int? statusCode,
-    StackTrace? stackTrace,
-  })  : statusCode = Option.from(statusCode),
-        stackTrace = stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
-        super._();
+  Err(super.value, {int? statusCode, StackTrace? stackTrace})
+    : statusCode = Option.from(statusCode),
+      stackTrace = stackTrace != null
+          ? Trace.from(stackTrace)
+          : Trace.current(),
+      super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -72,17 +72,13 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifOk(
-    @noFutures void Function(Err<T> self, Ok<T> ok) noFutures,
-  ) {
+  Err<T> ifOk(@noFutures void Function(Err<T> self, Ok<T> ok) noFutures) {
     return this;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> ifErr(
-    @noFutures void Function(Err<T> self, Err<T> err) noFutures,
-  ) {
+  Err<T> ifErr(@noFutures void Function(Err<T> self, Err<T> err) noFutures) {
     return Sync(() {
       noFutures(this, this);
       return this;
@@ -117,9 +113,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   @override
   @pragma('vm:prefer-inline')
-  Err<T> mapErr(
-    @noFutures Err<T> Function(Err<T> err) noFutures,
-  ) {
+  Err<T> mapErr(@noFutures Err<T> Function(Err<T> err) noFutures) {
     return noFutures(this);
   }
 
@@ -132,10 +126,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
     try {
       return onErr(this) ?? this;
     } catch (error, stackTrace) {
-      return Err(
-        error,
-        stackTrace: stackTrace,
-      );
+      return Err(error, stackTrace: stackTrace);
     }
   }
 
@@ -149,16 +140,14 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() => value is E ? Some(value as E) : const None();
+  Option<E> matchError<E extends Object>() =>
+      value is E ? Some(value as E) : const None();
 
   /// Transforms the [Err]'s generic type from `T` to `R` while preserving the
   /// contained `error`.
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(
-      value,
-      statusCode: statusCode.orNull(),
-    );
+    return Err(value, statusCode: statusCode.orNull());
   }
 
   /// Converts this [Err] to a data model for serialization.
@@ -199,18 +188,14 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
 
   @override
   @pragma('vm:prefer-inline')
-  Err<R> map<R extends Object>(
-    @noFutures R Function(T value) noFutures,
-  ) {
+  Err<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
     return transfErr();
   }
 
   @override
   @protected
   @pragma('vm:prefer-inline')
-  Err<R> transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
-  ]) {
+  Err<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
     return transfErr<R>();
   }
 

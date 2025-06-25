@@ -49,7 +49,8 @@ extension FlattenSomeExt5<T extends Object> on Some<Some<Some<Some<Some<T>>>>> {
   Some<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenSomeExt6<T extends Object> on Some<Some<Some<Some<Some<Some<T>>>>>> {
+extension FlattenSomeExt6<T extends Object>
+    on Some<Some<Some<Some<Some<Some<T>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten6();
 
@@ -58,7 +59,8 @@ extension FlattenSomeExt6<T extends Object> on Some<Some<Some<Some<Some<Some<T>>
   Some<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenSomeExt7<T extends Object> on Some<Some<Some<Some<Some<Some<Some<T>>>>>>> {
+extension FlattenSomeExt7<T extends Object>
+    on Some<Some<Some<Some<Some<Some<Some<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten7();
 
@@ -67,7 +69,8 @@ extension FlattenSomeExt7<T extends Object> on Some<Some<Some<Some<Some<Some<Som
   Some<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenSomeExt8<T extends Object> on Some<Some<Some<Some<Some<Some<Some<Some<T>>>>>>>> {
+extension FlattenSomeExt8<T extends Object>
+    on Some<Some<Some<Some<Some<Some<Some<Some<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten8();
 
