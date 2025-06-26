@@ -2,7 +2,7 @@ In software development, we spend an enormous amount of time writing defensive c
 
 What if there was a way to write clean, linear code that describes the happy path, while all the messy details of null values, failures, and asynchronicity are handled automatically in the background?
 
-This is the promise of **monads**, a powerful concept from functional programming that you can use in Dart today to make your code dramatically more robust.
+This is the promise of **Monads**, a powerful concept from functional programming that you can use in Dart today to make your code dramatically more robust.
 
 ## What is a Monad? (The Simple Explanation)
 Forget the complicated academic definitions. For our purposes, a monad is just a **wrapper** or a **box** around a value.
