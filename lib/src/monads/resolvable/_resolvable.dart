@@ -192,9 +192,6 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
     ]).then((e) => e.first as R);
   }
 
-  /// Unsafely converts this [Resolvable] to a [Sync]. Throws if it's an [Async].
-  Sync<T> toSync();
-
   /// Converts this [Resolvable] to an [Async].
   Async<T> toAsync();
 

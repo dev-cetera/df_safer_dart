@@ -228,11 +228,7 @@ final class Sync<T extends Object> extends Resolvable<T>
   ) {
     return Sync.result(value.fold(onOk, onErr));
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Sync<T> toSync() => this;
-
+  
   @override
   @pragma('vm:prefer-inline')
   Async<T> toAsync() => Async.result(value);
