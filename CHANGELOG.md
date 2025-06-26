@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.16.2]
+
+- Released @ 6/2025 (UTC)
+- Add utility function to TaskSequencer
+
 ## [0.16.1]
 
 - Released @ 6/2025 (UTC)
