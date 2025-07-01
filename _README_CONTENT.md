@@ -1,5 +1,3 @@
-![banner](doc_assets/banner.png)
-
 In mission-critical software, every potential failure must be accounted for. We write defensive code, check for nulls, and handle exceptions. However, standard Dart tools like **try-catch** and **nullable** types place the burden of safety entirely on the developer. It's easy to forget a check or miss an exception, leading to runtime failures in production—exactly where they are least acceptable.
 
 ☝️ **This is a reliability problem.**

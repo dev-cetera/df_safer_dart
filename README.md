@@ -11,9 +11,9 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 
 ---
 
-<!-- BEGIN _README_CONTENT -->
+![banner](https://github.com/dev-cetera/df_safer_dart/blob/v0.17.1/doc_assets/banner.png?raw=true)
 
-![banner](doc_assets/banner.png)
+<!-- BEGIN _README_CONTENT -->
 
 In mission-critical software, every potential failure must be accounted for. We write defensive code, check for nulls, and handle exceptions. However, standard Dart tools like **try-catch** and **nullable** types place the burden of safety entirely on the developer. It's easy to forget a check or miss an exception, leading to runtime failures in production—exactly where they are least acceptable.
 
