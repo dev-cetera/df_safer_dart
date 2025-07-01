@@ -28,21 +28,21 @@ For an introduction, please refer to this article:
 - **A Unified API:** While `Option`, `Result`, and `Resolvable` are distinct, they all inherit from a common base class. This is an implementation detail that allows them to share a consistent, predictable API for core methods, making the library easy to learn and use.
 - **Ergonomic Helpers & Utilities:** To make working with the core types seamless, the library includes a rich set of extensions and utilities with minimal boilerplate. These helpers allow you to safely handle collections (firstOrNone), manage nested types (flatten, swap), and convert data (e.g. `letIntOrNone`), all while reducing boilerplate and keeping your business logic clean and linear. Do refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
 
-## 🤷 When to Use/Not Use
+## ☝️ When to Use/Not Use
 
 `df_safer_dart` is a specialized tool. The goal is not to use it everywhere, but to use it where it matters most.
 
 ### Use it for:
 
-✔️ **Core Business Logic:** Make complex rules safe and auditable by forcing every step to be explicitly handled.
+✅ **Core Business Logic:** Make complex rules safe and auditable by forcing every step to be explicitly handled.
 
-✔️ **Data Parsing & Validation:** Create a secure boundary between untrusted external data (like JSON) and your application.
+✅ **Data Parsing & Validation:** Create a secure boundary between untrusted external data (like JSON) and your application.
 
-✔️ **Network & Database Interactions:** Model expected failures like timeouts as manageable data, not runtime exceptions.
+✅ **Network & Database Interactions:** Model expected failures like timeouts as manageable data, not runtime exceptions.
 
-✔️ **Authoring Reliable Packages:** Provide a crash-proof public API for other developers that doesn't rely on try-catch.
+✅ **Authoring Reliable Packages:** Provide a crash-proof public API for other developers that doesn't rely on try-catch.
 
-✔️ **Mission-Critical Modules:** Ensure any operation where a partial success is dangerous either completes fully or fails cleanly.
+✅ **Mission-Critical Modules:** Ensure any operation where a partial success is dangerous either completes fully or fails cleanly.
 
 ### Do Not Use it for:
 
@@ -54,7 +54,7 @@ For an introduction, please refer to this article:
 
 ❌ **Deeply Exception-Based Frameworks:** In codebases architecturally dependent on exceptions for control flow, as it may feel like fighting the current.
 
-## 📦 The Core Types for Unbreakable Code
+## 🪨 The Core Types for Rock-Solid Code
 
 `df_safer_dart` is built on three core types that work seamlessly together:
 
