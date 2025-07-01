@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.17.0]
+
+- Released @ 7/2025 (UTC)
+- Refactor Monad for Outcome to be more precise with naming
+
 ## [0.16.3]
 
 - Released @ 6/2025 (UTC)

@@ -40,8 +40,10 @@ Option<T> letOrNone<T extends Object>(dynamic input) {
   assert(
     !(isSubtype<T, List<dynamic>>() && !isSubtype<List<dynamic>, T>()) &&
         !(isSubtype<T, Set<dynamic>>() && !isSubtype<Set<dynamic>, T>()) &&
-        !(isSubtype<T, Iterable<dynamic>>() && !isSubtype<Iterable<dynamic>, T>()) &&
-        !(isSubtype<T, Map<dynamic, dynamic>>() && !isSubtype<Map<dynamic, dynamic>, T>()),
+        !(isSubtype<T, Iterable<dynamic>>() &&
+            !isSubtype<Iterable<dynamic>, T>()) &&
+        !(isSubtype<T, Map<dynamic, dynamic>>() &&
+            !isSubtype<Map<dynamic, dynamic>, T>()),
     'letOrNone<$T> cannot be used with specific collection types due to type safety. '
     'Only generic collection types are supported.',
   );
@@ -98,8 +100,8 @@ Option<T> letAsOrNone<T extends Object>(dynamic input) {
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letAsOrNone<T>(
-          NoStackOverflowWrapper(okValue),
-        ),
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }
@@ -117,8 +119,8 @@ Option<String> letAsStringOrNone(dynamic input) {
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letAsStringOrNone(
-          NoStackOverflowWrapper(okValue),
-        ),
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }
@@ -214,16 +216,16 @@ Option<bool> letBoolOrNone(dynamic input) {
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letBoolOrNone(
-          NoStackOverflowWrapper(okValue),
-        ),
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final bool value => Some(value),
     final String string => Option.from(
-        bool.tryParse(string.trim(), caseSensitive: false),
-      ),
+      bool.tryParse(string.trim(), caseSensitive: false),
+    ),
     _ => const None(),
   };
 }
@@ -260,8 +262,8 @@ Option<DateTime> letDateTimeOrNone(dynamic input) {
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letDateTimeOrNone(
-          NoStackOverflowWrapper(okValue),
-        ),
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }

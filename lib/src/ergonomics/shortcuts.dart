@@ -43,7 +43,8 @@ Async<Some<T>> asyncSome<T extends Object>(FutureOr<T> value) {
 Resolvable<None<T>> resolvableNone<T extends Object>() => syncNone();
 
 @pragma('vm:prefer-inline')
-Resolvable<Some<T>> resolvableSome<T extends Object>(T value) => syncSome(value);
+Resolvable<Some<T>> resolvableSome<T extends Object>(T value) =>
+    syncSome(value);
 
 @pragma('vm:prefer-inline')
 Resolvable<Unit> resolvableUnit() => syncUnit();

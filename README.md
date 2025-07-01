@@ -6,7 +6,7 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 [![sponsor](https://img.shields.io/badge/sponsor-grey?logo=github-sponsors)](https://github.com/sponsors/dev-cetera)
 [![patreon](https://img.shields.io/badge/patreon-grey?logo=patreon)](https://www.patreon.com/c/RobertMollentze)
 [![pub](https://img.shields.io/pub/v/df_safer_dart.svg)](https://pub.dev/packages/df_safer_dart)
-[![tag](https://img.shields.io/badge/tag-v0.16.3-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.16.3)
+[![tag](https://img.shields.io/badge/tag-v0.17.0-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.17.0)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE)
 
 ---
@@ -109,12 +109,12 @@ To get the full benefit of `df_safer_dart`, you must enable its custom linter ru
 1. Add `custom_lint` and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  df_safer_dart: ^0.17.0
+  df_safer_dart: ^0.16.2
 
 dev_dependencies:
   lints: ^6.0.0
   custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.3.3
+  df_safer_dart_lints: ^0.3.2
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
@@ -171,4 +171,3 @@ If you're enjoying this package and find it valuable, consider showing your appr
 ## 🧑‍⚖️ License
 
 This project is released under the [MIT License](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE). See [LICENSE](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE) for more information.
-

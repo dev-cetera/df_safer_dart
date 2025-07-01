@@ -23,7 +23,8 @@ import '/_common.dart';
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
 Resolvable<List<Option<T>>> combineOutcome<T extends Object>(
   Iterable<Outcome<T>> outcomes, {
-  @noFutures Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
+  @noFutures
+  Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
 }) {
   final reduced = outcomes.map((e) => e.reduce<T>());
   return combineResolvable<Option<T>>(reduced, onErr: onErr);
