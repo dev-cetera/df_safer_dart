@@ -102,19 +102,20 @@ For an introduction, please refer to this article:
 
 `Resolvable` eliminates the mental overhead of branching logic for sync vs. async code, allowing you to build complex, failable workflows with linear, readable chains.
 
-## ⚠️ Enable the Safety Lints (BETA feature)
+## ⚠️ Enable the Safety Lints
 
 To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is NOT OPTIONAL! It is fundamental to the library's design.
 
-1. Add `custom_lint` and `df_safer_dart_lints` to your `pubspec.yaml`:
+1. Add `df_safer_dart`, `custom_lint` and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
+# Replace "any" with the versions you want to use:
 dependencies:
-  df_safer_dart: ^0.16.2
+  df_safer_dart: any
 
 dev_dependencies:
-  lints: ^6.0.0
-  custom_lint: ^0.7.5
-  df_safer_dart_lints: ^0.3.2
+  lints:  any
+  custom_lint:  any
+  df_safer_dart_lints:  any
 ```
 
 2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
@@ -122,10 +123,11 @@ dev_dependencies:
 analyzer:
   plugins:
     - custom_lint
-# Optional.
+
+# Optional:
 custom_lint:
   rules:
-    # If any rule gives you trouble, you can set them to false.
+    # If any rule gives you trouble, set them to false.
     - no_futures: true
     - no_future_outcome_type_or_error: true
     - must_await_all_futures: true
@@ -133,7 +135,7 @@ custom_lint:
     - must_use_outcome_or_error: true
     - must_use_unsafe_wrapper_or_error: true
   errors:
-    # If you're using the "UNSAFE". See API documentation.
+    # If you're using the "UNSAFE" label. See API documentation for more.
     unused_label: ignore
 ```
 
