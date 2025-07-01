@@ -14,7 +14,7 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension WrapOnMonadExt<T extends Object, M extends Monad<T>> on M {
+extension WrapOnOutcomeExt<T extends Object, M extends Outcome<T>> on M {
   @pragma('vm:prefer-inline')
   Some<M> wrapInSome() => Some(this);
 
@@ -30,19 +30,19 @@ extension WrapOnMonadExt<T extends Object, M extends Monad<T>> on M {
   @pragma('vm:prefer-inline')
   Async<M> wrapInAsync() => Async.okValue(this);
 
-  Monad<Some<T>> wrapValueInSome() => map((e) => Some(e));
+  Outcome<Some<T>> wrapValueInSome() => map((e) => Some(e));
 
   @pragma('vm:prefer-inline')
-  Monad<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
+  Outcome<Ok<T>> wrapValueInOk() => map((e) => Ok(e));
 
   @pragma('vm:prefer-inline')
-  Monad<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
+  Outcome<Resolvable<T>> wrapValueInResolvable() => map((e) => Sync.okValue(e));
 
   @pragma('vm:prefer-inline')
-  Monad<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
+  Outcome<Sync<T>> wrapValueInSync() => map((e) => Sync.okValue(e));
 
   @pragma('vm:prefer-inline')
-  Monad<Async<T>> wrapValueInAsync() => map((e) => Async.okValue(e));
+  Outcome<Async<T>> wrapValueInAsync() => map((e) => Async.okValue(e));
 }
 
 extension WrapOnResolvableExt<T extends Object> on Resolvable<T> {
@@ -53,8 +53,7 @@ extension WrapOnResolvableExt<T extends Object> on Resolvable<T> {
   Resolvable<Ok<T>> wrapValueInOk() => then((e) => Ok(e));
 
   @pragma('vm:prefer-inline')
-  Resolvable<Resolvable<T>> wrapValueInResolvable() =>
-      then((e) => Sync.okValue(e));
+  Resolvable<Resolvable<T>> wrapValueInResolvable() => then((e) => Sync.okValue(e));
 
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> wrapValueInSync() => then((e) => Sync.okValue(e));

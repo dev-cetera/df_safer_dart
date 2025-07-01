@@ -11,7 +11,7 @@
 //.title~
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
-// ignore_for_file: no_future_monad_type_or_error
+// ignore_for_file: no_future_outcome_type_or_error
 
 import '/_common.dart';
 
@@ -117,18 +117,16 @@ extension NoneIfEmptyOnSetExt<T extends Object> on Set<T> {
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 //
-// Monadic Iterable Extensions
+// Outcome Iterable Extensions
 //
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   /// Filters for [Some] elements, returning an iterable of the [Some] instances.
-  Iterable<Some<T>> whereSome() =>
-      where((e) => e.isSome()).map((e) => e.some().unwrap());
+  Iterable<Some<T>> whereSome() => where((e) => e.isSome()).map((e) => e.some().unwrap());
 
   /// Filters for [None] elements, returning an iterable of the [None] instances.
-  Iterable<None<T>> whereNone() =>
-      where((e) => e.isNone()).map((e) => e.none().unwrap());
+  Iterable<None<T>> whereNone() => where((e) => e.isNone()).map((e) => e.none().unwrap());
 
   /// Returns a new [Iterable] containing only the values from [Some] elements.
   Iterable<T> get values => where((e) => e.isSome()).map((e) => e.unwrap());
@@ -173,15 +171,12 @@ extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   }
 }
 
-extension IterableFutureOptionExt<T extends Object>
-    on Iterable<Future<Option<T>>> {
+extension IterableFutureOptionExt<T extends Object> on Iterable<Future<Option<T>>> {
   /// Awaits all futures and then filters for [Some] elements.
-  Future<Iterable<Some<T>>> whereSome() =>
-      Future.wait(this).then((e) => e.whereSome());
+  Future<Iterable<Some<T>>> whereSome() => Future.wait(this).then((e) => e.whereSome());
 
   /// Awaits all futures and then filters for [None] elements.
-  Future<Iterable<None<T>>> whereNone() =>
-      Future.wait(this).then((e) => e.whereNone());
+  Future<Iterable<None<T>>> whereNone() => Future.wait(this).then((e) => e.whereNone());
 }
 
 extension IterableSomeExt<T extends Object> on Iterable<Some<T>> {
@@ -196,12 +191,10 @@ extension FutureIterableSomeExt<T extends Object> on Future<Iterable<Some<T>>> {
 
 extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   /// Filters for [Ok] elements, returning an iterable of the [Ok] instances.
-  Iterable<Ok<T>> whereOk() =>
-      where((e) => e.isOk()).map((e) => e.ok().unwrap());
+  Iterable<Ok<T>> whereOk() => where((e) => e.isOk()).map((e) => e.ok().unwrap());
 
   /// Filters for [Err] elements, returning an iterable of the [Err] instances.
-  Iterable<Err<T>> whereErr() =>
-      where((e) => e.isErr()).map((e) => e.err().unwrap());
+  Iterable<Err<T>> whereErr() => where((e) => e.isErr()).map((e) => e.err().unwrap());
 
   /// Returns a new [Iterable] containing only the values from [Ok] elements.
   Iterable<T> get values => where((e) => e.isOk()).map((e) => e.unwrap());
@@ -250,15 +243,12 @@ extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   }
 }
 
-extension IterableFutureResultExt<T extends Object>
-    on Iterable<Future<Result<T>>> {
+extension IterableFutureResultExt<T extends Object> on Iterable<Future<Result<T>>> {
   /// Awaits all futures and then filters for [Ok] elements.
-  Future<Iterable<Ok<T>>> whereOk() =>
-      Future.wait(this).then((e) => e.whereOk());
+  Future<Iterable<Ok<T>>> whereOk() => Future.wait(this).then((e) => e.whereOk());
 
   /// Awaits all futures and then filters for [Err] elements.
-  Future<Iterable<Err<T>>> whereErr() =>
-      Future.wait(this).then((e) => e.whereErr());
+  Future<Iterable<Err<T>>> whereErr() => Future.wait(this).then((e) => e.whereErr());
 }
 
 extension IterableOkExt<T extends Object> on Iterable<Ok<T>> {
@@ -273,12 +263,10 @@ extension FutureIterableOkExt<T extends Object> on Future<Iterable<Ok<T>>> {
 
 extension IterableResolvableExt<T extends Object> on Iterable<Resolvable<T>> {
   /// Filters for [Sync] elements, returning an iterable of the [Sync] instances.
-  Iterable<Sync<T>> whereSync() =>
-      where((e) => e.isSync()).map((e) => e.sync().unwrap());
+  Iterable<Sync<T>> whereSync() => where((e) => e.isSync()).map((e) => e.sync().unwrap());
 
   /// Filters for [Async] elements, returning an iterable of the [Async] instances.
-  Iterable<Async<T>> whereAsync() =>
-      where((e) => e.isAsync()).map((e) => e.async().unwrap());
+  Iterable<Async<T>> whereAsync() => where((e) => e.isAsync()).map((e) => e.async().unwrap());
 
   /// Converts every [Resolvable] in the iterable to an [Async].
   Iterable<Async<T>> mapToAsync() => map((e) => e.toAsync());

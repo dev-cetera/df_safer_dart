@@ -24,7 +24,7 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [bool]
 /// - [num]
 /// - [double]
@@ -40,15 +40,13 @@ Option<T> letOrNone<T extends Object>(dynamic input) {
   assert(
     !(isSubtype<T, List<dynamic>>() && !isSubtype<List<dynamic>, T>()) &&
         !(isSubtype<T, Set<dynamic>>() && !isSubtype<Set<dynamic>, T>()) &&
-        !(isSubtype<T, Iterable<dynamic>>() &&
-            !isSubtype<Iterable<dynamic>, T>()) &&
-        !(isSubtype<T, Map<dynamic, dynamic>>() &&
-            !isSubtype<Map<dynamic, dynamic>, T>()),
+        !(isSubtype<T, Iterable<dynamic>>() && !isSubtype<Iterable<dynamic>, T>()) &&
+        !(isSubtype<T, Map<dynamic, dynamic>>() && !isSubtype<Map<dynamic, dynamic>, T>()),
     'letOrNone<$T> cannot be used with specific collection types due to type safety. '
     'Only generic collection types are supported.',
   );
-  // 1. Unwrap any monad to get the raw value.
-  if (input is Monad) {
+  // 1. Unwrap any Outcome to get the raw value.
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letOrNone<T>(NoStackOverflowWrapper(okValue)),
       Err() => const None(),
@@ -94,14 +92,14 @@ Option<T> letOrNone<T extends Object>(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [Object]
 Option<T> letAsOrNone<T extends Object>(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letAsOrNone<T>(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
@@ -113,14 +111,14 @@ Option<T> letAsOrNone<T extends Object>(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [Object]
 Option<String> letAsStringOrNone(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letAsStringOrNone(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
@@ -138,7 +136,7 @@ Option<String> letAsStringOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [Object]
 Option<T> jsonDecodeOrNone<T extends Object>(dynamic input) {
   return letAsStringOrNone(input).map((rawInput) {
@@ -155,14 +153,14 @@ Option<T> jsonDecodeOrNone<T extends Object>(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [num]
 /// - [double]
 /// - [int]
 /// - [String]
 Option<num> letNumOrNone(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letNumOrNone(NoStackOverflowWrapper(okValue)),
       Err() => const None(),
@@ -179,7 +177,7 @@ Option<num> letNumOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [num]
 /// - [double]
@@ -194,7 +192,7 @@ Option<int> letIntOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [num]
 /// - [double]
@@ -209,23 +207,23 @@ Option<double> letDoubleOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [bool]
 Option<bool> letBoolOrNone(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letBoolOrNone(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final bool value => Some(value),
     final String string => Option.from(
-      bool.tryParse(string.trim(), caseSensitive: false),
-    ),
+        bool.tryParse(string.trim(), caseSensitive: false),
+      ),
     _ => const None(),
   };
 }
@@ -234,11 +232,11 @@ Option<bool> letBoolOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [Uri]
 Option<Uri> letUriOrNone(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letUriOrNone(NoStackOverflowWrapper(okValue)),
       Err() => const None(),
@@ -255,15 +253,15 @@ Option<Uri> letUriOrNone(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [String]
 /// - [DateTime]
 Option<DateTime> letDateTimeOrNone(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letDateTimeOrNone(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }

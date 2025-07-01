@@ -10,7 +10,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: no_future_monad_type_or_error
+// ignore_for_file: no_future_outcome_type_or_error
 
 import '/_common.dart';
 
@@ -43,9 +43,9 @@ class TaskSequencer<T extends Object> {
     @noFutures TOnTaskError? onPrevError,
     bool eagerError = false,
     Duration? minTaskDuration,
-  }) : _onPrevError = onPrevError,
-       _eagerError = eagerError,
-       _minTaskDuration = minTaskDuration;
+  })  : _onPrevError = onPrevError,
+        _eagerError = eagerError,
+        _minTaskDuration = minTaskDuration;
 
   /// A global error handler for the sequence.
   final TOnTaskError? _onPrevError;
@@ -141,10 +141,11 @@ class TaskSequencer<T extends Object> {
       final b = Option.from(
         task.onError,
       ).map((e) => Resolvable(() => e(err)).flatten());
-      if ((a, b) case (
-        Some(value: final someValueA),
-        Some(value: final someValueB),
-      )) {
+      if ((a, b)
+          case (
+            Some(value: final someValueA),
+            Some(value: final someValueB),
+          )) {
         errorResolvable = Resolvable.combine2(someValueA, someValueB);
       } else if (a case Some(value: final someValueA)) {
         errorResolvable = someValueA;
@@ -161,9 +162,8 @@ class TaskSequencer<T extends Object> {
     }
 
     // Execute the main task handler.
-    final output = task
-        .handler(previousResult)
-        .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    final output =
+        task.handler(previousResult).withMinDuration(task.minTaskDuration ?? _minTaskDuration);
     // Combine the task's result with any error-handling side effects.
     return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
   }
@@ -181,8 +181,7 @@ class TaskSequencer<T extends Object> {
 
 /// A function that defines a step in a task sequence.
 /// It receives the result of the `previous` task.
-typedef TTaskHandler<T extends Object> =
-    TResolvableOption<T> Function(TResultOption<T> previous);
+typedef TTaskHandler<T extends Object> = TResolvableOption<T> Function(TResultOption<T> previous);
 
 /// A function that handles an error from a previous task as a side-effect.
 typedef TOnTaskError = Resolvable Function(Err err);

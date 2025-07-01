@@ -14,10 +14,10 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension ToVoidOnMonadExt<T extends Object> on Monad<T> {
+extension ToVoidOnOutcomeExt<T extends Object> on Outcome<T> {
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Monad<void> toVoid() => this;
+  Outcome<void> toVoid() => this;
 }
 
 extension ToVoidOnResolvableExt<T extends Object> on Resolvable<T> {

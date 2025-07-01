@@ -22,7 +22,7 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [bool]
 /// - [num]
 /// - [double]
@@ -37,11 +37,11 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
   dynamic input,
 ) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letMapOrNone<K, V>(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
@@ -49,12 +49,12 @@ Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Map<dynamic, dynamic> m => _convertMapOrNone<K, V>(m),
     final String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(
-      s.trim(),
-    ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
-    final Monad m => switch (m.rawSync().value) {
-      Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
-      Err() => const None(),
-    },
+        s.trim(),
+      ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
+    final Outcome m => switch (m.rawSync().value) {
+        Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
+        Err() => const None(),
+      },
     _ => const None(),
   };
 }

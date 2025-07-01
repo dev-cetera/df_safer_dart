@@ -29,37 +29,37 @@ part 'impl/_async_impl.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// The foundational sealed class for all monadic types like [Option], [Result],
-/// and [Resolvable].
-sealed class Monad<T extends Object> implements Equatable {
-  const Monad(this.value);
+/// The foundational sealed class for all [Outcome] types like [Option],
+/// [Result] and [Resolvable].
+sealed class Outcome<T extends Object> implements Equatable {
+  const Outcome(this.value);
 
   final FutureOr<Object> value;
 
-  /// Reduces any nested [Monad] structure into a single [TResolvableOption].
+  /// Reduces any nested [Outcome] structure into a single [TResolvableOption].
   ///
-  /// This flattens all [Monad] layers ([Option], [Result], [Resolvable]) into
+  /// This flattens all [Outcome] layers ([Option], [Result], [Resolvable]) into
   /// a final container that is always a [Resolvable] holding an [Option].
   /// An [Err] state at any level will result in a failed [Resolvable].
   TResolvableOption<R> reduce<R extends Object>() {
     return switch (this) {
       Some(value: final someValue) => Resolvable(() => Some(someValue as R)),
-      Some(value: Monad<Object> monadValue) => monadValue.reduce<R>(),
+      Some(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
       None() => syncNone<R>(),
       Ok(value: final someValue) => Resolvable(() => Some(someValue as R)),
-      Ok(value: Monad<Object> monadValue) => monadValue.reduce<R>(),
+      Ok(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
       Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
-        final result = await futureResult;
-        final innerResolvable = result.reduce<R>();
-        return (await innerResolvable.value).unwrap();
-      }),
+          final result = await futureResult;
+          final innerResolvable = result.reduce<R>();
+          return (await innerResolvable.value).unwrap();
+        }),
     };
   }
 
-  /// The low-level primitive for reducing a [Monad] chain. It recursively
-  /// unwraps all [Monad] layers to return the innermost raw value, forcing the
+  /// The low-level primitive for reducing a [Outcome] chain. It recursively
+  /// unwraps all [Outcome] layers to return the innermost raw value, forcing the
   /// caller to handle terminal states via callbacks.
   ///
   /// - [onErr]: A function that is called when an [Err] is encountered.
@@ -72,7 +72,7 @@ sealed class Monad<T extends Object> implements Equatable {
       return switch (obj) {
         Err() => onErr(obj),
         None() => onNone(),
-        Monad(value: final okValue) =>
+        Outcome(value: final okValue) =>
           okValue is Future<Object> ? okValue.then(dive) : dive(okValue),
         Object() => obj,
       };
@@ -81,7 +81,7 @@ sealed class Monad<T extends Object> implements Equatable {
     return dive(this);
   }
 
-  /// Safely reduces any [Monad] chain to a single [Sync].
+  /// Safely reduces any [Outcome] chain to a single [Sync].
   ///
   /// It provides a direct way to get a raw synchronous value while collapsing
   /// all failure, empty, or asynchronous states into an [Err].
@@ -98,11 +98,11 @@ sealed class Monad<T extends Object> implements Equatable {
       // ignore: no_futures
       final value = raw(
         onErr: (err) => err,
-        onNone: () => Err('The Monad resolved to a None (empty) state!'),
+        onNone: () => Err('The Outcome resolved to a None (empty) state!'),
       );
       if (value is Future) {
         throw Err(
-          'The Monad contains an asynchronous value! Use rawAsync instead.',
+          'The Outcome contains an asynchronous value! Use rawAsync instead.',
         );
       }
       if (value is Err) {
@@ -112,7 +112,7 @@ sealed class Monad<T extends Object> implements Equatable {
     });
   }
 
-  /// Reduces any [Monad] chain to a single [Async].
+  /// Reduces any [Outcome] chain to a single [Async].
   ///
   /// It provides a direct way to get a raw value while collapsing
   /// all failure and empty states into an [Err].
@@ -126,7 +126,7 @@ sealed class Monad<T extends Object> implements Equatable {
     return Async(() async {
       final value = await raw(
         onErr: (err) => err,
-        onNone: () => Err('The Monad resolved to a None (empty) state!'),
+        onNone: () => Err('The Outcome resolved to a None (empty) state!'),
       );
       if (value is Err) {
         throw value;
@@ -138,7 +138,7 @@ sealed class Monad<T extends Object> implements Equatable {
   /// **Strongly discouraged:** Unsafely returns the contained value.
   ///
   /// This method is the equivalent of the `!` (bang) operator for nullable
-  /// types. It subverts the safety provided by the [Monad] by throwing an
+  /// types. It subverts the safety provided by the [Outcome] by throwing an
   /// exception instead of allowing you to handle the failure state through
   /// the type system. A thrown exception from `unwrap()` should be considered a
   /// critical programming error.
@@ -146,7 +146,7 @@ sealed class Monad<T extends Object> implements Equatable {
   /// ---
   /// ### ⚠️ DANGER
   ///
-  /// This method will throw an [Err] if the [Monad] is in a failure state
+  /// This method will throw an [Err] if the [Outcome] is in a failure state
   /// ([Err] or [None]).
   ///
   /// ---
@@ -200,21 +200,21 @@ sealed class Monad<T extends Object> implements Equatable {
   @unsafeOrError
   FutureOr<T> unwrap();
 
-  /// Returns the contained value, or the `fallback` if the [Monad] is in an
+  /// Returns the contained value, or the `fallback` if the [Outcome] is in an
   /// [Err] or [None] state.
   FutureOr<T> unwrapOr(T fallback);
 
   /// Transforms the contained value using the mapper function
-  /// [noFutures] while preserving the [Monad]'s structure.
-  Monad<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
+  /// [noFutures] while preserving the [Outcome]'s structure.
+  Outcome<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
 
-  /// Transforms the [Monad]'s generic type from `T` to `R`.
+  /// Transforms the [Outcome]'s generic type from `T` to `R`.
   ///
   /// Uses the transformer function [noFutures] if provided, otherwise
   /// attempts a direct cast.
-  Monad transf<R extends Object>([@noFutures R Function(T e)? noFutures]);
+  Outcome transf<R extends Object>([@noFutures R Function(T e)? noFutures]);
 
-  /// Suppresses the linter error `must_use_monad`.
+  /// Suppresses the linter error `must_use_outcome`.
   FutureOr<void> end();
 
   @override

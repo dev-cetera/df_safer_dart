@@ -20,7 +20,7 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [bool]
 /// - [num]
 /// - [double]
@@ -33,19 +33,19 @@ import '/src/utils/_no_stack_overflow_wrapper.dart' show NoStackOverflowWrapper;
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
 Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
-  if (input is Monad) {
+  if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letIterableOrNone(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Iterable<dynamic> i => Some(i.map((e) => letOrNone<T>(e))),
     final String s => jsonDecodeOrNone<Iterable<dynamic>>(
-      s,
-    ).map((i) => i.map((e) => letOrNone<T>(e))),
+        s,
+      ).map((i) => i.map((e) => letOrNone<T>(e))),
     _ => const None(),
   };
 }
@@ -54,7 +54,7 @@ Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [bool]
 /// - [num]
 /// - [double]
@@ -74,7 +74,7 @@ Option<List<Option<T>>> letListOrNone<T extends Object>(dynamic input) {
 ///
 /// Supported types:
 ///
-/// - Any sync [Monad] chain.
+/// - Any sync [Outcome] chain.
 /// - [bool]
 /// - [num]
 /// - [double]

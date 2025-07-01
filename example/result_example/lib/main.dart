@@ -3,7 +3,7 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 // A function that parses a string to an integer, with ZERO try-catch blocks.
 // It returns a Sync, which holds a Result<int>.
 Sync<int> parseInt(String value) {
-  // The Sync monad executes this function.
+  // The Sync Outcome executes this function.
   // - If int.parse() succeeds, it returns Ok(result).
   // - If int.parse() throws a FormatException, Sync catches it and returns Err(exception).
   return Sync(() => int.parse(value));

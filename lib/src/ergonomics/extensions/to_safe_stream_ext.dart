@@ -23,7 +23,7 @@ extension ToSafeStreamExt<T extends Object> on Stream<T> {
   ///
   /// If [cancelOnError] is `true`, the stream will be closed upon the first
   /// error.
-  Stream<Result<T>> toSafeStream({required bool cancelOnError}) {
+  TResultStream<T> toSafeStream({required bool cancelOnError}) {
     return transform(
       StreamTransformer.fromHandlers(
         handleData: (data, sink) {

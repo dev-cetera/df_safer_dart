@@ -10,18 +10,18 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: no_future_monad_type_or_error
+// ignore_for_file: no_future_outcome_type_or_error
 
-part of '../monad.dart';
+part of '../outcome.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents a value which can be resolved either synchronously
+/// A [Outcome] that represents a value which can be resolved either synchronously
 /// [Sync] or asynchronously [Async].
 ///
 /// The [value] of a [Sync] is never a [Future] while the value of an [Async]
 /// is always a [Future].
-sealed class Resolvable<T extends Object> extends Monad<T> {
+sealed class Resolvable<T extends Object> extends Outcome<T> {
   @override
   @pragma('vm:prefer-inline')
   FutureOr<Result<T>> get value => super.value as FutureOr<Result<T>>;
@@ -38,7 +38,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   @unsafeOrError
   const Resolvable.err(FutureOr<Err<T>> super.value);
 
-  /// Combines 2 [Resolvable] monads into 1 containing a tuple of their values
+  /// Combines 2 [Resolvable] outcomes into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
@@ -51,36 +51,32 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2],
-      onErr: onErr == null
-          ? null
-          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
 
-  /// Combines 3 [Resolvable] monads into 1 containing a tuple of their values
+  /// Combines 3 [Resolvable] outcomes into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResolvable].
-  static Resolvable<(T1, T2, T3)>
-  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Resolvable<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
-    @noFutures
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -93,9 +89,7 @@ sealed class Resolvable<T extends Object> extends Monad<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {

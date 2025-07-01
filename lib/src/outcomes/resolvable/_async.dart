@@ -11,13 +11,13 @@
 //.title~
 
 // ignore_for_file: must_use_unsafe_wrapper_or_error
-// ignore_for_file: no_future_monad_type_or_error
+// ignore_for_file: no_future_outcome_type_or_error
 
-part of '../monad.dart';
+part of '../outcome.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents a [Resolvable] that holds an asynchronous [Result].
+/// A [Outcome] that represents a [Resolvable] that holds an asynchronous [Result].
 ///
 /// The contained [value] is always a [Future].
 ///
@@ -25,9 +25,8 @@ part of '../monad.dart';
 ///
 /// Await all Futures in the constructor [Async.new] to ensure errors are
 /// properly caught and propagated.
-final class Async<T extends Object> extends Resolvable<T>
-    implements AsyncImpl<T> {
-  /// Combines 2 [Async] monads into 1 containing a tuple of their values
+final class Async<T extends Object> extends Resolvable<T> implements AsyncImpl<T> {
+  /// Combines 2 [Async] outcomes into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
@@ -40,36 +39,32 @@ final class Async<T extends Object> extends Resolvable<T>
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2],
-      onErr: onErr == null
-          ? null
-          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
 
-  /// Combines 3 [Async] monads into 1 containing a tuple of their values
+  /// Combines 3 [Async] outcomes into 1 containing a tuple of their values
   /// if all resolve to [Ok].
   ///
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineAsync].
-  static Async<(T1, T2, T3)>
-  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Async<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Async<T1> a1,
     Async<T2> a2,
     Async<T3> a3, [
-    @noFutures
-    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineAsync<Object>(
       [a1, a2, a3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -80,30 +75,30 @@ final class Async<T extends Object> extends Resolvable<T>
 
   @unsafeOrError
   Async.result(super.value)
-    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.result();
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.result();
 
   @unsafeOrError
   Async.ok(super.ok)
-    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.ok();
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.ok();
 
   @unsafeOrError
   Async.okValue(FutureOr<T> okValue)
-    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.ok(Future.value(okValue).then((e) => Ok(e)));
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.ok(Future.value(okValue).then((e) => Ok(e)));
 
   @unsafeOrError
   Async.err(super.err)
-    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.err();
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.err();
 
   @unsafeOrError
   Async.errValue(FutureOr<({Object error, int? statusCode})> error)
-    : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.err(
-        Future.value(error).then((e) => Err(e.error, statusCode: e.statusCode)),
-      );
+      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+        super.err(
+          Future.value(error).then((e) => Err(e.error, statusCode: e.statusCode)),
+        );
 
   /// Creates an [Async] by executing an asynchronous function
   /// [mustAwaitAllFutures].
@@ -113,9 +108,7 @@ final class Async<T extends Object> extends Resolvable<T>
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Async(
-    @mustBeAnonymous
-    @mustAwaitAllFutures
-    Future<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous @mustAwaitAllFutures Future<T> Function() mustAwaitAllFutures, {
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
@@ -185,9 +178,9 @@ final class Async<T extends Object> extends Resolvable<T>
       final awaitedValue = await value;
       return switch (awaitedValue) {
         Ok<T> ok => Resolvable(() {
-          noFutures(this, ok);
-          return awaitedValue;
-        }).flatten(),
+            noFutures(this, ok);
+            return awaitedValue;
+          }).flatten(),
         Err() => this,
       };
     }).flatten();
@@ -202,9 +195,9 @@ final class Async<T extends Object> extends Resolvable<T>
       return switch (awaitedValue) {
         Ok() => this,
         Err<T> err => Sync(() {
-          noFutures(this, err);
-          return awaitedValue;
-        }).flatten(),
+            noFutures(this, err);
+            return awaitedValue;
+          }).flatten(),
       };
     }).flatten();
   }

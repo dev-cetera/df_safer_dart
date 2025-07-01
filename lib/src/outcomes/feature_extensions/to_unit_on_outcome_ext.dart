@@ -16,10 +16,10 @@ import '/_common.dart';
 
 // Void.
 
-extension ToUnitOnVoidMonad on Monad<void> {
+extension ToUnitOnVoidOutcome on Outcome<void> {
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Monad<Unit> toUnit() => map((_) => Unit());
+  Outcome<Unit> toUnit() => map((_) => Unit());
 }
 
 extension ToUnitOnVoidOption on Option<void> {
@@ -78,9 +78,9 @@ extension ToUnitOnVoidErr on Err<void> {
 
 // Object.
 
-extension ToUnitOnObjectMonad on Monad<Object> {
+extension ToUnitOnObjectOutcome on Outcome<Object> {
   @pragma('vm:prefer-inline')
-  Monad<Unit> toUnit() => map((_) => Unit());
+  Outcome<Unit> toUnit() => map((_) => Unit());
 }
 
 extension ToUnitOnObjectOption on Option<Object> {

@@ -10,14 +10,14 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-part of '../monad.dart';
+part of '../outcome.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents an optional value: every [Option] is either
+/// A [Outcome] that represents an optional value: every [Option] is either
 /// [Some] and contains a value, or [None] and does not.
-sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
-  /// Combines 2 [Option] monads into 1 containing a tuple of their values if
+sealed class Option<T extends Object> extends Outcome<T> implements SyncImpl<T> {
+  /// Combines 2 [Option] outcomes into 1 containing a tuple of their values if
   /// all are [Some].
   ///
   /// Returns [None] if any are [None].
@@ -30,17 +30,17 @@ sealed class Option<T extends Object> extends Monad<T> implements SyncImpl<T> {
     return combineOption<Object>([o1, o2]).map((l) => (l[0] as T1, l[1] as T2));
   }
 
-  /// Combines 3 [Option] monads into 1 containing a tuple of their values if
+  /// Combines 3 [Option] outcomes into 1 containing a tuple of their values if
   /// all are [Some].
   ///
   /// Returns [None] if any are [None].
   ///
   /// See also: [combineOption].
-  static Option<(T1, T2, T3)> combine3<
-    T1 extends Object,
-    T2 extends Object,
-    T3 extends Object
-  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
+  static Option<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+    Option<T1> o1,
+    Option<T2> o2,
+    Option<T3> o3,
+  ) {
     return combineOption<Object>([
       o1,
       o2,

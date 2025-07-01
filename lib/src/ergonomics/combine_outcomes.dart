@@ -16,17 +16,16 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// Combines an iterable of [Monad]s into one containing a list of their
+/// Combines an iterable of [Outcome]s into one containing a list of their
 /// values.
 ///
-/// The result is an [Async] if any of the [monads] are [Async]
+/// The result is an [Async] if any of the [outcomes] are [Async]
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
-Resolvable<List<Option<T>>> combineMonad<T extends Object>(
-  Iterable<Monad<T>> monads, {
-  @noFutures
-  Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
+Resolvable<List<Option<T>>> combineOutcome<T extends Object>(
+  Iterable<Outcome<T>> outcomes, {
+  @noFutures Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
 }) {
-  final reduced = monads.map((e) => e.reduce<T>());
+  final reduced = outcomes.map((e) => e.reduce<T>());
   return combineResolvable<Option<T>>(reduced, onErr: onErr);
 }
 

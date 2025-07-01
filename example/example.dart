@@ -39,7 +39,7 @@ Async<Option<String>> getUserNotificationSound(int userId) {
   return fetchUserData(userId) // Starts with Async<String>
       .map(
         // The .unwrap() here will throw if parseJson created an Err.
-        // The Async monad's .map will catch that throw and turn the
+        // The Async Outcome's .map will catch that throw and turn the
         // whole chain into an Err state.
         (jsonString) => UNSAFE(() => parseJson(jsonString).unwrap()),
       )

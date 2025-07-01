@@ -1,1 +1,0 @@
-- [ ] Improve package by studying `fpdart` and `ribs_core` by using it in a project and parsing it through AI.

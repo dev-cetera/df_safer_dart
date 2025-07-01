@@ -52,9 +52,9 @@ The library achieves this through only three core types (`Option`, `Result`, and
 
 For an introduction, please refer to this article:
 
-- **MEDIUM.COM** [An Introduction to Monads in Dart: Building Unbreakable Code](https://medium.com/@dev-cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-8909705a2451)
-- **DEV.TO** [An Introduction to Monads in Dart: Building Unbreakable Code](https://dev.to/dev_cetera/an-introduction-to-monads-in-dart-building-unbreakable-code-4766)
-- **GITHUB** [An Introduction to Monads in Dart: Building Unbreakable Code](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)
+- **MEDIUM.COM** [Write Unbreakable Code in Dart](https://medium.com/@dev-cetera/write-unbreakable-code-in-dart-8076e62346b5)
+- **DEV.TO** [Write Unbreakable Code in Dart](https://dev.to/dev_cetera/write-unbreakable-code-in-dart-njh)
+- **GITHUB** [Write Unbreakable Code in Dart](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)
 
 ## 📦 The Core Types for Unbreakable Code
 
@@ -67,7 +67,7 @@ For an introduction, please refer to this article:
   - `Ok<T>`: Contains the success value.
   - `Err<T>`: Contains a detailed, traceable error object.
 
-Result transforms exceptions from runtime surprises into predictable data, forcing you to handle failure as an explicit, manageable case.
+`Result` transforms exceptions from runtime surprises into predictable data, forcing you to handle failure as an explicit, manageable case.
 
 - `Option<T>`: **For Values That Might Not Exist**
 
@@ -76,7 +76,7 @@ Result transforms exceptions from runtime surprises into predictable data, forci
   - `Some<T>`: Contains a present value.
   - `None<T>`: Represents the absence of a value.
 
-Option is the ultimate weapon against null pointer exceptions. It makes absence a compile-time concern, not a runtime crash.
+`Option` is the ultimate weapon against null pointer exceptions. It makes absence a compile-time concern, not a runtime crash.
 
 - `Resolvable<T>`: **To Unify Sync and Async Logic**
 
@@ -85,13 +85,13 @@ Option is the ultimate weapon against null pointer exceptions. It makes absence 
   - `Sync<T>`: For immediate, failable operations. Contains a Result.
   - `Async<T>`: For operations that return a Future, also containing a Result.
 
-Resolvable eliminates the mental overhead of branching logic for sync vs. async code, allowing you to build complex, failable workflows with linear, readable chains.
+`Resolvable` eliminates the mental overhead of branching logic for sync vs. async code, allowing you to build complex, failable workflows with linear, readable chains.
 
 ## ⚠️ Enable the Safety Lints (BETA feature)
 
 To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is NOT OPTIONAL! It is fundamental to the library's design.
 
-1. Add custom_lint and `df_safer_dart_lints` to your `pubspec.yaml`:
+1. Add `custom_lint` and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
 dependencies:
   df_safer_dart: ^0.16.2
@@ -112,10 +112,10 @@ custom_lint:
   rules:
     # If any rule gives you trouble, you can set them to false.
     - no_futures: true
-    - no_future_monad_type_or_error: true
+    - no_future_outcome_type_or_error: true
     - must_await_all_futures: true
     - must_be_anonymous: true
-    - must_use_monad_or_error: true
+    - must_use_outcome_or_error: true
     - must_use_unsafe_wrapper_or_error: true
   errors:
     # If you're using the "UNSAFE". See API documentation.

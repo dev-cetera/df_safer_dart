@@ -10,49 +10,54 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-part of '../monad.dart';
+part of '../outcome.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-/// A [Monad] that represents the success case of a [Result], containing a
-/// [value].
-final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
+/// A [Outcome] that represents an [Option] that contains a [value].
+final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   T get value => super.value as T;
 
-  const Ok(T super.value) : super._();
+  const Some(T super.value) : super._();
 
   @override
   @pragma('vm:prefer-inline')
-  bool isOk() => true;
+  bool isSome() => true;
 
   @override
   @pragma('vm:prefer-inline')
-  bool isErr() => false;
+  bool isNone() => false;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifOk(@noFutures void Function(Ok<T> self, Ok<T> ok) noFutures) {
+  Ok<Some<T>> some() => Ok(this);
+
+  @override
+  @pragma('vm:prefer-inline')
+  Err<None<T>> none() {
+    return Err('Called none() on Some<$T>.');
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Some<T>> ifSome(
+    @noFutures void Function(Some<T> self, Some<T> none) noFutures,
+  ) {
     return Sync(() {
       noFutures(this, this);
-      return value;
+      return this;
     }).value;
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> ifErr(@noFutures void Function(Ok<T> self, Err<T> err) noFutures) {
-    return this;
+  Result<Some<T>> ifNone(
+    @noFutures void Function(Some<T> self, None<T> none) noFutures,
+  ) {
+    return Ok(this);
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  None<Err<T>> err() => const None();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Some<Ok<T>> ok() => Some(this);
 
   @override
   @pragma('vm:prefer-inline')
@@ -60,46 +65,47 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Result<R> flatMap<R extends Object>(
-    @noFutures Result<R> Function(T value) noFutures,
-  ) {
-    return noFutures(unwrap());
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  Ok<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures) {
+  Some<T> mapSome(@noFutures Some<T> Function(Some<T> some) noFutures) {
     return noFutures(this);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> mapErr(@noFutures Err<T> Function(Err<T> err) noFutures) {
-    return this;
+  Option<R> flatMap<R extends Object>(
+    @noFutures Option<R> Function(T value) noFutures,
+  ) {
+    return noFutures(UNSAFE(() => unwrap()));
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Result<Object> fold(
-    @noFutures Result<Object>? Function(Ok<T> ok) onOk,
-    @noFutures Result<Object>? Function(Err<T> err) onErr,
+  Option<T> filter(@noFutures bool Function(T value) noFutures) {
+    return noFutures(value) ? this : const None();
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Result<Option<Object>> fold(
+    @noFutures Option<Object>? Function(Some<T> some) onSome,
+    @noFutures Option<Object>? Function(None<T> none) onNone,
   ) {
     try {
-      return onOk(this) ?? this;
-    } catch (error, stackTrace) {
-      return Err(error, stackTrace: stackTrace);
+      return Ok(onSome(this) ?? this);
+    } catch (error) {
+      return Err(error);
     }
   }
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> okOr(Result<T> other) => this;
+  Some<T> someOr(Option<T> other) => this;
 
   @override
   @pragma('vm:prefer-inline')
-  Result<T> errOr(Result<T> other) => other;
+  Option<T> noneOr(Option<T> other) => other;
 
   @override
+  @unsafeOrError
   @pragma('vm:prefer-inline')
   T unwrap() => value;
 
@@ -109,19 +115,22 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
 
   @override
   @pragma('vm:prefer-inline')
-  Ok<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
-    return Ok(noFutures(value));
+  Some<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
+    return Some(noFutures(value));
   }
 
   @override
-  Result<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
+  Result<Option<R>> transf<R extends Object>([
+    @noFutures R Function(T e)? noFutures,
+  ]) {
     try {
-      final a = unwrap();
-      final b = noFutures?.call(a) ?? a as R;
-      return Ok(b);
+      UNSAFE:
+      final value0 = unwrap();
+      final value1 = noFutures?.call(value0) ?? value0 as R;
+      return Ok(Option.from(value1));
     } catch (error, stackTrace) {
       assert(false, error);
-      return Err('Cannot transform $T to $R.', stackTrace: stackTrace);
+      return Err('Cannot transform $T to $R', stackTrace: stackTrace);
     }
   }
 }

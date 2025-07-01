@@ -2,10 +2,10 @@ In software development, we spend an enormous amount of time writing defensive c
 
 What if there was a way to write clean, linear code that describes the happy path, while all the messy details of null values, failures, and asynchronicity are handled automatically in the background?
 
-This is the promise of **Monads**, a powerful concept from functional programming that you can use in Dart today to make your code dramatically more robust.
+This is the promise of using **Outcomes**, a powerful concept from functional programming that you can use in Dart today to make your code dramatically more robust.
 
-## What is a Monad? (The Simple Explanation)
-Forget the complicated academic definitions. For our purposes, a monad is just a **wrapper** or a **box** around a value.
+## What is an Outcome? (The Simple Explanation)
+Forget complicated academic definitions. For our purposes, an outcome is just a **wrapper** or a **box** around a value.
 
 This box has a superpower: it understands **context**.
 
@@ -13,18 +13,18 @@ This box has a superpower: it understands **context**.
 - Was the computation to get this value successful, or did it fail?
 - Is the value available now, or will it arrive in the future?
 
-A monad provides a simple, consistent API to chain operations together. The box itself manages the context. If something goes wrong — a value is missing or an operation fails — **the chain is automatically short-circuited, and the failure context is passed along instead.**
+An outcome provides a simple, consistent API to chain operations together. The box itself manages the context. If something goes wrong — a value is missing or an operation fails — **the chain is automatically short-circuited, and the failure context is passed along instead.**
 
-## The Three Core Monads You Need to Know
+## The Three Core Outcomes You Need to Know
 
-While you can build your own, a library like [df_safer_dart](https://pub.dev/packages/df_safer_dart) on pub.dev provides these monadic types out of the box, seamlessly linked and ready to use. Let’s explore the three fundamental types it offers.
+While you can build your own, a library like [df_safer_dart](https://pub.dev/packages/df_safer_dart) on pub.dev provides these outcome types out of the box, seamlessly linked and ready to use. Let’s explore the three fundamental types it offers.
 
-### 1. The `Option` Monad: Eliminating null and `if (x != null)`
+### 1. The `Option` Outcome: Eliminating null and `if (x != null)`
 
-The `Option` monad tackles the problem of null. Instead of a value that can be `T` or `null` an `Option` can be one of two things:
+The `Option` outcome tackles the problem of null. Instead of a value that can be `T` or `null`, an `Option` can be one of two things:
 
-`Some`: A box containing a value of type `T`.
-`None`: A box representing the absence of a value.
+- `Some`: A box containing a value of type `T`.
+- `None`: A box representing the absence of a value.
 
 **Why is this better than null?** Because the type system forces you to deal with the absence. No more “**Error: Unexpected null value**” or **NoSuchMethodError**. You must open the box to get the value!
 
@@ -52,11 +52,11 @@ switch (result) {
 }
 ```
 
-Notice how clean that is? No `if (user != null)` check. The Option box handles it.
+Notice how clean that is? No `if (user != null)` check. The `Option` box handles it.
 
-### 2. The `Sync` and `Result` Monads: Eliminating try-catch
+### 2. The `Sync` and `Result` Outcomes: Eliminating try-catch
 
-Operations that can fail, like parsing a number or decoding JSON, traditionally force us to write try-catch blocks. The monadic approach is to make failure a predictable, manageable value instead of an application-halting exception.
+Operations that can fail, like parsing a number or decoding JSON, traditionally force us to write try-catch blocks. The outcome-based approach is to make failure a predictable, manageable value instead of an application-halting exception.
 
 - A `Result` is a simple wrapper that is either `Ok` (success) or `Err` (failure).
 - A `Sync` is a powerful constructor for a `Result`. It executes a synchronous function for you and automatically catches any exceptions, wrapping the outcome in a `Result`.
@@ -69,7 +69,7 @@ Let’s write a parsing function that is truly exception-free.
 // A function that parses a string to an integer, with ZERO try-catch blocks.
 // It returns a Sync, which holds a Result<int>.
 Sync<int> parseInt(String value) {
-  // The Sync monad executes this function.
+  // The Sync outcome executes this function.
   // - If int.parse() succeeds, it returns Ok(result).
   // - If int.parse() throws a FormatException, Sync catches it and returns Err(exception).
   return Sync(() => int.parse(value));
@@ -103,29 +103,28 @@ Hello!
 ^
 ```
 
-### 3. The `Async` Monad: Taming Asynchronous Failures
+### 3. The `Async` Outcome: Taming Asynchronous Failures
 
-An `Async` monad combines the concepts of `Future` and `Result`. It’s a box that represents a value that will resolve in the future to either an `Ok` or an `Err`. It’s the ultimate tool for robust asynchronous pipelines, as it handles both network/IO exceptions and logical failures.
+An `Async` outcome combines the concepts of `Future` and `Result`. It’s a box that represents a value that will resolve in the future to either an `Ok` or an `Err`. It’s the ultimate tool for robust asynchronous pipelines, as it handles both network/IO exceptions and logical failures.
 
 ## The Big Payoff: Building an Unbreakable Pipeline
 
 Let’s put it all together. Imagine a common real-world scenario:
 
-For a given user ID, fetch the user’s configuration data from an API, parse it as JSON, and then safely extract a deeply nested, optional setting: config.notifications.sound.
+For a given user ID, fetch the user’s configuration data from an API, parse it as JSON, and then safely extract a deeply nested, optional setting: `config.notifications.sound`.
 
 This process can fail at every single step:
 
-The network request to fetchUserData could fail (no internet, 404, etc.).
-
+- The network request to fetch `userData` could fail (no internet, 404, etc.).
 - The response body might not be valid JSON.
-- The JSON might be valid, but the config key could be missing.
-- The notifications key could be missing.
-- The sound key could be missing.
+- The JSON might be valid, but the `config` key could be missing.
+- The `notifications` key could be missing.
+- The `sound` key could be missing.
 
-Here’s how you’d build this logic robustly with monads from the [df_safer_dart](https://pub.dev/packages/df_safer_dart) package.
+Here’s how you’d build this logic robustly with outcomes from the [df_safer_dart](https://pub.dev/packages/df_safer_dart) package.
 
-### Step 1: Define the failable operations monadically
-We wrap our primitive operations, letting the monads handle the error context.
+### Step 1: Define the failable operations using outcomes
+We wrap our primitive operations, letting the outcome types handle the error context.
 
 ```dart
 import 'package:df_safer_dart/df_safer_dart.dart';
@@ -152,7 +151,7 @@ Option<T> getFromMap<T extends Object>(Map map, String key) {
 ```
 
 ### Step 2: Chain them together into a beautiful, linear flow
-Now we compose these functions. We’ll use `.map()` to chain operations. If any step produces an Err, all subsequent `.map()` calls in the chain are automatically skipped.
+Now we compose these functions. We’ll use `.map()` to chain operations. If any step produces an `Err`, all subsequent `.map()` calls in the chain are automatically skipped.
 
 ```dart
 /// This is the logic pipeline. It reads like a description of the happy path.
@@ -161,7 +160,7 @@ Async<Option<String>> getUserNotificationSound(int userId) {
   return fetchUserData(userId) // Starts with Async<String>
       .map(
         // The .unwrap() here will throw if parseJson created an Err.
-        // The Async monad's .map will catch that throw and turn the
+        // The Async outcome's .map will catch that throw and turn the
         // whole chain into an Err state.
         (jsonString) => UNSAFE(() => parseJson(jsonString).unwrap()),
       )
@@ -221,11 +220,11 @@ Processing User ID: 5
   -> Failure: An error occurred: Exception: User Not Found
 ```
 
-This is the power of monadic design in Dart. The getUserNotificationSound function is a clean, declarative, and robust description of a complex operation. Every potential point of failure is handled gracefully and implicitly by the monad wrappers. You write the code for the ideal scenario, and the monads take care of the messy reality.
+This is the power of outcome-based design in Dart. The `getUserNotificationSound` function is a clean, declarative, and robust description of a complex operation. Every potential point of failure is handled gracefully and implicitly by the outcome wrappers. You write the code for the ideal scenario, and the outcomes take care of the messy reality.
 
 ## Why You Should Use This Pattern
 
-1. **Eliminates Error-Prone Boilerplate:** You no longer write `if (x != null)` or try-catch. This removes entire classes of common bugs.
+1. **Eliminates Error-Prone Boilerplate:** You no longer write `if (x != null)` or `try-catch`. This removes entire classes of common bugs.
 2. **Explicitness and Predictability:** Failures are not hidden exceptions; they are predictable values encoded in the type system. You are forced to handle them.
 3. **Composability:** You build complex operations from small, simple, and independently testable functions.
 4. **Readability:** Your code describes what you want to achieve (the happy path), not the low-level mechanics of how you’re avoiding crashes.
