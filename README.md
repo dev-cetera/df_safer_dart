@@ -9,9 +9,9 @@ Dart & Flutter Packages by dev-cetera.com & contributors.
 [![tag](https://img.shields.io/badge/tag-v0.17.2-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.17.2)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dev-cetera/df_safer_dart/main/LICENSE)
 
-![banner](https://github.com/dev-cetera/df_safer_dart/blob/v0.17.2/doc/assets/banner.png?raw=true)
-
 ---
+
+![banner](https://github.com/dev-cetera/df_safer_dart/blob/v0.17.2/doc/assets/banner.png?raw=true)
 
 <!-- BEGIN _README_CONTENT -->
 
