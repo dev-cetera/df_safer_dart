@@ -18,7 +18,7 @@ funding:
   - https://www.patreon.com/c/RobertMollentze
   - https://github.com/sponsors/robmllze
 description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
-version: 0.17.0
+version: 0.17.1
 topics:
   - rust
   - error-handling
