@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.17.2]
+
+- Released @ 7/2025 (UTC)
+- Update readme banner
+
 ## [0.17.1]
 
 - Released @ 7/2025 (UTC)
