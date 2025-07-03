@@ -1,6 +1,30 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'dart:convert';
 
+void main() async {
+  for (var id in [1, 2, 3, 4, 5]) {
+    print('Processing User ID: $id');
+
+    // Execute the pipeline. `await value` opens the Async box.
+    final finalResult = await getUserNotificationSound(id).value;
+
+    switch (finalResult) {
+      case Ok(value: final optionSound):
+        switch (optionSound) {
+          // Success! The value is an Option<String>.
+          // Now open the Option box.
+          case Some(value: final sound):
+            print('  -> Success: Sound setting is "$sound"\n');
+          case None():
+            print('  -> Success: Sound setting was not specified.\n');
+        }
+      case Err err:
+        // The entire pipeline failed at some point.
+        print('  -> Failure: An error occurred: ${err.error}\n');
+    }
+  }
+}
+
 typedef KeyValueMap = Map<String, dynamic>;
 
 // A network call that can fail. Async handles both success and exceptions.
@@ -23,8 +47,7 @@ Async<String> fetchUserData(int userId) => Async(() async {
     });
 
 // A parser that can fail. Sync automatically catches the jsonDecode exception.
-Sync<KeyValueMap> parseJson(String json) =>
-    Sync(() => jsonDecode(json) as KeyValueMap);
+Sync<KeyValueMap> parseJson(String json) => Sync(() => jsonDecode(json) as KeyValueMap);
 
 // A helper to safely extract a typed value. It cannot fail, it can only be absent,
 // so it returns an Option.
@@ -56,28 +79,4 @@ Async<Option<String>> getUserNotificationSound(int userId) {
                   (notifications) => getFromMap<String>(notifications, 'sound'),
                 ),
       );
-}
-
-void main() async {
-  for (var id in [1, 2, 3, 4, 5]) {
-    print('Processing User ID: $id');
-
-    // Execute the pipeline. `await value` opens the Async box.
-    final finalResult = await getUserNotificationSound(id).value;
-
-    switch (finalResult) {
-      case Ok(value: final optionSound):
-        switch (optionSound) {
-          // Success! The value is an Option<String>.
-          // Now open the Option box.
-          case Some(value: final sound):
-            print('  -> Success: Sound setting is "$sound"\n');
-          case None():
-            print('  -> Success: Sound setting was not specified.\n');
-        }
-      case Err err:
-        // The entire pipeline failed at some point.
-        print('  -> Failure: An error occurred: ${err.error}\n');
-    }
-  }
 }
