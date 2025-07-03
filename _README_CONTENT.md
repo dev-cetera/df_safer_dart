@@ -32,7 +32,7 @@ For an introduction, please refer to this article:
 
 `df_safer_dart` is a specialized tool. The goal is not to use it everywhere, but to use it where it matters most.
 
-### Use it for:
+### **Use it for:**
 
 ✅ **Core Business Logic:** Make complex rules safe and auditable by forcing every step to be explicitly handled.
 
@@ -44,7 +44,7 @@ For an introduction, please refer to this article:
 
 ✅ **Mission-Critical Modules:** Ensure any operation where a partial success is dangerous either completes fully or fails cleanly.
 
-### Do Not Use it for:
+### **Do Not Use it for:**
 
 ❌ **Simple UI Display Code:** Dart's built-in null-aware operators (??, ?.) are often more concise and sufficient for declarative UI.
 
@@ -111,13 +111,16 @@ analyzer:
 custom_lint:
   rules:
     # If any rule gives you trouble, set them to false.
-    - no_futures: true
-    - no_future_outcome_type_or_error: true
     - must_await_all_futures: true
     - must_be_anonymous: true
     - must_use_outcome_or_error: true
     - must_use_unsafe_wrapper_or_error: true
-  errors:
-    # If you're using the "UNSAFE" label. See API documentation for more.
-    unused_label: ignore
+    - no_future_outcome_type_or_error: true
+    - no_future_outcome_type_or_error: true
+    - no_futures: true
+# Optional:
+errors:
+  # If you're using the "UNSAFE" label. See API documentation for more.
+  unused_label: ignore
+  non_constant_identifier_names: ignore
 ```
