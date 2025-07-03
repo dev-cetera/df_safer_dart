@@ -65,7 +65,7 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
   ///
   /// See also: [combineResolvable].
   static Resolvable<(T1, T2, T3)>
-  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+      combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
@@ -77,10 +77,10 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
       onErr: onErr == null
           ? null
           : (l) => onErr(
-              l[0].transf<T1>(),
-              l[1].transf<T2>(),
-              l[2].transf<T3>(),
-            ).transfErr(),
+                l[0].transf<T1>(),
+                l[1].transf<T2>(),
+                l[2].transf<T3>(),
+              ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }

@@ -36,11 +36,10 @@ final class Err<T extends Object> extends Result<T>
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
   Err(super.value, {int? statusCode, StackTrace? stackTrace})
-    : statusCode = Option.from(statusCode),
-      stackTrace = stackTrace != null
-          ? Trace.from(stackTrace)
-          : Trace.current(),
-      super._();
+      : statusCode = Option.from(statusCode),
+        stackTrace =
+            stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')

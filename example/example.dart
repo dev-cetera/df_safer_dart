@@ -29,22 +29,22 @@ typedef KeyValueMap = Map<String, dynamic>;
 
 // A network call that can fail. Async handles both success and exceptions.
 Async<String> fetchUserData(int userId) => Async(() async {
-  await Future<void>.delayed(
-    const Duration(milliseconds: 10),
-  ); // Simulate network latency
-  if (userId == 1) {
-    return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
-  }
-  if (userId == 2) {
-    return '{"config":{}}';
-  }
-  if (userId == 3) {
-    return '{"config": "bad_data"}';
-  }
-  throw Exception(
-    'User Not Found',
-  ); // This will be caught by Async and become an Err
-});
+      await Future<void>.delayed(
+        const Duration(milliseconds: 10),
+      ); // Simulate network latency
+      if (userId == 1) {
+        return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
+      }
+      if (userId == 2) {
+        return '{"config":{}}';
+      }
+      if (userId == 3) {
+        return '{"config": "bad_data"}';
+      }
+      throw Exception(
+        'User Not Found',
+      ); // This will be caught by Async and become an Err
+    });
 
 // A parser that can fail. Sync automatically catches the jsonDecode exception.
 Sync<KeyValueMap> parseJson(String json) =>
