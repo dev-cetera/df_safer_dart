@@ -162,8 +162,9 @@ class TaskSequencer<T extends Object> {
     }
 
     // Execute the main task handler.
-    final output =
-        task.handler(previousResult).withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    final output = task
+        .handler(previousResult)
+        .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
     // Combine the task's result with any error-handling side effects.
     return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
   }
