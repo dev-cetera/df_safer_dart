@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.17.6]
+
+- Released @ 7/2025 (UTC)
+- Update pubspec.yaml
+
 ## [0.17.5]
 
 - Released @ 7/2025 (UTC)
