@@ -32,8 +32,7 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   int _executionIndex = 0;
 
   @override
-  int get executionCount =>
-      tasks.length; // _executionCount will not always equal tasks.length
+  int get executionCount => tasks.length; // _executionCount will not always equal tasks.length
   int _executionCount = 0;
 
   @override
@@ -47,8 +46,8 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   SequencedTaskBatch({
     TaskSequencer<T>? sequencer,
     TOnTaskConpletedCallback<T>? onTaskCompleted,
-  })  : _onTaskCompleted = onTaskCompleted,
-        _sequencer = sequencer ?? TaskSequencer<T>();
+  }) : _onTaskCompleted = onTaskCompleted,
+       _sequencer = sequencer ?? TaskSequencer<T>();
 
   /// Creates a new batch from an existing one, sharing its configuration.
   ///
