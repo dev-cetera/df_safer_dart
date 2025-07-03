@@ -1,3 +1,7 @@
+[![banner](https://github.com/dev-cetera/df_safer_dart/blob/main/doc/assets/banner.png?raw=true)](https://github.com/dev-cetera)
+
+## Synopsis
+
 In software development, we spend an enormous amount of time writing defensive code. **We check for null, handle exceptions with try-catch, and manage asynchronous operations with async/await.** While these tools are essential, they often lead to code that is nested, verbose, and difficult to read. The core logic — the “happy path” — gets buried under layers of error handling.
 
 What if there was a way to write clean, linear code that describes the happy path, while all the messy details of null values, failures, and asynchronicity are handled automatically in the background?
