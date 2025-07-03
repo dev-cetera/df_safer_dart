@@ -5,22 +5,22 @@ typedef KeyValueMap = Map<String, dynamic>;
 
 // A network call that can fail. Async handles both success and exceptions.
 Async<String> fetchUserData(int userId) => Async(() async {
-  await Future<void>.delayed(
-    const Duration(milliseconds: 10),
-  ); // Simulate network latency
-  if (userId == 1) {
-    return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
-  }
-  if (userId == 2) {
-    return '{"config":{}}';
-  }
-  if (userId == 3) {
-    return '{"config": "bad_data"}';
-  }
-  throw Exception(
-    'User Not Found',
-  ); // This will be caught by Async and become an Err
-});
+      await Future<void>.delayed(
+        const Duration(milliseconds: 10),
+      ); // Simulate network latency
+      if (userId == 1) {
+        return '{"config":{"notifications":{"sound":"chime.mp3"}}}';
+      }
+      if (userId == 2) {
+        return '{"config":{}}';
+      }
+      if (userId == 3) {
+        return '{"config": "bad_data"}';
+      }
+      throw Exception(
+        'User Not Found',
+      ); // This will be caught by Async and become an Err
+    });
 
 // A parser that can fail. Sync automatically catches the jsonDecode exception.
 Sync<KeyValueMap> parseJson(String json) =>
@@ -41,7 +41,7 @@ Async<Option<String>> getUserNotificationSound(int userId) {
         // The .unwrap() here will throw if parseJson created an Err.
         // The Async Outcome's .map will catch that throw and turn the
         // whole chain into an Err state.
-        (jsonString) => parseJson(jsonString).unwrap(),
+        (jsonString) => UNSAFE(() => parseJson(jsonString).unwrap()),
       )
       .map(
         // This .map only runs if fetching and parsing were successful.

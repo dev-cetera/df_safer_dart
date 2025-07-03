@@ -51,10 +51,10 @@ sealed class Outcome<T extends Object> implements Equatable {
       Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
-        final result = await futureResult;
-        final innerResolvable = result.reduce<R>();
-        return (await innerResolvable.value).unwrap();
-      }),
+          final result = await futureResult;
+          final innerResolvable = result.reduce<R>();
+          return (await innerResolvable.value).unwrap();
+        }),
     };
   }
 

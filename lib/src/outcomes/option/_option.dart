@@ -37,11 +37,9 @@ sealed class Option<T extends Object> extends Outcome<T>
   /// Returns [None] if any are [None].
   ///
   /// See also: [combineOption].
-  static Option<(T1, T2, T3)> combine3<
-    T1 extends Object,
-    T2 extends Object,
-    T3 extends Object
-  >(Option<T1> o1, Option<T2> o2, Option<T3> o3) {
+  static Option<(T1, T2, T3)>
+      combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+          Option<T1> o1, Option<T2> o2, Option<T3> o3) {
     return combineOption<Object>([
       o1,
       o2,

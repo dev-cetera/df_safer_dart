@@ -61,43 +61,30 @@ extension MapOutcomeExt7<T extends Object>
   }
 }
 
-extension MapOutcomeExt8<T extends Object>
-    on
-        Outcome<
-          Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>
-        > {
+extension MapOutcomeExt8<T extends Object> on Outcome<
+    Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map8<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map7((e) => mapper(e as T))).reduce();
   }
 }
 
-extension MapOutcomeExt9<T extends Object>
-    on
+extension MapOutcomeExt9<T extends Object> on Outcome<
+    Outcome<
         Outcome<
-          Outcome<
-            Outcome<
-              Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>
-            >
-          >
-        > {
+            Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map9<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map8((e) => mapper(e as T))).reduce();
   }
 }
 
-extension MapOutcomeExt10<T extends Object>
-    on
+extension MapOutcomeExt10<T extends Object> on Outcome<
+    Outcome<
         Outcome<
-          Outcome<
             Outcome<
-              Outcome<
-                Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>
-              >
-            >
-          >
-        > {
+                Outcome<
+                    Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>>>> {
   @pragma('vm:prefer-inline')
   TResolvableOption<Object> map10<R extends Object>(R Function(T) mapper) {
     return map((e) => e.map9((e) => mapper(e as T))).reduce();
