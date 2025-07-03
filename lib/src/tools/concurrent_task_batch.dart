@@ -31,8 +31,7 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   int _executionIndex = 0;
 
   @override
-  int get executionCount =>
-      tasks.length; // _executionCount will not always equal tasks.length
+  int get executionCount => tasks.length; // _executionCount will not always equal tasks.length
   int _executionCount = 0;
 
   @override
@@ -51,11 +50,11 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
     Duration? minTaskDuration,
     TOnTaskError? onError,
     TOnTaskConpletedCallback<T>? onTaskCompleted,
-  })  : _onTaskCompleted = onTaskCompleted,
-        _eagerError = eagerError,
-        _minTaskDuration = minTaskDuration,
-        _onError = onError,
-        super();
+  }) : _onTaskCompleted = onTaskCompleted,
+       _eagerError = eagerError,
+       _minTaskDuration = minTaskDuration,
+       _onError = onError,
+       super();
 
   /// Creates a new batch from an existing one, copying its configuration and tasks.
   factory ConcurrentTaskBatch.from(ConcurrentTaskBatch<T> other) {
@@ -94,16 +93,17 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
     _executionCount = tasks.length;
     _executionIndex = 0;
     final itemFactories = tasks.map(
-      (task) => () => task
-          .handler(Ok(None<T>()))
-          .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
-          .then((e) {
-            _executionIndex++;
-            return _onTaskCompleted?.call(task, executionProgress) ??
-                syncUnit();
-          })
-          .flatten()
-          .value,
+      (task) =>
+          () => task
+              .handler(Ok(None<T>()))
+              .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
+              .then((e) {
+                _executionIndex++;
+                return _onTaskCompleted?.call(task, executionProgress) ??
+                    syncUnit();
+              })
+              .flatten()
+              .value,
     );
     _internalIsExecuting = true;
     return Resolvable(

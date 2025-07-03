@@ -49,17 +49,20 @@ class SafeCompleter<T extends Object> {
 
     // `ifOk` and `ifErr` are used to handle the two possible outcomes of the
     // resolvable, ensuring the completer is correctly handled in both cases.
-    return resolvable.ifOk((_, ok) {
-      final okValue = ok.unwrap();
-      _value = Some(okValue);
-      _completer.complete(okValue);
-    }).ifErr((_, err) {
-      _completer.completeError(err);
-    }).whenComplete((_) {
-      // Ensure the lock is always released.
-      _isCompleting = false;
-      return resolvable;
-    });
+    return resolvable
+        .ifOk((_, ok) {
+          final okValue = ok.unwrap();
+          _value = Some(okValue);
+          _completer.complete(okValue);
+        })
+        .ifErr((_, err) {
+          _completer.completeError(err);
+        })
+        .whenComplete((_) {
+          // Ensure the lock is always released.
+          _isCompleting = false;
+          return resolvable;
+        });
   }
 
   /// A convenience method to complete with a direct value or future.
