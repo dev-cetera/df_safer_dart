@@ -2,7 +2,6 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {
-  UNSAFE:
   TaskSequencer(eagerError: true)
     ..then((prev) {
       print(prev);

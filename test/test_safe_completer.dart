@@ -1,10 +1,11 @@
+// ignore_for_file: must_use_unsafe_wrapper_or_error
+
 // --- AI GENERATED TEST ---
 
 import 'package:test/test.dart';
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {
-  UNSAFE:
   {
     group('SafeCompleter Tests', () {
       test('should complete successfully with a synchronous value', () async {

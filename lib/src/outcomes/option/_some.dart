@@ -124,8 +124,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
     @noFutures R Function(T e)? noFutures,
   ]) {
     try {
-      UNSAFE:
-      final value0 = unwrap();
+      final value0 = UNSAFE(() => unwrap());
       final value1 = noFutures?.call(value0) ?? value0 as R;
       return Ok(Option.from(value1));
     } catch (error, stackTrace) {
