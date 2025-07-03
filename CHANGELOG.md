@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.17.5]
+
+- Released @ 7/2025 (UTC)
+- Address pub.dev issues
+
 ## [0.17.4]
 
 - Released @ 7/2025 (UTC)
