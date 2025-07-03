@@ -17,6 +17,8 @@ import '/_common.dart';
 typedef TResultStream<T extends Object> = Stream<Result<T>>;
 
 typedef TOnErrorCallback<T extends Object> = Err<T> Function(
-    Object? error, StackTrace stackTrace);
+  Object? error,
+  StackTrace stackTrace,
+);
 
 typedef TVoidCallback = void Function();

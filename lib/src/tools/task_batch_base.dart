@@ -151,4 +151,6 @@ abstract class TaskBatchBase<T extends Object> {
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 typedef TOnTaskConpletedCallback<T extends Object> = Resolvable<Unit> Function(
-    Task<T> task, double executionProgress);
+  Task<T> task,
+  double executionProgress,
+);

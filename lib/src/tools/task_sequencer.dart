@@ -162,9 +162,8 @@ class TaskSequencer<T extends Object> {
     }
 
     // Execute the main task handler.
-    final output = task
-        .handler(previousResult)
-        .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    final output =
+        task.handler(previousResult).withMinDuration(task.minTaskDuration ?? _minTaskDuration);
     // Combine the task's result with any error-handling side effects.
     return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
   }
@@ -183,7 +182,8 @@ class TaskSequencer<T extends Object> {
 /// A function that defines a step in a task sequence.
 /// It receives the result of the `previous` task.
 typedef TTaskHandler<T extends Object> = TResolvableOption<T> Function(
-    TResultOption<T> previous);
+  TResultOption<T> previous,
+);
 
 /// A function that handles an error from a previous task as a side-effect.
 typedef TOnTaskError = Resolvable Function(Err err);
