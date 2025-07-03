@@ -75,8 +75,11 @@ extension FlattenResolvableExt5<T extends Object>
   Resolvable<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenResolvableExt6<T extends Object> on Resolvable<
-    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>> {
+extension FlattenResolvableExt6<T extends Object>
+    on
+        Resolvable<
+          Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten6();
 
@@ -85,8 +88,13 @@ extension FlattenResolvableExt6<T extends Object> on Resolvable<
   Resolvable<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenResolvableExt7<T extends Object> on Resolvable<
-    Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>> {
+extension FlattenResolvableExt7<T extends Object>
+    on
+        Resolvable<
+          Resolvable<
+            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten7();
 
@@ -95,10 +103,15 @@ extension FlattenResolvableExt7<T extends Object> on Resolvable<
   Resolvable<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenResolvableExt8<T extends Object> on Resolvable<
-    Resolvable<
+extension FlattenResolvableExt8<T extends Object>
+    on
         Resolvable<
-            Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>> {
+          Resolvable<
+            Resolvable<
+              Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten8();
 
@@ -107,12 +120,17 @@ extension FlattenResolvableExt8<T extends Object> on Resolvable<
   Resolvable<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenResolvableExt9<T extends Object> on Resolvable<
-    Resolvable<
+extension FlattenResolvableExt9<T extends Object>
+    on
         Resolvable<
+          Resolvable<
             Resolvable<
-                Resolvable<
-                    Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>>>>> {
+              Resolvable<
+                Resolvable<Resolvable<Resolvable<Resolvable<Resolvable<T>>>>>
+              >
+            >
+          >
+        > {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten9();
 
