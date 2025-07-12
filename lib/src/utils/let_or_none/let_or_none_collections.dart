@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -36,16 +37,16 @@ Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letIterableOrNone(
-        NoStackOverflowWrapper(okValue),
-      ),
+          NoStackOverflowWrapper(okValue),
+        ),
       Err() => const None(),
     };
   }
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Iterable<dynamic> i => Some(i.map((e) => letOrNone<T>(e))),
     final String s => jsonDecodeOrNone<Iterable<dynamic>>(
-      s,
-    ).map((i) => i.map((e) => letOrNone<T>(e))),
+        s,
+      ).map((i) => i.map((e) => letOrNone<T>(e))),
     _ => const None(),
   };
 }

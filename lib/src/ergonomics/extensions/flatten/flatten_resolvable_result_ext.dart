@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -17,8 +18,7 @@ import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-extension FlattenResolvableResultExt2<T extends Object>
-    on Resolvable<Result<T>> {
+extension FlattenResolvableResultExt2<T extends Object> on Resolvable<Result<T>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten2();
 
@@ -37,8 +37,7 @@ extension FlattenResolvableResultExt2<T extends Object>
   }
 }
 
-extension FlattenResolvableResulteExt3<T extends Object>
-    on Resolvable<Result<Result<T>>> {
+extension FlattenResolvableResulteExt3<T extends Object> on Resolvable<Result<Result<T>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten3();
 
@@ -47,8 +46,7 @@ extension FlattenResolvableResulteExt3<T extends Object>
   Resolvable<T> flatten3() => flatten2().flatten2();
 }
 
-extension FlattenResolvableResulteExt4<T extends Object>
-    on Resolvable<Result<Result<Result<T>>>> {
+extension FlattenResolvableResulteExt4<T extends Object> on Resolvable<Result<Result<Result<T>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten4();
 
@@ -98,10 +96,7 @@ extension FlattenResolvableResulteExt8<T extends Object>
 }
 
 extension FlattenResolvableResulteExt9<T extends Object>
-    on
-        Resolvable<
-          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
-        > {
+    on Resolvable<Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten9();
 

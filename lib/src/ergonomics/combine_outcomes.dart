@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -23,8 +24,7 @@ import '/_common.dart';
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
 Resolvable<List<Option<T>>> combineOutcome<T extends Object>(
   Iterable<Outcome<T>> outcomes, {
-  @noFutures
-  Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
+  @noFutures Err<List<Option<T>>> Function(List<Result<Option<T>>> allResults)? onErr,
 }) {
   final reduced = outcomes.map((e) => e.reduce<T>());
   return combineResolvable<Option<T>>(reduced, onErr: onErr);

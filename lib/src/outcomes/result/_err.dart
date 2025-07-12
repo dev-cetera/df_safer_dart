@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -18,8 +19,7 @@ part of '../outcome.dart';
 
 /// A [Outcome] that represents the failure case of a [Result], containing an
 /// error [value].
-final class Err<T extends Object> extends Result<T>
-    implements SyncImpl<T>, Exception {
+final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exception {
   /// An optional HTTP status code associated with the error.
   final Option<int> statusCode;
 
@@ -36,11 +36,9 @@ final class Err<T extends Object> extends Result<T>
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
   Err(super.value, {int? statusCode, StackTrace? stackTrace})
-    : statusCode = Option.from(statusCode),
-      stackTrace = stackTrace != null
-          ? Trace.from(stackTrace)
-          : Trace.current(),
-      super._();
+      : statusCode = Option.from(statusCode),
+        stackTrace = stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -140,8 +138,7 @@ final class Err<T extends Object> extends Result<T>
 
   /// Returns an [Option] containing the error if its type matches `E`.
   @pragma('vm:prefer-inline')
-  Option<E> matchError<E extends Object>() =>
-      value is E ? Some(value as E) : const None();
+  Option<E> matchError<E extends Object>() => value is E ? Some(value as E) : const None();
 
   /// Transforms the [Err]'s generic type from `T` to `R` while preserving the
   /// contained `error`.

@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -76,8 +77,7 @@ extension FlattenOkExt8<T extends Object> on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>> {
   Ok<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenOkExt9<T extends Object>
-    on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>>> {
+extension FlattenOkExt9<T extends Object> on Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<Ok<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Ok<T> flatten() => flatten9();
 

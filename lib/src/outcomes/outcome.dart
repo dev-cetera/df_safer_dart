@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -51,10 +52,10 @@ sealed class Outcome<T extends Object> implements Equatable {
       Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
-        final result = await futureResult;
-        final innerResolvable = result.reduce<R>();
-        return (await innerResolvable.value).unwrap();
-      }),
+          final result = await futureResult;
+          final innerResolvable = result.reduce<R>();
+          return (await innerResolvable.value).unwrap();
+        }),
     };
   }
 

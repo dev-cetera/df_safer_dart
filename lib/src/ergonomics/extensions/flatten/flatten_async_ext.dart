@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -52,8 +53,7 @@ extension FlattenAsyncExt4<T extends Object> on Async<Async<Async<Async<T>>>> {
   Async<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenAsyncExt5<T extends Object>
-    on Async<Async<Async<Async<Async<T>>>>> {
+extension FlattenAsyncExt5<T extends Object> on Async<Async<Async<Async<Async<T>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten5();
 
@@ -62,8 +62,7 @@ extension FlattenAsyncExt5<T extends Object>
   Async<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenAsyncExt6<T extends Object>
-    on Async<Async<Async<Async<Async<Async<T>>>>>> {
+extension FlattenAsyncExt6<T extends Object> on Async<Async<Async<Async<Async<Async<T>>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten6();
 
@@ -72,8 +71,7 @@ extension FlattenAsyncExt6<T extends Object>
   Async<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenAsyncExt7<T extends Object>
-    on Async<Async<Async<Async<Async<Async<Async<T>>>>>>> {
+extension FlattenAsyncExt7<T extends Object> on Async<Async<Async<Async<Async<Async<Async<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten7();
 

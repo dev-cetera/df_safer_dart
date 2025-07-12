@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -49,20 +50,17 @@ class SafeCompleter<T extends Object> {
 
     // `ifOk` and `ifErr` are used to handle the two possible outcomes of the
     // resolvable, ensuring the completer is correctly handled in both cases.
-    return resolvable
-        .ifOk((_, ok) {
-          final okValue = ok.unwrap();
-          _value = Some(okValue);
-          _completer.complete(okValue);
-        })
-        .ifErr((_, err) {
-          _completer.completeError(err);
-        })
-        .whenComplete((_) {
-          // Ensure the lock is always released.
-          _isCompleting = false;
-          return resolvable;
-        });
+    return resolvable.ifOk((_, ok) {
+      final okValue = ok.unwrap();
+      _value = Some(okValue);
+      _completer.complete(okValue);
+    }).ifErr((_, err) {
+      _completer.completeError(err);
+    }).whenComplete((_) {
+      // Ensure the lock is always released.
+      _isCompleting = false;
+      return resolvable;
+    });
   }
 
   /// A convenience method to complete with a direct value or future.
@@ -106,9 +104,7 @@ class SafeCompleter<T extends Object> {
         final result = noFutures != null ? noFutures(e) : (e as R);
         newCompleter.complete(result).end();
       } catch (error, stackTrace) {
-        newCompleter
-            .resolve(Sync.err(Err(error, stackTrace: stackTrace)))
-            .end();
+        newCompleter.resolve(Sync.err(Err(error, stackTrace: stackTrace))).end();
       }
       return e;
     }).end();

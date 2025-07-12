@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -58,8 +59,7 @@ extension FlattenErrExt6<T extends Object> on Err<Err<Err<Err<Err<Err<T>>>>>> {
   Err<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenErrExt7<T extends Object>
-    on Err<Err<Err<Err<Err<Err<Err<T>>>>>>> {
+extension FlattenErrExt7<T extends Object> on Err<Err<Err<Err<Err<Err<Err<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten7();
 
@@ -68,8 +68,7 @@ extension FlattenErrExt7<T extends Object>
   Err<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenErrExt8<T extends Object>
-    on Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>> {
+extension FlattenErrExt8<T extends Object> on Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten8();
 
@@ -78,8 +77,7 @@ extension FlattenErrExt8<T extends Object>
   Err<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenErrExt9<T extends Object>
-    on Err<Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>>> {
+extension FlattenErrExt9<T extends Object> on Err<Err<Err<Err<Err<Err<Err<Err<Err<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Err<T> flatten() => flatten9();
 

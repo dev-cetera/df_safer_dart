@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -31,9 +32,7 @@ class Lazy<T extends Object> {
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    return (currentInstance.isNone()
-            ? currentInstance = Some(_constructor())
-            : currentInstance)
+    return (currentInstance.isNone() ? currentInstance = Some(_constructor()) : currentInstance)
         .unwrap();
   }
 

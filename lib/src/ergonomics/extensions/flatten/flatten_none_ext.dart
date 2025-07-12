@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -49,8 +50,7 @@ extension FlattenNoneExt5<T extends Object> on None<None<None<None<None<T>>>>> {
   None<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenNoneExt6<T extends Object>
-    on None<None<None<None<None<None<T>>>>>> {
+extension FlattenNoneExt6<T extends Object> on None<None<None<None<None<None<T>>>>>> {
   @pragma('vm:prefer-inline')
   None<T> flatten() => flatten6();
 
@@ -59,8 +59,7 @@ extension FlattenNoneExt6<T extends Object>
   None<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenNoneExt7<T extends Object>
-    on None<None<None<None<None<None<None<T>>>>>>> {
+extension FlattenNoneExt7<T extends Object> on None<None<None<None<None<None<None<T>>>>>>> {
   @pragma('vm:prefer-inline')
   None<T> flatten() => flatten7();
 
@@ -69,8 +68,7 @@ extension FlattenNoneExt7<T extends Object>
   None<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenNoneExt8<T extends Object>
-    on None<None<None<None<None<None<None<None<T>>>>>>>> {
+extension FlattenNoneExt8<T extends Object> on None<None<None<None<None<None<None<None<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   None<T> flatten() => flatten8();
 

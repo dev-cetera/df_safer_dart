@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -46,8 +47,8 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
   SequencedTaskBatch({
     TaskSequencer<T>? sequencer,
     TOnTaskConpletedCallback<T>? onTaskCompleted,
-  }) : _onTaskCompleted = onTaskCompleted,
-       _sequencer = sequencer ?? TaskSequencer<T>();
+  })  : _onTaskCompleted = onTaskCompleted,
+        _sequencer = sequencer ?? TaskSequencer<T>();
 
   /// Creates a new batch from an existing one, sharing its configuration.
   ///
@@ -82,8 +83,7 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
       _executeTask(task)
           .then((e) {
             _executionIndex++;
-            return _onTaskCompleted?.call(task, executionProgress) ??
-                syncUnit();
+            return _onTaskCompleted?.call(task, executionProgress) ?? syncUnit();
           })
           .flatten()
           .end();

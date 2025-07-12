@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -50,11 +51,11 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
     Duration? minTaskDuration,
     TOnTaskError? onError,
     TOnTaskConpletedCallback<T>? onTaskCompleted,
-  }) : _onTaskCompleted = onTaskCompleted,
-       _eagerError = eagerError,
-       _minTaskDuration = minTaskDuration,
-       _onError = onError,
-       super();
+  })  : _onTaskCompleted = onTaskCompleted,
+        _eagerError = eagerError,
+        _minTaskDuration = minTaskDuration,
+        _onError = onError,
+        super();
 
   /// Creates a new batch from an existing one, copying its configuration and tasks.
   factory ConcurrentTaskBatch.from(ConcurrentTaskBatch<T> other) {
@@ -93,17 +94,15 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
     _executionCount = tasks.length;
     _executionIndex = 0;
     final itemFactories = tasks.map(
-      (task) =>
-          () => task
-              .handler(Ok(None<T>()))
-              .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
-              .then((e) {
-                _executionIndex++;
-                return _onTaskCompleted?.call(task, executionProgress) ??
-                    syncUnit();
-              })
-              .flatten()
-              .value,
+      (task) => () => task
+          .handler(Ok(None<T>()))
+          .withMinDuration(_minTaskDuration ?? task.minTaskDuration)
+          .then((e) {
+            _executionIndex++;
+            return _onTaskCompleted?.call(task, executionProgress) ?? syncUnit();
+          })
+          .flatten()
+          .value,
     );
     _internalIsExecuting = true;
     return Resolvable(

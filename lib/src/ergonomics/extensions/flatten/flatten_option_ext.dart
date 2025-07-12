@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -38,8 +39,7 @@ extension FlattenOptionExt3<T extends Object> on Option<Option<Option<T>>> {
   Option<T> flatten3() => flatten2().flatten2();
 }
 
-extension FlattenOptionExt4<T extends Object>
-    on Option<Option<Option<Option<T>>>> {
+extension FlattenOptionExt4<T extends Object> on Option<Option<Option<Option<T>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten4();
 
@@ -48,8 +48,7 @@ extension FlattenOptionExt4<T extends Object>
   Option<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenOptionExt5<T extends Object>
-    on Option<Option<Option<Option<Option<T>>>>> {
+extension FlattenOptionExt5<T extends Object> on Option<Option<Option<Option<Option<T>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten5();
 
@@ -58,8 +57,7 @@ extension FlattenOptionExt5<T extends Object>
   Option<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenOptionExt6<T extends Object>
-    on Option<Option<Option<Option<Option<Option<T>>>>>> {
+extension FlattenOptionExt6<T extends Object> on Option<Option<Option<Option<Option<Option<T>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten6();
 
@@ -89,10 +87,7 @@ extension FlattenOptionExt8<T extends Object>
 }
 
 extension FlattenOptionExt9<T extends Object>
-    on
-        Option<
-          Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>
-        > {
+    on Option<Option<Option<Option<Option<Option<Option<Option<Option<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Option<T> flatten() => flatten9();
 

@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -53,8 +54,7 @@ extension WrapOnResolvableExt<T extends Object> on Resolvable<T> {
   Resolvable<Ok<T>> wrapValueInOk() => then((e) => Ok(e));
 
   @pragma('vm:prefer-inline')
-  Resolvable<Resolvable<T>> wrapValueInResolvable() =>
-      then((e) => Sync.okValue(e));
+  Resolvable<Resolvable<T>> wrapValueInResolvable() => then((e) => Sync.okValue(e));
 
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> wrapValueInSync() => then((e) => Sync.okValue(e));

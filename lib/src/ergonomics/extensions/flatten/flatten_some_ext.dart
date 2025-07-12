@@ -1,9 +1,10 @@
 //.title
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //
-// Dart/Flutter (DF) Packages by dev-cetera.com & contributors. The use of this
-// source code is governed by an MIT-style license described in the LICENSE
-// file located in this project's root directory.
+// Copyright © dev-cetera.com & contributors.
+//
+// The use of this source code is governed by an MIT-style license described in
+// the LICENSE file located in this project's root directory.
 //
 // See: https://opensource.org/license/mit
 //
@@ -49,8 +50,7 @@ extension FlattenSomeExt5<T extends Object> on Some<Some<Some<Some<Some<T>>>>> {
   Some<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenSomeExt6<T extends Object>
-    on Some<Some<Some<Some<Some<Some<T>>>>>> {
+extension FlattenSomeExt6<T extends Object> on Some<Some<Some<Some<Some<Some<T>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten6();
 
@@ -59,8 +59,7 @@ extension FlattenSomeExt6<T extends Object>
   Some<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenSomeExt7<T extends Object>
-    on Some<Some<Some<Some<Some<Some<Some<T>>>>>>> {
+extension FlattenSomeExt7<T extends Object> on Some<Some<Some<Some<Some<Some<Some<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten7();
 
@@ -69,8 +68,7 @@ extension FlattenSomeExt7<T extends Object>
   Some<T> flatten7() => flatten6().flatten2();
 }
 
-extension FlattenSomeExt8<T extends Object>
-    on Some<Some<Some<Some<Some<Some<Some<Some<T>>>>>>>> {
+extension FlattenSomeExt8<T extends Object> on Some<Some<Some<Some<Some<Some<Some<Some<T>>>>>>>> {
   @pragma('vm:prefer-inline')
   Some<T> flatten() => flatten8();
 
