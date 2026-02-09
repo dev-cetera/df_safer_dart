@@ -212,6 +212,7 @@ final class Sync<T extends Object> extends Resolvable<T> implements SyncImpl<T> 
     try {
       return onSync(this) ?? this;
     } catch (error, stackTrace) {
+      assert(false, error);
       return Sync.err(Err(error, stackTrace: stackTrace));
     }
   }

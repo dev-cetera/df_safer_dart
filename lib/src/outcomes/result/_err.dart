@@ -124,6 +124,7 @@ final class Err<T extends Object> extends Result<T> implements SyncImpl<T>, Exce
     try {
       return onErr(this) ?? this;
     } catch (error, stackTrace) {
+      assert(false, error);
       return Err(error, stackTrace: stackTrace);
     }
   }

@@ -44,7 +44,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   @override
   @pragma('vm:prefer-inline')
   Result<Some<T>> ifSome(
-    @noFutures void Function(Some<T> self, Some<T> none) noFutures,
+    @noFutures void Function(Some<T> self, Some<T> some) noFutures,
   ) {
     return Sync(() {
       noFutures(this, this);
@@ -75,7 +75,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   Option<R> flatMap<R extends Object>(
     @noFutures Option<R> Function(T value) noFutures,
   ) {
-    return noFutures(UNSAFE(() => unwrap()));
+    return noFutures(value);
   }
 
   @override
@@ -93,6 +93,7 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
     try {
       return Ok(onSome(this) ?? this);
     } catch (error) {
+      assert(false, error);
       return Err(error);
     }
   }
@@ -125,9 +126,9 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
     @noFutures R Function(T e)? noFutures,
   ]) {
     try {
-      final value0 = UNSAFE(() => unwrap());
-      final value1 = noFutures?.call(value0) ?? value0 as R;
-      return Ok(Option.from(value1));
+      final a = value;
+      final b = noFutures?.call(a) ?? a as R;
+      return Ok(Option.from(b));
     } catch (error, stackTrace) {
       assert(false, error);
       return Err('Cannot transform $T to $R', stackTrace: stackTrace);

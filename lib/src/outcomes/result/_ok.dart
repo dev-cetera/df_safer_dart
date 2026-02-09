@@ -88,6 +88,7 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
     try {
       return onOk(this) ?? this;
     } catch (error, stackTrace) {
+      assert(false, error);
       return Err(error, stackTrace: stackTrace);
     }
   }
@@ -117,7 +118,7 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   @override
   Result<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
     try {
-      final a = unwrap();
+      final a = value;
       final b = noFutures?.call(a) ?? a as R;
       return Ok(b);
     } catch (error, stackTrace) {

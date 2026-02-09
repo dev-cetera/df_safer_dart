@@ -138,8 +138,12 @@ extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   Option<List<T>> sequenceList() {
     final buffer = <T>[];
     for (final e in this) {
-      if (e.isNone()) return const None();
-      buffer.add(e.unwrap());
+      switch (e) {
+        case Some(value: final v):
+          buffer.add(v);
+        case None():
+          return const None();
+      }
     }
     return Some(buffer);
   }
@@ -150,8 +154,12 @@ extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   Option<Set<T>> sequenceSet() {
     final buffer = <T>{};
     for (final e in this) {
-      if (e.isNone()) return const None();
-      buffer.add(e.unwrap());
+      switch (e) {
+        case Some(value: final v):
+          buffer.add(v);
+        case None():
+          return const None();
+      }
     }
     return Some(buffer);
   }
@@ -206,10 +214,12 @@ extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   Option<List<T>> sequenceList() {
     final buffer = <T>[];
     for (final e in this) {
-      if (e.isErr()) {
-        return const None();
+      switch (e) {
+        case Ok(value: final v):
+          buffer.add(v);
+        case Err():
+          return const None();
       }
-      buffer.add(e.unwrap());
     }
     return Some(buffer);
   }
@@ -220,10 +230,12 @@ extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   Option<Set<T>> sequenceSet() {
     final buffer = <T>{};
     for (final e in this) {
-      if (e.isErr()) {
-        return const None();
+      switch (e) {
+        case Ok(value: final v):
+          buffer.add(v);
+        case Err():
+          return const None();
       }
-      buffer.add(e.unwrap());
     }
     return Some(buffer);
   }
@@ -277,10 +289,11 @@ extension IterableResolvableExt<T extends Object> on Iterable<Resolvable<T>> {
     final syncParts = <Sync<T>>[];
     final asyncParts = <Async<T>>[];
     for (final resolvable in this) {
-      if (resolvable.isSync()) {
-        syncParts.add(resolvable as Sync<T>);
-      } else {
-        asyncParts.add(resolvable as Async<T>);
+      switch (resolvable) {
+        case Sync():
+          syncParts.add(resolvable);
+        case Async():
+          asyncParts.add(resolvable);
       }
     }
     return (syncParts: syncParts, asyncParts: asyncParts);

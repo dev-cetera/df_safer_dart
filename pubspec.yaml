@@ -13,13 +13,15 @@
 
 name: df_safer_dart
 homepage: https://dev-cetera.com/
-repository: https://github.com/robmllze/df_safer_dart
 funding:
-  - https://buymeacoffee.com/dev_cetera
-  - https://patreon.com/RobertMollentze
-  - https://github.com/sponsors/robmllze
+- https://www.buymeacoffee.com/dev_cetera
+- https://www.patreon.com/c/robelator
+- https://github.com/sponsors/robelator
+- https://www.buymeacoffee.com/dev_cetera
+- https://www.patreon.com/c/robelator
+- https://github.com/sponsors/robelator
 description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
-version: 0.17.8
+version: 0.17.9
 topics:
   - rust
   - error-handling
