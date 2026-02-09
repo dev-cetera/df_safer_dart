@@ -83,23 +83,27 @@ void main() {
         });
       });
 
-      await sequencer.then(
-        (prev) {
-          executionOrder.add('task 3');
-          expect(prev, isA<Err>());
-          return Sync.okValue(const Some(3));
-        },
-        onPrevError: (err) {
-          caughtError = err;
-          executionOrder.add('onError');
-          return Sync.okValue(const None());
-        },
-      ).value;
+      await sequencer
+          .then(
+            (prev) {
+              executionOrder.add('task 3');
+              expect(prev, isA<Err>());
+              return Sync.okValue(const Some(3));
+            },
+            onPrevError: (err) {
+              caughtError = err;
+              executionOrder.add('onError');
+              return Sync.okValue(const None());
+            },
+          )
+          .value;
 
-      expect(
-        executionOrder,
-        ['task 1', 'task 2 (throws)', 'onError', 'task 3'],
-      );
+      expect(executionOrder, [
+        'task 1',
+        'task 2 (throws)',
+        'onError',
+        'task 3',
+      ]);
       expect(caughtError, isA<Err>());
       expect(
         (caughtError!.error as Exception).toString(),

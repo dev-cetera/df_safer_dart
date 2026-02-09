@@ -1,7 +1,7 @@
-[![banner](https://github.com/dev-cetera/df_safer_dart/blob/v0.17.8/doc/assets/banner.png?raw=true)](https://github.com/dev-cetera)
+[![banner](https://github.com/dev-cetera/df_safer_dart/blob/v0.17.9/doc/assets/banner.png?raw=true)](https://github.com/dev-cetera)
 
 [![pub](https://img.shields.io/pub/v/df_safer_dart.svg)](https://pub.dev/packages/df_safer_dart)
-[![tag](https://img.shields.io/badge/Tag-v0.17.8-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.17.8)
+[![tag](https://img.shields.io/badge/Tag-v0.17.9-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.17.9)
 [![buymeacoffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/dev_cetera)
 [![sponsor](https://img.shields.io/badge/Sponsor-grey?logo=github-sponsors&logoColor=pink)](https://github.com/sponsors/dev-cetera)
 [![patreon](https://img.shields.io/badge/Patreon-grey?logo=patreon)](https://www.patreon.com/robelator)
@@ -13,230 +13,131 @@
 
 <!-- BEGIN _README_CONTENT -->
 
-## Summary
+## 💭 Synopsis
 
-Standard Dart gives you `try-catch` and nullable types. Both put the burden of safety entirely on you. Forget a check, miss an exception, and your app crashes in production.
+In mission-critical software, every potential failure must be accounted for. We write defensive code, check for nulls, and handle exceptions. However, standard Dart tools like **try-catch** and **nullable** types place the burden of safety entirely on the developer. It's easy to forget a check or miss an exception, leading to runtime failures in production—exactly where they are least acceptable.
 
-`df_safer_dart` fixes this with three sealed types: `Option`, `Result`, and `Resolvable`. Exceptions thrown inside these types don't crash your app. They're caught automatically and passed down the chain as `Err` values. You write the happy path; the type system handles the rest.
+☝️ **This is a reliability problem.**
 
-Inspired by Rust's `Option` and `Result`. Built for Dart.
+## 🧠 The Philosophy: Paternalistic Safety for Mission-Critical Code
 
-## Getting Started
+`df_safer_dart` is intentionally paternalistic. Drawing heavy inspiration from Rust's safety-first philosophy, it operates on the principle that the compiler should be your primary partner in preventing errors. It's not about being "functional"; it's about making your code predictable and reliable at scale.
 
-- **MEDIUM** [Write Unbreakable Code in Dart](https://medium.com/@dev-cetera/write-unbreakable-code-in-dart-8076e62346b5)
+While powerful functional libraries like `fpdart` and `dartz` provide excellent tools for safety, they often place the ultimate burden of correct implementation on the developer. An unhandled exception within a mapping function can still lead to a runtime crash if not handled with perfect discipline.
+
+`df_safer_dart` takes a stricter, more opinionated stance. It is architected to absorb common failure points, automatically converting runtime exceptions into manageable `Err` states and passing errors down a "chain". The goal is to shift the burden of safety from developer discipline to the library's core design.
+
+The library achieves this through only three core types (`Option`, `Result`, and `Resolvable`) that wrap failable operations. This lets you write clean, linear code that describes the "happy path," confident that the type system is handling the messy details of nulls, exceptions, and asynchronicity.
+
+## 🚀 Getting Started
+
+For an introduction, please refer to this article:
+
+- **MEDIUM.COM** [Write Unbreakable Code in Dart](https://medium.com/@dev-cetera/write-unbreakable-code-in-dart-8076e62346b5)
 - **DEV.TO** [Write Unbreakable Code in Dart](https://dev.to/dev_cetera/write-unbreakable-code-in-dart-njh)
 - **GITHUB** [Write Unbreakable Code in Dart](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)
 
-## The Three Core Types
+## ✨ Core Features & Design
 
-### `Result<T>` — Operations That Can Fail
+- **Automatic Exception Handling:** `Result` and `Resolvable` have built-in exception handling. An unexpected throw within your logic won't crash your entire operation chain; it will be automatically caught and converted into an `Err` state. This provides a "crash-proof" resilience against common mistakes that even other safety libraries might not prevent.
+- **Airtight Sync/Async Boundaries:** Dart's `Future` and `FutureOr` can be error-prone if misused. This library addresses these challenges with its `Resolvable` type, which splits into `Sync` or `Async` branches. By enforcing compile-time checks, it prevents using a `Future` in a synchronous context or forgetting to `await` a `Future` in an asynchronous context, ensuring structural correctness.
+- **Compile-Time Null Safety:** The `Option` type makes the absence of a value an explicit state (`None`) that your code must handle, eradicating null pointer exceptions at their source.
+- **A Unified API:** While `Option`, `Result`, and `Resolvable` are distinct, they all inherit from a common base class. This is an implementation detail that allows them to share a consistent, predictable API for core methods, making the library easy to learn and use.
+- **Ergonomic Helpers & Utilities:** To make working with the core types seamless, the library includes a rich set of extensions and utilities with minimal boilerplate. These helpers allow you to safely handle collections (firstOrNone), manage nested types (flatten, swap), and convert data (e.g. `letIntOrNone`), all while reducing boilerplate and keeping your business logic clean and linear. Do refer to the [API reference](https://pub.dev/documentation/df_safer_dart/) for more information.
 
-Either `Ok<T>` (success value) or `Err<T>` (traceable error). Turns exceptions into data.
+## ☝️ When to Use/Not Use
 
-```dart
-// Sync catches the throw and converts it to Err<Map> automatically.
-Sync<Map<String, dynamic>> parseJson(String raw) =>
-    Sync(() => jsonDecode(raw) as Map<String, dynamic>);
+`df_safer_dart` is a specialized tool. The goal is not to use it everywhere, but to use it where it matters most.
 
-final result = parseJson('{"name": "Alice"}').value;
-switch (result) {
-  case Ok(value: final data):
-    print(data['name']); // Alice
-  case Err(error: final e):
-    print('Parse failed: $e');
-}
-```
+### **Use it for:**
 
-### `Option<T>` — Values That Might Not Exist
+✅ **Core Business Logic:** Make complex rules safe and auditable by forcing every step to be explicitly handled.
 
-Either `Some<T>` (present) or `None<T>` (absent). Eliminates null checks.
+✅ **Data Parsing & Validation:** Create a secure boundary between untrusted external data (like JSON) and your application.
 
-```dart
-Option<String> findUser(Map<String, String> db, String id) =>
-    Option.from(db[id]);
+✅ **Network & Database Interactions:** Model expected failures like timeouts as manageable data, not runtime exceptions.
 
-final user = findUser({'1': 'Alice'}, '2');
-print(user.unwrapOr('Guest')); // Guest
-```
+✅ **Authoring Reliable Packages:** Provide a crash-proof public API for other developers that doesn't rely on try-catch.
 
-### `Resolvable<T>` — Unified Sync/Async
+✅ **Mission-Critical Modules:** Ensure any operation where a partial success is dangerous either completes fully or fails cleanly.
 
-Either `Sync<T>` (immediate `Result<T>`) or `Async<T>` (future `Result<T>`). One API for both.
+### **Do Not Use it for:**
 
-```dart
-Async<String> fetchData() => Async(() async {
-      final response = await http.get(Uri.parse('https://api.example.com/data'));
-      if (response.statusCode != 200) throw Exception('HTTP ${response.statusCode}');
-      return response.body;
-    });
+❌ **Simple UI Display Code:** Dart's built-in null-aware operators (??, ?.) are often more concise and sufficient for declarative UI.
 
-// The throw above doesn't crash. It becomes Err<String>.
-final result = await fetchData().value;
-```
+❌ **Rapid Prototyping:** When the goal is maximum iteration speed, the deliberate safety constraints can be unnecessary overhead.
 
-## Chaining Operations
+❌ **Performance-Critical "Hot Paths":** In tight loops or micro-optimization scenarios where the minimal overhead of wrapper objects is a primary concern.
 
-The real power is in chaining. Each `.map()` and `.flatMap()` only runs if the previous step succeeded. If anything fails, the error propagates automatically — no try-catch needed anywhere in the chain.
+❌ **Deeply Exception-Based Frameworks:** In codebases architecturally dependent on exceptions for control flow, as it may feel like fighting the current.
 
-```dart
-Async<Option<String>> getUserNotificationSound(int userId) {
-  return fetchUserData(userId)              // Async<String>
-      .map((json) => parseJson(json))       // Async<Map> — exceptions become Err
-      .map((data) =>
-          getFromMap<Map>(data, 'config')    // Option<Map>
-              .flatMap((c) => getFromMap<Map>(c, 'notifications'))
-              .flatMap((n) => getFromMap<String>(n, 'sound')),
-      );
-}
+## 🪨 The Core Types for Rock-Solid Code
 
-// Consume the result with exhaustive pattern matching:
-final result = await getUserNotificationSound(1).value;
-switch (result) {
-  case Ok(value: Some(value: final sound)):
-    print('Sound: $sound');
-  case Ok(value: None()):
-    print('No sound configured');
-  case Err(error: final e):
-    print('Failed: $e');
-}
-```
+`df_safer_dart` is built on three core types that work seamlessly together:
 
-## Working with Collections
+- `Result<T>`: **For Operations That Can Fail**
 
-The library extends `Iterable`, `Map`, and `String` with safe operations:
+  Represents the outcome of an operation. It will be either:
 
-```dart
-final items = [Some(1), None<int>(), Some(3), Some(5)];
+  - `Ok<T>`: Contains the success value.
+  - `Err<T>`: Contains a detailed, traceable error object.
 
-items.whereSome();      // Iterable<Some<int>> → [Some(1), Some(3), Some(5)]
-items.values;           // Iterable<int> → [1, 3, 5]
-items.sequenceList();   // Option<List<int>> → None (because one element is None)
-items.partition();      // (someParts: [...], noneParts: [...])
+`Result` transforms exceptions from runtime surprises into predictable data, forcing you to handle failure as an explicit, manageable case.
 
-// Same for Result:
-final results = [Ok(1), Err<int>('fail'), Ok(3)];
-results.whereOk();      // Iterable<Ok<int>> → [Ok(1), Ok(3)]
-results.values;         // Iterable<int> → [1, 3]
+- `Option<T>`: **For Values That Might Not Exist**
 
-// Safe collection access:
-[10, 20, 30].elementAtOrNone(5); // None
-[10, 20, 30].firstOrNone;       // Some(10)
-{'a': 1}.getOption('b');         // None
-'hello'.firstOrNone;             // Some('h')
-```
+  Represents an optional value. It will be either:
 
-## Flattening Nested Types
+  - `Some<T>`: Contains a present value.
+  - `None<T>`: Represents the absence of a value.
 
-When operations compose, types can nest: `Result<Result<T>>`, `Option<Option<T>>`, etc. Use `.flatten()` to collapse them:
+`Option` is the ultimate weapon against null pointer exceptions. It makes absence a compile-time concern, not a runtime crash.
 
-```dart
-final nested = Ok(Ok(42));        // Result<Result<int>>
-final flat = nested.flatten();    // Result<int> → Ok(42)
+- `Resolvable<T>`: **To Unify Sync and Async Logic**
 
-final deep = Some(Some(Some(7))); // Option<Option<Option<int>>>
-final flat3 = deep.flatten();     // Option<Option<int>> → Some(Some(7))
-final flat3b = deep.flatten().flatten(); // Option<int> → Some(7)
-```
+  A powerful wrapper that provides a single, consistent API for operations, regardless of whether they complete instantly or over time. It will be either:
 
-For deeply nested `Outcome` types (e.g., `Resolvable<Result<Option<T>>>`), use `reduce()` to collapse everything into a single `Resolvable<Option<T>>`:
+  - `Sync<T>`: For immediate, failable operations. Contains a Result.
+  - `Async<T>`: For operations that return a Future, also containing a Result.
 
-```dart
-final complex = Sync.okValue(Ok(Some(42)));  // Sync<Result<Option<int>>>
-final reduced = complex.reduce<int>();        // Resolvable<Option<int>>
-```
+`Resolvable` eliminates the mental overhead of branching logic for sync vs. async code, allowing you to build complex, failable workflows with linear, readable chains.
 
-## Combining Multiple Results
+## ⚠️ Enable the Safety Lints
 
-Combine independent operations without nested callbacks:
+To get the full benefit of `df_safer_dart`, you must enable its custom linter rules. This is NOT OPTIONAL! It is fundamental to the library's design.
 
-```dart
-final name = Ok('Alice');
-final age = Ok(30);
-final email = Err<String>('Email service unavailable');
-
-// combine2 returns Ok((Alice, 30)) or the first Err encountered.
-final profile = Result.combine2(name, age);
-
-// combine3 would short-circuit with the email Err.
-final full = Result.combine3(name, age, email); // Err
-
-// Works for Option, Sync, and Async too:
-final both = Option.combine2(Some('a'), Some('b')); // Some(('a', 'b'))
-final nope = Option.combine2(Some('a'), None<String>()); // None
-```
-
-## Safe Type Conversion
-
-Convert between types safely without casting or exceptions:
-
-```dart
-// Safe conversions from dynamic/unknown data:
-letIntOrNone('42');           // Some(42)
-letIntOrNone('hello');        // None
-letDoubleOrNone('3.14');      // Some(3.14)
-letBoolOrNone('true');        // Some(true)
-letAsOrNone<List>(someValue); // Some(list) or None — never throws
-
-// Transform between Outcome types:
-final r = Ok(42).transf<String>((n) => n.toString()); // Ok('42')
-```
-
-## The `UNSAFE` Label Convention
-
-Operations that could throw are marked `@unsafeOrError` and enforced by custom lint rules. When you must use them, the `UNSAFE:` label makes it explicit:
-
-```dart
-// The linter warns if you call unwrap() without the UNSAFE label:
-UNSAFE:
-final value = someResult.unwrap(); // Throws if Err
-
-// Prefer safe alternatives:
-final value = someResult.unwrapOr(defaultValue);
-// Or pattern matching:
-switch (someResult) {
-  case Ok(value: final v): /* use v */
-  case Err(): /* handle error */
-}
-```
-
-## When to Use This Package
-
-**Use it for:** core business logic, data parsing and validation, network/database interactions, authoring library APIs, and any module where a silent failure is unacceptable.
-
-**Skip it for:** simple UI display code (Dart's `??` and `?.` are fine), rapid prototyping, tight performance-critical loops, and codebases that rely on exceptions for control flow.
-
-## Setup
-
-1. Add dependencies to `pubspec.yaml`:
-
+1. Add `df_safer_dart`, `custom_lint` and `df_safer_dart_lints` to your `pubspec.yaml`:
 ```yaml
+# Replace "any" with the versions you want to use:
 dependencies:
   df_safer_dart: any
 
 dev_dependencies:
-  custom_lint: any
-  df_safer_dart_lints: any
+  lints:  any
+  custom_lint:  any
+  df_safer_dart_lints:  any
 ```
 
-2. Configure `analysis_options.yaml`:
-
+2. In your `analysis_options.yaml`, add `custom_lint` to the analyzer plugins:
 ```yaml
 analyzer:
   plugins:
     - custom_lint
 
-# Optional — tune individual rules:
+# Optional:
 custom_lint:
   rules:
+    # If any rule gives you trouble, set them to false.
     - must_await_all_futures: true
     - must_be_anonymous: true
     - must_use_outcome_or_error: true
     - must_use_unsafe_wrapper_or_error: true
     - no_future_outcome_type_or_error: true
+    - no_future_outcome_type_or_error: true
     - no_futures: true
-
-# Optional — suppress label warnings:
+# Optional:
 errors:
+  # If you're using the "UNSAFE" label. See API documentation for more.
   unused_label: ignore
   non_constant_identifier_names: ignore
 ```

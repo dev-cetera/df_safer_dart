@@ -52,7 +52,9 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2],
-      onErr: onErr == null ? null : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
+      onErr: onErr == null
+          ? null
+          : (l) => onErr(l[0].transf<T1>(), l[1].transf<T2>()).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2));
   }
@@ -63,21 +65,23 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
   /// If any resolve to [Err], applies [onErr] function to combine errors.
   ///
   /// See also: [combineResolvable].
-  static Resolvable<(T1, T2, T3)> combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+  static Resolvable<(T1, T2, T3)>
+  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Resolvable<T1> r1,
     Resolvable<T2> r2,
     Resolvable<T3> r3, [
-    @noFutures Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
+    @noFutures
+    Err<(T1, T2, T3)> Function(Result<T1>, Result<T2>, Result<T3>)? onErr,
   ]) {
     final combined = combineResolvable<Object>(
       [r1, r2, r3],
       onErr: onErr == null
           ? null
           : (l) => onErr(
-                l[0].transf<T1>(),
-                l[1].transf<T2>(),
-                l[2].transf<T3>(),
-              ).transfErr(),
+              l[0].transf<T1>(),
+              l[1].transf<T2>(),
+              l[2].transf<T3>(),
+            ).transfErr(),
     );
     return combined.map((l) => (l[0] as T1, l[1] as T2, l[2] as T3));
   }
@@ -90,7 +94,9 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
   /// Always all futures witin [mustAwaitAllFutures] to ensure errors are be
   /// caught and propagated.
   factory Resolvable(
-    @mustBeAnonymous @mustAwaitAllFutures FutureOr<T> Function() mustAwaitAllFutures, {
+    @mustBeAnonymous
+    @mustAwaitAllFutures
+    FutureOr<T> Function() mustAwaitAllFutures, {
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {

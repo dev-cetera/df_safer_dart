@@ -54,7 +54,8 @@ extension WrapOnResolvableExt<T extends Object> on Resolvable<T> {
   Resolvable<Ok<T>> wrapValueInOk() => then((e) => Ok(e));
 
   @pragma('vm:prefer-inline')
-  Resolvable<Resolvable<T>> wrapValueInResolvable() => then((e) => Sync.okValue(e));
+  Resolvable<Resolvable<T>> wrapValueInResolvable() =>
+      then((e) => Sync.okValue(e));
 
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> wrapValueInSync() => then((e) => Sync.okValue(e));

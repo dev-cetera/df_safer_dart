@@ -46,18 +46,24 @@ extension MapOfOptions<K, V extends Object> on Map<K, Option<V>> {
   /// Creates a new map containing only the entries where the value is a [Some].
   /// The values in the new map are instances of [Some<V>].
   Map<K, Some<V>> whereSome() => Map.fromEntries(
-        entries.where((e) => e.value.isSome()).map((e) => MapEntry(e.key, e.value.some().unwrap())),
-      );
+    entries
+        .where((e) => e.value.isSome())
+        .map((e) => MapEntry(e.key, e.value.some().unwrap())),
+  );
 
   /// Creates a new map containing only the entries where the value is a [None].
   Map<K, None<V>> whereNone() => Map.fromEntries(
-        entries.where((e) => e.value.isNone()).map((e) => MapEntry(e.key, e.value.none().unwrap())),
-      );
+    entries
+        .where((e) => e.value.isNone())
+        .map((e) => MapEntry(e.key, e.value.none().unwrap())),
+  );
 
   /// Returns a new map containing only the unwrapped values from [Some] entries.
   Map<K, V> get someValues => Map.fromEntries(
-        entries.where((e) => e.value.isSome()).map((e) => MapEntry(e.key, e.value.unwrap())),
-      );
+    entries
+        .where((e) => e.value.isSome())
+        .map((e) => MapEntry(e.key, e.value.unwrap())),
+  );
 
   /// Turns a `Map<K, Option<V>>` into an `Option<Map<K, V>>`.
   /// If all values are [Some], it returns a `Some<Map<K, V>>`. If any value
@@ -96,19 +102,25 @@ extension MapOfResults<K, V extends Object> on Map<K, Result<V>> {
   /// Creates a new map containing only the entries where the value is an [Ok].
   /// The values in the new map are instances of [Ok<V>].
   Map<K, Ok<V>> whereOk() => Map.fromEntries(
-        entries.where((e) => e.value.isOk()).map((e) => MapEntry(e.key, e.value.ok().unwrap())),
-      );
+    entries
+        .where((e) => e.value.isOk())
+        .map((e) => MapEntry(e.key, e.value.ok().unwrap())),
+  );
 
   /// Creates a new map containing only the entries where the value is an [Err].
   /// The values in the new map are instances of [Err<V>].
   Map<K, Err<V>> whereErr() => Map.fromEntries(
-        entries.where((e) => e.value.isErr()).map((e) => MapEntry(e.key, e.value.err().unwrap())),
-      );
+    entries
+        .where((e) => e.value.isErr())
+        .map((e) => MapEntry(e.key, e.value.err().unwrap())),
+  );
 
   /// Returns a new map containing only the unwrapped values from [Ok] entries.
   Map<K, V> get okValues => Map.fromEntries(
-        entries.where((e) => e.value.isOk()).map((e) => MapEntry(e.key, e.value.unwrap())),
-      );
+    entries
+        .where((e) => e.value.isOk())
+        .map((e) => MapEntry(e.key, e.value.unwrap())),
+  );
 
   /// Turns a `Map<K, Result<V>>` into a `Result<Map<K, V>>`.
   /// If all values are [Ok], it returns an `Ok<Map<K, V>>`. If any value

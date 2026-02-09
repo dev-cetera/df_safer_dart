@@ -41,8 +41,8 @@ Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
   if (input is Outcome) {
     return switch (input.rawSync().value) {
       Ok(value: final okValue) => letMapOrNone<K, V>(
-          NoStackOverflowWrapper(okValue),
-        ),
+        NoStackOverflowWrapper(okValue),
+      ),
       Err() => const None(),
     };
   }
@@ -50,12 +50,12 @@ Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Map<dynamic, dynamic> m => _convertMapOrNone<K, V>(m),
     final String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(
-        s.trim(),
-      ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
+      s.trim(),
+    ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
     final Outcome m => switch (m.rawSync().value) {
-        Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
-        Err() => const None(),
-      },
+      Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
+      Err() => const None(),
+    },
     _ => const None(),
   };
 }

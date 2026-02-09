@@ -53,7 +53,8 @@ extension FlattenAsyncExt4<T extends Object> on Async<Async<Async<Async<T>>>> {
   Async<T> flatten4() => flatten3().flatten2();
 }
 
-extension FlattenAsyncExt5<T extends Object> on Async<Async<Async<Async<Async<T>>>>> {
+extension FlattenAsyncExt5<T extends Object>
+    on Async<Async<Async<Async<Async<T>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten5();
 
@@ -62,7 +63,8 @@ extension FlattenAsyncExt5<T extends Object> on Async<Async<Async<Async<Async<T>
   Async<T> flatten5() => flatten4().flatten2();
 }
 
-extension FlattenAsyncExt6<T extends Object> on Async<Async<Async<Async<Async<Async<T>>>>>> {
+extension FlattenAsyncExt6<T extends Object>
+    on Async<Async<Async<Async<Async<Async<T>>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten6();
 
@@ -71,7 +73,8 @@ extension FlattenAsyncExt6<T extends Object> on Async<Async<Async<Async<Async<As
   Async<T> flatten6() => flatten5().flatten2();
 }
 
-extension FlattenAsyncExt7<T extends Object> on Async<Async<Async<Async<Async<Async<Async<T>>>>>>> {
+extension FlattenAsyncExt7<T extends Object>
+    on Async<Async<Async<Async<Async<Async<Async<T>>>>>>> {
   @pragma('vm:prefer-inline')
   Async<T> flatten() => flatten7();
 
