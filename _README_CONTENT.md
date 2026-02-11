@@ -126,3 +126,13 @@ errors:
   unused_label: ignore
   non_constant_identifier_names: ignore
 ```
+
+## 🔗 Related Packages
+
+These packages use `df_safer_dart` types for type-safe state management:
+
+- [df_di](https://pub.dev/packages/df_di) - Dependency injection using `Option` and `Resolvable`
+- [df_pod](https://pub.dev/packages/df_pod) - Reactive state containers using `Option` and `Result`
+- [df_flutter_services](https://pub.dev/packages/df_flutter_services) - Service lifecycle management
+- [df_safer_dart_annotations](https://pub.dev/packages/df_safer_dart_annotations) - Annotations for custom lint rules
+- [df_safer_dart_lints](https://pub.dev/packages/df_safer_dart_lints) - Custom lint rules for safety enforcement

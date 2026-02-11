@@ -21,7 +21,7 @@ funding:
 - https://www.patreon.com/c/robelator
 - https://github.com/sponsors/robelator
 description: A package inspired by functional programming, designed to enhance the structure, safety, and debuggability of mission-critical code.
-version: 0.17.9
+version: 0.17.10
 topics:
   - rust
   - error-handling

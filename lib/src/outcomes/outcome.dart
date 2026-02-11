@@ -44,11 +44,13 @@ sealed class Outcome<T extends Object> implements Equatable {
   /// An [Err] state at any level will result in a failed [Resolvable].
   TResolvableOption<R> reduce<R extends Object>() {
     return switch (this) {
-      Some(value: final someValue) => Resolvable(() => Some(someValue as R)),
+      // More specific Outcome patterns must come BEFORE the general patterns
+      // to ensure nested Outcomes are recursively reduced, not cast.
       Some(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
+      Some(value: final someValue) => Resolvable(() => Some(someValue as R)),
       None() => syncNone<R>(),
-      Ok(value: final someValue) => Resolvable(() => Some(someValue as R)),
       Ok(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
+      Ok(value: final someValue) => Resolvable(() => Some(someValue as R)),
       Err(error: final error) => Sync.err(Err(error)),
       Sync(value: final result) => result.reduce<R>(),
       Async(value: final futureResult) => Async<Option<R>>(() async {
