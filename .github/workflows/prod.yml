@@ -90,6 +90,10 @@ jobs:
         with:
           fetch-depth: 0  # Full history + tags for accurate bump decisions
           ref: prod
+          # PAT (not GITHUB_TOKEN) so the tag push at the end of this job
+          # is attributed to a real account and triggers publish.yml.
+          # GitHub blocks workflow_run cascades from GITHUB_TOKEN.
+          token: ${{ secrets.RELEASE_PAT }}
 
       - name: Set up Dart
         uses: dart-lang/setup-dart@v1
