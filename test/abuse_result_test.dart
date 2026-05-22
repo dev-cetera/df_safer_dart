@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
@@ -301,8 +300,7 @@ void main() {
     test('with onErr handler', () {
       final out = combineResult<int>(
         [const Ok<int>(1), Err<int>('mid')],
-        onErr: (List<Result<int>> results) =>
-            Err<List<int>>('custom error'),
+        onErr: (List<Result<int>> results) => Err<List<int>>('custom error'),
       );
       expect(out, isA<Err>());
       expect((out as Err).error, 'custom error');

@@ -265,19 +265,16 @@ void main() {
     test('Sync pipeline: throwing step short-circuits, no escape', () {
       var stepReached = 0;
 
-      final r = Sync<int>(() => 1)
-          .map<int>((v) {
-            stepReached = 1;
-            return v + 1;
-          })
-          .map<int>((v) {
-            stepReached = 2;
-            throw Exception(_boom);
-          })
-          .map<int>((v) {
-            stepReached = 3; // must NOT run after error
-            return v + 1;
-          });
+      final r = Sync<int>(() => 1).map<int>((v) {
+        stepReached = 1;
+        return v + 1;
+      }).map<int>((v) {
+        stepReached = 2;
+        throw Exception(_boom);
+      }).map<int>((v) {
+        stepReached = 3; // must NOT run after error
+        return v + 1;
+      });
 
       expect(r.value, isA<Err>());
       expect(stepReached, 2, reason: 'pipeline must short-circuit on Err');

@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
@@ -417,8 +416,7 @@ void main() {
 
     test('combineAsync — concurrent execution', () async {
       var counter = 0;
-      Async<int> makeAsync(int v) =>
-          Async(() async {
+      Async<int> makeAsync(int v) => Async(() async {
             counter++;
             await Future<void>.delayed(const Duration(milliseconds: 20));
             return v;

@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -96,11 +95,8 @@ extension FlattenResolvableResulteExt8<T extends Object>
   Resolvable<T> flatten8() => flatten7().flatten2();
 }
 
-extension FlattenResolvableResulteExt9<T extends Object>
-    on
-        Resolvable<
-          Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>
-        > {
+extension FlattenResolvableResulteExt9<T extends Object> on Resolvable<
+    Result<Result<Result<Result<Result<Result<Result<Result<T>>>>>>>>> {
   @pragma('vm:prefer-inline')
   Resolvable<T> flatten() => flatten9();
 
