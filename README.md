@@ -71,7 +71,9 @@ void main() {
 This package is held to a **military-/medical-grade reliability** standard.
 The
 [`test/hardening_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/hardening_test.dart)
-suite encodes the rules:
+and
+[`test/propagation_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/propagation_test.dart)
+suites encode the rules:
 
 - **No stack overflows on deep nesting.** `Outcome.reduce()` and
   `Outcome.raw()` flatten iteratively. A chain of 10,000 nested
@@ -81,6 +83,9 @@ suite encodes the rules:
 - **Debug and release behave identically.** Errors thrown inside `fold()` and
   `transf()` always become an `Err` carrying the original stack — no
   `assert(false)` divergence.
+- **Throws inside `map` / `flatMap` / `mapOk` are absorbed.** `Ok.map<R>`,
+  `Ok.flatMap<R>` and `Ok.mapOk` return `Result<R>` (not `Ok<R>`); a throwing
+  callback becomes an `Err` instead of escaping the pipeline.
 - **Concurrency primitives don't blow the stack.** `TaskSequencer` drains its
   re-entrant queue iteratively. `SafeCompleter.isCompleted` flips the moment
   a resolve is accepted, making the resolve-once invariant observable.
@@ -88,6 +93,26 @@ suite encodes the rules:
   `±Infinity`, and out-of-range doubles instead of throwing.
 - **Iteration-safe combinators.** `combineResolvable` materializes its input
   once, so single-pass `sync*` generators are handled correctly.
+
+### Failure attribution: `Err.breadcrumbs` and `.named(label)`
+
+Every `Err` carries a `List<String> breadcrumbs` — ordered labels identifying
+the pipeline step(s) that produced it. Tag steps with `.named(label)` on any
+`Result`, `Sync`, `Async`, or `Resolvable`. The first failing step wins
+attribution; downstream `.named(...)` calls don't overwrite it.
+
+```dart
+final r = parseInt('not-a-number')
+  .named('parse')
+  .map((n) => n * 2)
+  .named('double');
+
+// r is Err(..., breadcrumbs: ['parse'])
+```
+
+The 30-test propagation matrix in `propagation_test.dart` verifies that every
+combinator on every concrete `Outcome` flavour preserves error attribution
+through multi-step pipelines.
 
 ## Compile-time enforcement
 

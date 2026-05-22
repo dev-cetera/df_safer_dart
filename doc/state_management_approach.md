@@ -11,7 +11,7 @@ Four packages cooperate to give Flutter apps a strict, lifecycle-aware, reactive
 | `df_di` | services + DI | `DI` (hierarchical container), `Service` / `ServiceMixin`, `ServiceState`, `StreamService` / `StreamServiceMixin`, `PollingStreamService`, `Entity` / `TypeEntity`, `World` / `Component` (ECS subsystem) |
 | `df_flutter_services` | glue + Flutter lifecycle | `ObservedService`, `ObservedStreamService`, `ObservedDataStreamService`, `ObservedPollingStreamService`, `HandleServiceLifecycleStateMixin`, `ObservedDataStreamServiceMixin` |
 
-The packages publish independently; their `^` constraints stay in lockstep (workspace majors today: safer 0.18, di 0.16, pod 0.20, flutter_services 0.2).
+The packages publish independently; their `^` constraints stay in lockstep (workspace majors today: safer 0.20, di 0.16, pod 0.20, flutter_services 0.2).
 
 ---
 
@@ -79,7 +79,7 @@ final name = findUser('42').map((u) => u.name).unwrapOr('anonymous');
 
 ### 2.2 `Result<T> = Ok<T> | Err<T>`
 
-Fallibility as data. `Err` implements `Exception` and carries an optional `stackTrace` + `statusCode`.
+Fallibility as data. `Err` implements `Exception` and carries an optional `stackTrace`, `statusCode`, and `breadcrumbs` (labels of the pipeline step(s) that produced the error).
 
 ```dart
 Result<int> parseAge(String s) {
@@ -92,6 +92,8 @@ parseAge('twelve').fold(
   ifErr: (e) => Log.err(e),
 );
 ```
+
+`Ok.map<R>` / `Ok.flatMap<R>` / `Ok.mapOk` return `Result<R>` (not `Ok<R>`) — a callback that throws is absorbed into an `Err` with the original stack rather than escaping. Tag each step with `.named('label')` on any `Result`/`Sync`/`Async`/`Resolvable` to populate `Err.breadcrumbs` for first-failure attribution.
 
 ### 2.3 `Resolvable<T> = Sync<T> | Async<T>`
 
@@ -538,13 +540,15 @@ PodCollectionBuilder<List<Pod<Message>>>(
 
 ## 10. Migration notes (workspace majors → published)
 
-This guide reflects the workspace majors: `df_safer_dart 0.18`, `df_di 0.16`, `df_pod 0.20`, `df_flutter_services 0.2`, with `df_log 0.5`, `df_type 0.15`, `df_safer_dart_annotations 0.3`, `df_safer_dart_lints 0.4`.
+This guide reflects the workspace majors: `df_safer_dart 0.20`, `df_di 0.16`, `df_pod 0.20`, `df_flutter_services 0.2`, with `df_log 0.5`, `df_type 0.15`, `df_safer_dart_annotations 0.3`, `df_safer_dart_lints 0.5`.
 
-Renames that older code may still reference:
+Renames and behaviour changes that older code may still reference:
 
 - **`DataStreamService` → `ObservedDataStreamService`.** The base type with `pData` is in `df_flutter_services`, not `df_di`. (`StreamService` without the Pod still lives in `df_di`.)
 - **`ObservedService` observer registration** moved from constructor into init listeners — no public API change, but custom subclasses that called `addObserver(this)` in their constructor should remove that call.
 - **`SafeCompleter.isCompleted`** now flips `true` the instant a resolve is accepted, not when the future settles. Code that relied on `!isCompleted` to detect "in-flight" must check a different signal.
+- **`Outcome.end()` now returns `void`** (was `FutureOr<void>`, with `Async.end()` returning `Future<void>`). `Async.end()` detaches its cleanup via `unawaited(...)`. Code that `await`ed `.end()` should switch to `await x.value` if it really needed the value.
+- **`Ok.map<R>` / `Ok.flatMap<R>` / `Ok.mapOk`** return `Result<R>` (was `Ok<R>`). A throwing callback becomes an `Err` instead of escaping. Annotate callsites as `Result<R>` instead of `Ok<R>`.
 
 For the audit that produced the current majors and what changed inside `df_safer_dart`, see `packages/df_safer_dart/CLAUDE.md` (hardening sweep).
 
