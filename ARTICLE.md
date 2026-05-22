@@ -231,11 +231,30 @@ The patterns above only pay off if the library underneath them refuses to surpri
 - **No stack overflows on deep chains.** `Outcome.reduce()` and `Outcome.raw()` flatten nested outcomes iteratively. A pipeline that produces `Some(Some(Ok(Ok(...))))` 10,000 layers deep collapses without consuming 10,000 stack frames — and the flattening is now genuinely exhaustive (a long-standing dead-code bug that silently skipped layers has been fixed).
 - **Stack traces survive transformations.** When you map an `Err<A>` into an `Err<B>` via `transfErr()`, the original `stackTrace` (and `statusCode`) travels with it. The trail back to the real failure point is never lost.
 - **Debug and release behave identically.** Errors thrown inside `fold()` and `transf()` are captured into an `Err` with the original stack trace in both modes. No more "works in release, asserts in debug" surprises.
+- **Throws inside `map` / `flatMap` / `mapOk` are absorbed.** `Ok.map<R>`, `Ok.flatMap<R>` and `Ok.mapOk` return `Result<R>` (widened from `Ok<R>`). A throwing callback becomes an `Err` carrying the original stack instead of escaping the pipeline.
 - **Concurrency primitives don't blow the stack.** `TaskSequencer` drains its reentrant queue iteratively — bursts of 200,000+ reentrant tasks no longer recurse. `SafeCompleter.isCompleted` flips to `true` the moment a resolve is accepted, making the resolve-once invariant observable from outside.
 - **Safe numeric coercion.** Helpers like `letIntOrNone` return `None` for `NaN`, `±Infinity`, and out-of-range doubles instead of throwing. Bad data becomes absence, not a crash.
 - **Iteration-safe combinators.** `combineResolvable` materializes its input once, so even single-pass `sync*` generators are handled correctly — you can't accidentally lose elements by passing a lazy iterable.
 
 The point isn't the individual fixes — it's that every one of them came from a written-down abuse test in `test/hardening_test.dart`. The library is held to a standard where "the user did something weird" is a bug, not an excuse.
+
+### Knowing which step failed: breadcrumbs and `.named(...)`
+
+When a pipeline is ten combinators long, "something threw" is not a useful error message. Every `Err` carries a `List<String> breadcrumbs` — ordered labels identifying the pipeline step(s) that produced it. Tag steps with `.named(label)` on any `Result`, `Sync`, `Async`, or `Resolvable`. The first failing step wins attribution; downstream `.named(...)` calls don't overwrite it.
+
+```dart
+final r = parseInt('not-a-number')
+  .named('parse')
+  .map((n) => n * 2)
+  .named('double')
+  .map((n) => n - 1)
+  .named('subtract');
+
+// r is Err(FormatException ..., breadcrumbs: ['parse'])
+//   .breadcrumbs shows you the *first* failing node, not the last.
+```
+
+A 30-test propagation matrix in `test/propagation_test.dart` verifies that every combinator on every concrete `Outcome` flavour preserves error attribution through multi-step pipelines — including when the failure happens deep inside a sync→async transition.
 
 ## The Lints Make the Discipline Compile-Time
 
