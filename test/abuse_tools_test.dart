@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
@@ -123,7 +122,8 @@ void main() {
       expect(seen, 10);
     });
 
-    test('handles synchronous throw from handler without leaking count', () async {
+    test('handles synchronous throw from handler without leaking count',
+        () async {
       final seq = TaskSequencer<int>();
       seq.then((_) {
         throw StateError('boom');
@@ -136,7 +136,8 @@ void main() {
       expect(seq.isExecuting, isFalse);
     });
 
-    test('error from one task surfaces in final completion when eager', () async {
+    test('error from one task surfaces in final completion when eager',
+        () async {
       final seq = TaskSequencer<int>(eagerError: true);
       seq.then((_) => Sync.okValue(const Some(1))).end();
       seq.then((_) => Sync.err(Err<Option<int>>('boom'))).end();

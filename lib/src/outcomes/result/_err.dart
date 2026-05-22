@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 part of '../outcome.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -61,12 +60,11 @@ final class Err<T extends Object> extends Result<T>
     int? statusCode,
     StackTrace? stackTrace,
     List<String> breadcrumbs = const [],
-  }) : statusCode = Option.from(statusCode),
-       stackTrace = stackTrace != null
-           ? Trace.from(stackTrace)
-           : Trace.current(),
-       breadcrumbs = List.unmodifiable(breadcrumbs),
-       super._();
+  })  : statusCode = Option.from(statusCode),
+        stackTrace =
+            stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
+        breadcrumbs = List.unmodifiable(breadcrumbs),
+        super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')

@@ -106,19 +106,17 @@ Future<void> _demoErrorPropagation() async {
     });
   }).end();
 
-  await sequencer
-      .then(
-        (prev) {
-          order.add('task 3');
-          return Sync.okValue(const Some(3));
-        },
-        onPrevError: (err) {
-          caught = err;
-          order.add('onError');
-          return Sync.okValue(const None());
-        },
-      )
-      .value;
+  await sequencer.then(
+    (prev) {
+      order.add('task 3');
+      return Sync.okValue(const Some(3));
+    },
+    onPrevError: (err) {
+      caught = err;
+      order.add('onError');
+      return Sync.okValue(const None());
+    },
+  ).value;
 
   _check(
     'order matches expected',

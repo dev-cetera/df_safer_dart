@@ -39,7 +39,7 @@ sealed class Option<T extends Object> extends Outcome<T>
   ///
   /// See also: [combineOption].
   static Option<(T1, T2, T3)>
-  combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
+      combine3<T1 extends Object, T2 extends Object, T3 extends Object>(
     Option<T1> o1,
     Option<T2> o2,
     Option<T3> o3, //,

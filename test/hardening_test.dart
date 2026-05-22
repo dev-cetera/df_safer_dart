@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
@@ -108,7 +107,8 @@ void main() {
   });
 
   group('TaskSequencer — reentrant queue abuse', () {
-    test('drains a large synchronous reentrant queue without stack overflow', () async {
+    test('drains a large synchronous reentrant queue without stack overflow',
+        () async {
       // From inside a running task, enqueue N more sync tasks.
       // A naive recursive drain stack-overflows; an iterative drain does not.
       // Large enough to overflow the default Dart stack without the iterative
@@ -138,7 +138,8 @@ void main() {
   });
 
   group('SafeCompleter — race window', () {
-    test('isCompleted reports true once resolve() has accepted the work', () async {
+    test('isCompleted reports true once resolve() has accepted the work',
+        () async {
       final completer = SafeCompleter<int>();
       final pending = Future<int>.delayed(
         const Duration(milliseconds: 30),
@@ -160,7 +161,8 @@ void main() {
       expect(value, 7);
     });
 
-    test('rejects a second resolve while the first is still in flight', () async {
+    test('rejects a second resolve while the first is still in flight',
+        () async {
       final completer = SafeCompleter<int>();
       final slow = Future<int>.delayed(
         const Duration(milliseconds: 20),

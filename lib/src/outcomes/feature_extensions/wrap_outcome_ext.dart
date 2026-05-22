@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-
 import '/_common.dart';
 
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -55,8 +54,7 @@ extension WrapOnResolvableExt<T extends Object> on Resolvable<T> {
   Resolvable<Ok<T>> wrapValueInOk() => then(Ok.new);
 
   @pragma('vm:prefer-inline')
-  Resolvable<Resolvable<T>> wrapValueInResolvable() =>
-      then(Sync.okValue);
+  Resolvable<Resolvable<T>> wrapValueInResolvable() => then(Sync.okValue);
 
   @pragma('vm:prefer-inline')
   Resolvable<Sync<T>> wrapValueInSync() => then(Sync.okValue);
