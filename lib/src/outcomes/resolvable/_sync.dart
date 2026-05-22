@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 part of '../outcome.dart';
 
@@ -217,7 +216,6 @@ final class Sync<T extends Object> extends Resolvable<T>
     try {
       return onSync(this) ?? this;
     } catch (error, stackTrace) {
-      assert(false, error);
       return Sync.err(Err(error, stackTrace: stackTrace));
     }
   }

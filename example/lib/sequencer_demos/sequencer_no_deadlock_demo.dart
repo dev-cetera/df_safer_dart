@@ -2,7 +2,10 @@ import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() async {
   print('Starting sequence...');
-  await sequencer.then(handlerA).end();
+  // `.end()` only marks the Resolvable as intentionally discarded — it returns
+  // void. To wait for the sequencer to finish, await `.completion.value`.
+  sequencer.then(handlerA).end();
+  await sequencer.completion.value;
   print('Sequence finished.');
 
   // The final execution order should be sequential, not interleaved.

@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 import '/_common.dart';
 
@@ -19,22 +18,22 @@ import '/_common.dart';
 
 extension SwapSomeSyncExt<T extends Object> on Some<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<Some<T>> swap() => unwrap().map((e) => Some(e));
+  Sync<Some<T>> swap() => unwrap().map(Some.new);
 }
 
 extension SwapSomeAsyncExt<T extends Object> on Some<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<Some<T>> swap() => unwrap().then((e) => Some(e));
+  Async<Some<T>> swap() => unwrap().then(Some.new);
 }
 
 extension SwapSomeResolvableExt<T extends Object> on Some<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<Some<T>> swap() => unwrap().then((e) => Some(e));
+  Resolvable<Some<T>> swap() => unwrap().then(Some.new);
 }
 
 extension SwapSomeOptionExt<T extends Object> on Some<Option<T>> {
   @pragma('vm:prefer-inline')
-  Option<Some<T>> swap() => unwrap().map((e) => Some(e));
+  Option<Some<T>> swap() => unwrap().map(Some.new);
 }
 
 extension SwapSomeNoneExt<T extends Object> on Some<None<T>> {
@@ -44,7 +43,7 @@ extension SwapSomeNoneExt<T extends Object> on Some<None<T>> {
 
 extension SwapSomeResultExt<T extends Object> on Some<Result<T>> {
   @pragma('vm:prefer-inline')
-  Result<Some<T>> swap() => unwrap().map((e) => Some(e));
+  Result<Some<T>> swap() => unwrap().map(Some.new);
 }
 
 extension SwapSomeOkExt<T extends Object> on Some<Ok<T>> {

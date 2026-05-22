@@ -104,12 +104,24 @@ sealed class Option<T extends Object> extends Outcome<T>
 
   /// Maps an `Option<T>` to `Option<R>` by applying a function that returns
   /// another [Option].
+  ///
+  /// ### ⚠️ Callback must not throw
+  ///
+  /// `Option<R>` has no `Err` variant — there is no slot to record a failure
+  /// here. If your transformation can fail, use [fold] or [transf] (both of
+  /// which return a [Result] that *can* hold an [Err]), or lift the call via
+  /// `Sync(() => f(value))` to land in the safer `Result` world.
   Option<R> flatMap<R extends Object>(
     @noFutures Option<R> Function(T value) noFutures,
   );
 
   /// Returns [None] if the predicate [noFutures] returns `false`.
   /// Otherwise, returns the original [Option].
+  ///
+  /// ### ⚠️ Callback must not throw
+  ///
+  /// `Option<T>` has no `Err` variant. Throwing predicates escape to the
+  /// caller. If your predicate can fail, lift it via `Sync(() => p(value))`.
   Option<T> filter(@noFutures bool Function(T value) noFutures);
 
   /// Folds the two cases of this [Option] into a single [Result].

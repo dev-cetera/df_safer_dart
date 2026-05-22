@@ -1,3 +1,6 @@
+// See ARTICLE.md at the package root for a tutorial-style walkthrough of
+// Option, Result, and Resolvable that this example builds on.
+
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'dart:convert';
 

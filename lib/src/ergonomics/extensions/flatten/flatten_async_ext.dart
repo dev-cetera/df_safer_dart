@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 import '/_common.dart';
 
@@ -27,7 +26,7 @@ extension FlattenAsyncExt2<T extends Object> on Async<Async<T>> {
       final outerResult = await value;
       switch (outerResult) {
         case Ok(value: final innerAsync):
-          return await innerAsync.unwrap();
+          return innerAsync.unwrap();
         case final Err<Async<T>> err:
           throw err;
       }

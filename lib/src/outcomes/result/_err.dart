@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 part of '../outcome.dart';
 
@@ -27,6 +26,27 @@ final class Err<T extends Object> extends Result<T>
   /// The stack trace captured when the [Err] was created.
   final Trace stackTrace;
 
+  /// Ordered labels naming the pipeline node(s) that produced this [Err].
+  ///
+  /// Populated by [`.named(label)`] in the order the chain saw them — the
+  /// first entry is the originally-failing step. Empty when no `.named()`
+  /// scope has tagged the error.
+  ///
+  /// Example:
+  /// ```dart
+  /// final out = fetchUser(id).named('fetch')
+  ///   .map(parseJson).named('parse')
+  ///   .map(extractCfg).named('extract');
+  ///
+  /// switch (await out.value) {
+  ///   case Err(:final breadcrumbs):
+  ///     print('failed at: ${breadcrumbs.join(" → ")}');
+  ///   case Ok():
+  ///     // ...
+  /// }
+  /// ```
+  final List<String> breadcrumbs;
+
   @override
   @protected
   @pragma('vm:prefer-inline')
@@ -36,12 +56,17 @@ final class Err<T extends Object> extends Result<T>
   Object get error => value;
 
   /// Creates a new [Err] from [value] and an optional [statusCode].
-  Err(super.value, {int? statusCode, StackTrace? stackTrace})
-    : statusCode = Option.from(statusCode),
-      stackTrace = stackTrace != null
-          ? Trace.from(stackTrace)
-          : Trace.current(),
-      super._();
+  Err(
+    super.value, {
+    int? statusCode,
+    StackTrace? stackTrace,
+    List<String> breadcrumbs = const [],
+  }) : statusCode = Option.from(statusCode),
+       stackTrace = stackTrace != null
+           ? Trace.from(stackTrace)
+           : Trace.current(),
+       breadcrumbs = List.unmodifiable(breadcrumbs),
+       super._();
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -127,7 +152,6 @@ final class Err<T extends Object> extends Result<T>
     try {
       return onErr(this) ?? this;
     } catch (error, stackTrace) {
-      assert(false, error);
       return Err(error, stackTrace: stackTrace);
     }
   }
@@ -146,10 +170,27 @@ final class Err<T extends Object> extends Result<T>
       value is E ? Some(value as E) : const None();
 
   /// Transforms the [Err]'s generic type from `T` to `R` while preserving the
-  /// contained `error`.
+  /// contained `error`, original [stackTrace], [statusCode] and [breadcrumbs].
   @pragma('vm:prefer-inline')
   Err<R> transfErr<R extends Object>() {
-    return Err(value, statusCode: statusCode.orNull());
+    return Err(
+      value,
+      statusCode: statusCode.orNull(),
+      stackTrace: stackTrace,
+      breadcrumbs: breadcrumbs,
+    );
+  }
+
+  /// Returns a copy of this [Err] with the given [breadcrumbs] (replacing any
+  /// existing breadcrumbs). Used internally by `.named(label)`.
+  @pragma('vm:prefer-inline')
+  Err<T> withBreadcrumbs(List<String> breadcrumbs) {
+    return Err<T>(
+      value,
+      statusCode: statusCode.orNull(),
+      stackTrace: stackTrace,
+      breadcrumbs: breadcrumbs,
+    );
   }
 
   /// Converts this [Err] to a data model for serialization.
@@ -164,7 +205,8 @@ final class Err<T extends Object> extends Result<T>
     );
   }
 
-  /// Converts this [Err] to a JSON map.
+  /// Converts this [Err] to a JSON map. Includes [breadcrumbs] only when the
+  /// list is non-empty so existing consumers see no extra fields.
   Map<String, dynamic> toJson() {
     final model = toModel();
     return {
@@ -172,6 +214,7 @@ final class Err<T extends Object> extends Result<T>
       if (model.error != null) 'error': model.error,
       if (model.statusCode != null) 'statusCode': model.statusCode,
       if (model.stackTrace != null) 'stackTrace': model.stackTrace,
+      if (breadcrumbs.isNotEmpty) 'breadcrumbs': breadcrumbs,
     };
   }
 
@@ -215,8 +258,7 @@ final class Err<T extends Object> extends Result<T>
 String _safeToString(Object? obj) {
   try {
     return obj.toString();
-  } catch (error) {
-    assert(false, error);
+  } catch (_) {
     return '${obj.runtimeType}@${obj.hashCode.toRadixString(16)}';
   }
 }

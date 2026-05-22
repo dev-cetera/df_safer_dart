@@ -21,6 +21,7 @@ export './ergonomics/extensions/flatten/flatten_sync_ext.dart';
 export './ergonomics/extensions/iterable_ext.dart';
 export './ergonomics/extensions/map/map_outcome_ext.dart';
 export './ergonomics/extensions/map_ext.dart';
+export './ergonomics/extensions/named_ext.dart';
 export './ergonomics/extensions/resolvable_ext.dart';
 export './ergonomics/extensions/string_ext.dart';
 export './ergonomics/extensions/swap/swap_async_ext.dart';

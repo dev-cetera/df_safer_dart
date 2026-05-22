@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 import '/_common.dart';
 
@@ -42,21 +41,55 @@ sealed class Outcome<T extends Object> implements Equatable {
   /// This flattens all [Outcome] layers ([Option], [Result], [Resolvable]) into
   /// a final container that is always a [Resolvable] holding an [Option].
   /// An [Err] state at any level will result in a failed [Resolvable].
+  ///
+  /// The implementation is iterative: a chain of `Some(Some(Some(... 42)))`
+  /// thousands deep does not consume a stack frame per layer. Only crossing
+  /// into an asynchronous layer (`Async`, or a `Future` lurking inside a
+  /// `Some`/`Ok`) hands off to a single async continuation.
   TResolvableOption<R> reduce<R extends Object>() {
-    return switch (this) {
-      Some(value: final someValue) => Resolvable(() => Some(someValue as R)),
-      Some(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
-      None() => syncNone<R>(),
-      Ok(value: final someValue) => Resolvable(() => Some(someValue as R)),
-      Ok(value: Outcome<Object> outcomeValue) => outcomeValue.reduce<R>(),
-      Err(error: final error) => Sync.err(Err(error)),
-      Sync(value: final result) => result.reduce<R>(),
-      Async(value: final futureResult) => Async<Option<R>>(() async {
-        final result = await futureResult;
-        final innerResolvable = result.reduce<R>();
-        return (await innerResolvable.value).unwrap();
-      }),
-    };
+    // The loop variable is reassigned to various sealed-Outcome subtypes plus
+    // raw payload values, so the static type must widen to `Object`. The cast
+    // achieves that without an explicit-type annotation the lint dislikes.
+    var current = this as Object;
+    while (true) {
+      if (current is None) {
+        return syncNone<R>();
+      }
+      if (current is Err) {
+        final err = current;
+        return Sync.err(
+          Err<Option<R>>(
+            err.error,
+            statusCode: err.statusCode.orNull(),
+            stackTrace: err.stackTrace,
+          ),
+        );
+      }
+      if (current is Async) {
+        final futureResult = current.value;
+        return Async<Option<R>>(() async {
+          final result = await futureResult;
+          return (await result.reduce<R>().value).unwrap();
+        });
+      }
+      if (current is Outcome) {
+        final inner = current.value;
+        if (inner is Future) {
+          return Async<Option<R>>(() async {
+            final resolved = await inner;
+            if (resolved is Outcome<Object>) {
+              return (await resolved.reduce<R>().value).unwrap();
+            }
+            return Some(resolved as R);
+          });
+        }
+        current = inner;
+        continue;
+      }
+      // Innermost raw, non-Outcome value.
+      final raw = current;
+      return Sync(() => Some(raw as R));
+    }
   }
 
   /// The low-level primitive for reducing a [Outcome] chain. It recursively
@@ -69,14 +102,28 @@ sealed class Outcome<T extends Object> implements Equatable {
     required FutureOr<Object> Function(Err<Object> err) onErr,
     required FutureOr<Object> Function() onNone,
   }) {
-    FutureOr<Object> dive(Object obj) {
-      return switch (obj) {
-        Err() => onErr(obj),
-        None() => onNone(),
-        Outcome(value: final okValue) =>
-          okValue is Future<Object> ? okValue.then(dive) : dive(okValue),
-        Object() => obj,
-      };
+    FutureOr<Object> dive(Object start) {
+      // Iterative peel for all synchronous layers. Recursion is reserved for
+      // crossing into a Future via `.then(dive)`, so the call depth is bounded
+      // by the number of async hops in the chain, not the total nesting depth.
+      var current = start;
+      while (true) {
+        if (current is Err) {
+          return onErr(current);
+        }
+        if (current is None) {
+          return onNone();
+        }
+        if (current is Outcome) {
+          final inner = current.value;
+          if (inner is Future<Object>) {
+            return inner.then(dive);
+          }
+          current = inner;
+          continue;
+        }
+        return current;
+      }
     }
 
     return dive(this);
@@ -96,7 +143,6 @@ sealed class Outcome<T extends Object> implements Equatable {
   /// ```
   Sync rawSync() {
     return Sync(() {
-      // ignore: no_futures
       final value = raw(
         onErr: (err) => err,
         onNone: () => Err('The Outcome resolved to a None (empty) state!'),
@@ -207,6 +253,14 @@ sealed class Outcome<T extends Object> implements Equatable {
 
   /// Transforms the contained value using the mapper function
   /// [noFutures] while preserving the [Outcome]'s structure.
+  ///
+  /// ### Throw behaviour
+  ///
+  /// `map` absorbs throws into [Err] when the receiver's *static* type has
+  /// somewhere to put one (any [Result]/[Resolvable]-shaped chain). On
+  /// [Option] subtypes ([Some], [None]) the return type does not include an
+  /// [Err] variant, so a throwing callback escapes to the caller — use
+  /// [fold] or [transf] for fallible Option transformations.
   Outcome<R> map<R extends Object>(@noFutures R Function(T value) noFutures);
 
   /// Transforms the [Outcome]'s generic type from `T` to `R`.
@@ -215,8 +269,12 @@ sealed class Outcome<T extends Object> implements Equatable {
   /// attempts a direct cast.
   Outcome transf<R extends Object>([@noFutures R Function(T e)? noFutures]);
 
-  /// Suppresses the linter error `must_use_outcome`.
-  FutureOr<void> end();
+  /// Suppresses the linter error `must_use_outcome`. Returns [void] in every
+  /// subtype — calling `.end()` is the "I am intentionally discarding this
+  /// Outcome" marker, so the call site never needs to think about a Future.
+  /// For [Async] this means the underlying future is detached internally via
+  /// `unawaited(...)`; if you actually need to await completion, use `.value`.
+  void end();
 
   @override
   @pragma('vm:prefer-inline')

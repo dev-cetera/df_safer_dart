@@ -59,18 +59,32 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   @pragma('vm:prefer-inline')
   T? orNull() => value;
 
+  /// Returns `noFutures(value)`, absorbing any throw from the callback into an
+  /// [Err]. Widened from `Ok<R>` to `Result<R>` so the absorbed error has a
+  /// place to live — callers that previously type-annotated as `Ok<R>` will
+  /// need to switch to `Result<R>`.
   @override
   @pragma('vm:prefer-inline')
   Result<R> flatMap<R extends Object>(
     @noFutures Result<R> Function(T value) noFutures,
   ) {
-    return noFutures(unwrap());
+    try {
+      return noFutures(unwrap());
+    } catch (error, stackTrace) {
+      return Err<R>(error, stackTrace: stackTrace);
+    }
   }
 
+  /// Absorbs any throw from the callback into an [Err]. Widened from `Ok<T>`
+  /// to `Result<T>` to make room for the absorbed error.
   @override
   @pragma('vm:prefer-inline')
-  Ok<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures) {
-    return noFutures(this);
+  Result<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures) {
+    try {
+      return noFutures(this);
+    } catch (error, stackTrace) {
+      return Err<T>(error, stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -88,7 +102,6 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
     try {
       return onOk(this) ?? this;
     } catch (error, stackTrace) {
-      assert(false, error);
       return Err(error, stackTrace: stackTrace);
     }
   }
@@ -109,10 +122,17 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   @pragma('vm:prefer-inline')
   T unwrapOr(T fallback) => value;
 
+  /// Applies [noFutures] to the contained value and wraps the result in [Ok].
+  /// Any throw from the callback becomes an [Err]. Widened from `Ok<R>` to
+  /// `Result<R>` so the absorbed error has a place to live.
   @override
   @pragma('vm:prefer-inline')
-  Ok<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
-    return Ok(noFutures(value));
+  Result<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
+    try {
+      return Ok(noFutures(value));
+    } catch (error, stackTrace) {
+      return Err<R>(error, stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -122,8 +142,10 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
       final b = noFutures?.call(a) ?? a as R;
       return Ok(b);
     } catch (error, stackTrace) {
-      assert(false, error);
-      return Err('Cannot transform $T to $R.', stackTrace: stackTrace);
+      return Err(
+        'Cannot transform $T to $R: $error',
+        stackTrace: stackTrace,
+      );
     }
   }
 }

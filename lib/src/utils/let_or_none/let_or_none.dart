@@ -126,6 +126,9 @@ Option<String> letAsStringOrNone(dynamic input) {
     };
   }
   final rawInput = input is NoStackOverflowWrapper ? input.value : input;
+  // Treat `null` as absence (None) rather than producing the literal string
+  // "null" — `null.toString() == 'null'` is rarely what callers want.
+  if (rawInput == null) return const None();
 
   try {
     return Some(rawInput.toString());
@@ -178,6 +181,10 @@ Option<num> letNumOrNone(dynamic input) {
 
 /// Converts [input] to [int], returning [None] on failure.
 ///
+/// Returns [None] for `NaN`, `Infinity`, `-Infinity`, and any value outside
+/// the signed 64-bit integer range — converting these via `num.toInt()`
+/// would throw `UnsupportedError` or silently saturate.
+///
 /// Supported types:
 ///
 /// - Any sync [Outcome] chain.
@@ -186,9 +193,19 @@ Option<num> letNumOrNone(dynamic input) {
 /// - [double]
 /// - [int]
 /// - [String]
-@pragma('vm:prefer-inline')
 Option<int> letIntOrNone(dynamic input) {
-  return letNumOrNone(input).map((n) => n.toInt());
+  return letNumOrNone(input).flatMap((n) {
+    if (n is int) return Some(n);
+    final d = n.toDouble();
+    if (!d.isFinite) return const None();
+    // int64 bounds. 9.223372036854776e18 is the smallest double > int64.max,
+    // and -9.223372036854776e18 is the largest double < int64.min, so we
+    // reject values at or beyond those magnitudes.
+    if (d >= 9223372036854775808.0 || d < -9223372036854775808.0) {
+      return const None();
+    }
+    return Some(d.toInt());
+  });
 }
 
 /// Converts [input] to [double], returning [None] on failure.

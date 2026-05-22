@@ -95,7 +95,7 @@ switch (result2) {
   case Ok(value: final number):
     print('Result: $number');
   case Err err:
-    print('Failed to parse: ${result2.error}');
+    print('Failed to parse: ${err.error}');
 }
 ```
 ```sh
@@ -223,6 +223,55 @@ Processing User ID: 5
 ```
 
 This is the power of outcome-based design in Dart. The `getUserNotificationSound` function is a clean, declarative, and robust description of a complex operation. Every potential point of failure is handled gracefully and implicitly by the outcome wrappers. You write the code for the ideal scenario, and the outcomes take care of the messy reality.
+
+## Hardened for Reliability
+
+The patterns above only pay off if the library underneath them refuses to surprise you. `df_safer_dart` is built for **military-/medical-grade reliability** — the kind of code that has to keep working under abuse, misuse, and edge cases that "should never happen." A recent hardening sweep tightened the guarantees you actually get when you use these outcomes:
+
+- **No stack overflows on deep chains.** `Outcome.reduce()` and `Outcome.raw()` flatten nested outcomes iteratively. A pipeline that produces `Some(Some(Ok(Ok(...))))` 10,000 layers deep collapses without consuming 10,000 stack frames — and the flattening is now genuinely exhaustive (a long-standing dead-code bug that silently skipped layers has been fixed).
+- **Stack traces survive transformations.** When you map an `Err<A>` into an `Err<B>` via `transfErr()`, the original `stackTrace` (and `statusCode`) travels with it. The trail back to the real failure point is never lost.
+- **Debug and release behave identically.** Errors thrown inside `fold()` and `transf()` are captured into an `Err` with the original stack trace in both modes. No more "works in release, asserts in debug" surprises.
+- **Concurrency primitives don't blow the stack.** `TaskSequencer` drains its reentrant queue iteratively — bursts of 200,000+ reentrant tasks no longer recurse. `SafeCompleter.isCompleted` flips to `true` the moment a resolve is accepted, making the resolve-once invariant observable from outside.
+- **Safe numeric coercion.** Helpers like `letIntOrNone` return `None` for `NaN`, `±Infinity`, and out-of-range doubles instead of throwing. Bad data becomes absence, not a crash.
+- **Iteration-safe combinators.** `combineResolvable` materializes its input once, so even single-pass `sync*` generators are handled correctly — you can't accidentally lose elements by passing a lazy iterable.
+
+The point isn't the individual fixes — it's that every one of them came from a written-down abuse test in `test/hardening_test.dart`. The library is held to a standard where "the user did something weird" is a bug, not an excuse.
+
+## The Lints Make the Discipline Compile-Time
+
+Reliability guarantees in the runtime are only half the story. The companion package [`df_safer_dart_lints`](https://pub.dev/packages/df_safer_dart_lints) ships a `custom_lint` plugin that turns the design rules into actual lint errors. Annotations live in [`df_safer_dart_annotations`](https://pub.dev/packages/df_safer_dart_annotations) and come in two flavours: a *warning* form for incremental adoption, and an `*OrError` form that fails the build.
+
+| If your code…                                                       | The lint that fires           |
+|---------------------------------------------------------------------|-------------------------------|
+| Drops an `Outcome` value as a bare expression statement             | `must_use_outcome_or_error`   |
+| Uses `Future<Outcome<T>>` or `Outcome<Future<T>>` as a type         | `no_future_outcome_type_or_error` |
+| Has `async`/`await`/`Future` inside an `@noFutures` function        | `no_futures` / `_or_error`    |
+| Drops a Future statement inside `@mustAwaitAllFutures`              | `must_await_all_futures` / `_or_error` |
+| Passes a named ref to a `@mustBeAnonymous` parameter                | `must_be_anonymous` / `_or_error` |
+| Passes an anonymous closure to a `@mustBeStrongRef` parameter       | `must_be_strong_ref` / `_or_error` |
+| Drops the return value of an `@mustHandleReturn` function           | `must_handle_return` / `_or_error` |
+| Calls an `@unsafe` method outside an `UNSAFE(() => ...)` block      | `must_use_unsafe_wrapper` / `_or_error` |
+
+Every rule has a *coverage fixture* — a small Dart file in
+`df_safer_dart_lints/example/lib/fixtures/<rule>_fixture.dart` that uses
+`// expect_lint:` markers next to lines the rule should fire on. An end-to-end
+test runs `dart run custom_lint` over those fixtures and asserts every marker
+is satisfied with no extras. The lint plugin is held to the same "no surprises
+under abuse" standard as the runtime.
+
+Add the plugin to your project with:
+
+```sh
+dart pub add --dev custom_lint df_safer_dart_lints
+```
+
+And enable it in `analysis_options.yaml`:
+
+```yaml
+analyzer:
+  plugins:
+    - custom_lint
+```
 
 ## Why You Should Use This Pattern
 

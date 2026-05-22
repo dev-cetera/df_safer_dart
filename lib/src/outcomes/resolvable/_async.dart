@@ -11,8 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
-// ignore_for_file: no_future_outcome_type_or_error
 
 part of '../outcome.dart';
 
@@ -92,7 +90,7 @@ final class Async<T extends Object> extends Resolvable<T>
   @unsafeOrError
   Async.okValue(FutureOr<T> okValue)
     : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
-      super.ok(Future.value(okValue).then((e) => Ok(e)));
+      super.ok(Future.value(okValue).then(Ok.new));
 
   @unsafeOrError
   Async.err(super.err)
@@ -246,7 +244,6 @@ final class Async<T extends Object> extends Resolvable<T>
     try {
       return onAsync(this) ?? this;
     } catch (error, stackTrace) {
-      assert(false, error);
       return Async.err(Err(error, stackTrace: stackTrace));
     }
   }
@@ -330,7 +327,18 @@ final class Async<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   Async<R> then<R extends Object>(@noFutures R Function(T value) noFutures) {
-    return Async.result(value.then((e) => e.map(noFutures)));
+    // Route through Async(() async {...}) so a synchronous throw from
+    // `noFutures` is captured as an Err on the chain instead of escaping
+    // to whoever awaits the resulting Async.
+    return Async<R>(() async {
+      final result = await value;
+      switch (result) {
+        case Ok(value: final v):
+          return noFutures(v);
+        case final Err err:
+          throw err;
+      }
+    });
   }
 
   @override
@@ -360,7 +368,10 @@ final class Async<T extends Object> extends Resolvable<T>
 
   @override
   @pragma('vm:prefer-inline')
-  Future<void> end() {
-    return value.then((e) => e.end()).catchError((_) {});
+  void end() {
+    // Detach the internal cleanup future deliberately — `.end()` is the
+    // "discard this Outcome" marker. Anyone who actually needs to know when
+    // the async value settles should use `.value` instead.
+    unawaited(value.then((e) => e.end()).catchError((_) {}));
   }
 }

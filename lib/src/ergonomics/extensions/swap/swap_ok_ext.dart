@@ -17,27 +17,27 @@ import '/_common.dart';
 
 extension SwapOkSyncExt<T extends Object> on Ok<Sync<T>> {
   @pragma('vm:prefer-inline')
-  Sync<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Sync<Ok<T>> swap() => unwrap().map(Ok.new);
 }
 
 extension SwapOkAsyncExt<T extends Object> on Ok<Async<T>> {
   @pragma('vm:prefer-inline')
-  Async<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Async<Ok<T>> swap() => unwrap().map(Ok.new);
 }
 
 extension SwapOkResolvableExt<T extends Object> on Ok<Resolvable<T>> {
   @pragma('vm:prefer-inline')
-  Resolvable<Ok<T>> swap() => unwrap().then((e) => Ok(e));
+  Resolvable<Ok<T>> swap() => unwrap().then(Ok.new);
 }
 
 extension SwapOkOptionExt<T extends Object> on Ok<Option<T>> {
   @pragma('vm:prefer-inline')
-  Option<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Option<Ok<T>> swap() => unwrap().map(Ok.new);
 }
 
 extension SwapOkSomeExt<T extends Object> on Ok<Some<T>> {
   @pragma('vm:prefer-inline')
-  Some<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Some<Ok<T>> swap() => unwrap().map(Ok.new);
 }
 
 extension SwapOkNoneExt<T extends Object> on Ok<None<T>> {
@@ -47,7 +47,7 @@ extension SwapOkNoneExt<T extends Object> on Ok<None<T>> {
 
 extension SwapOkResultExt<T extends Object> on Ok<Result<T>> {
   @pragma('vm:prefer-inline')
-  Result<Ok<T>> swap() => unwrap().map((e) => Ok(e));
+  Result<Ok<T>> swap() => unwrap().map(Ok.new);
 }
 
 extension SwapOkErrExt<T extends Object> on Ok<Err<T>> {

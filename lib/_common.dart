@@ -13,7 +13,7 @@
 
 export 'src/_src.g.dart';
 
-export 'dart:async' show FutureOr, Completer, StreamTransformer;
+export 'dart:async' show FutureOr, Completer, StreamTransformer, unawaited;
 export 'dart:convert' show JsonEncoder, JsonDecoder;
 export 'package:equatable/equatable.dart' show Equatable;
 export 'dart:collection' show Queue;

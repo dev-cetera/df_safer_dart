@@ -1,4 +1,3 @@
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 
@@ -41,21 +40,23 @@ void main() {
         // Act
         completer.complete(futureValue).end();
 
-        // Assert: The completer is NOT yet complete because the future is still running.
+        // Assert: the completer is "committed" the moment resolve accepts work,
+        // even while the underlying future is still in flight. This prevents a
+        // racing caller from sneaking in a second resolve.
         expect(
           completer.isCompleted,
-          isFalse,
-          reason: 'Completer is not completed until the future resolves',
+          isTrue,
+          reason: 'Completer must be committed once a resolve is in flight',
         );
 
         // Await for the resolvable to finish, which internally completes the future.
         final result = await completer.resolvable().value;
 
-        // Assert: NOW the completer should be marked as completed.
+        // Assert: still completed.
         expect(
           completer.isCompleted,
           isTrue,
-          reason: 'Completer should be completed after awaiting the result',
+          reason: 'Completer should remain completed after awaiting the result',
         );
         expect(result, isA<Ok<String>>());
         expect(result.unwrap(), 'hello world');
@@ -94,14 +95,14 @@ void main() {
         // Act
         completer.complete(failingFuture).end();
 
-        // Assert: Not yet completed.
-        expect(completer.isCompleted, isFalse);
+        // Assert: committed at resolve, even though the future is still in flight.
+        expect(completer.isCompleted, isTrue);
 
         // Await the resolution.
         final resolvable = completer.resolvable();
         await expectLater(resolvable.value, completion(isA<Err>()));
 
-        // Assert: Now it is completed (with an error).
+        // Assert: still completed (now with the materialized error).
         expect(completer.isCompleted, isTrue);
 
         final result = await resolvable.value;

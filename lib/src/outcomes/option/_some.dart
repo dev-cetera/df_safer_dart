@@ -92,9 +92,8 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   ) {
     try {
       return Ok(onSome(this) ?? this);
-    } catch (error) {
-      assert(false, error);
-      return Err(error);
+    } catch (error, stackTrace) {
+      return Err(error, stackTrace: stackTrace);
     }
   }
 
@@ -130,8 +129,10 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
       final b = noFutures?.call(a) ?? a as R;
       return Ok(Option.from(b));
     } catch (error, stackTrace) {
-      assert(false, error);
-      return Err('Cannot transform $T to $R', stackTrace: stackTrace);
+      return Err(
+        'Cannot transform $T to $R: $error',
+        stackTrace: stackTrace,
+      );
     }
   }
 }

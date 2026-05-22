@@ -68,7 +68,7 @@ Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
 Option<List<Option<T>>> letListOrNone<T extends Object>(dynamic input) {
-  return letIterableOrNone<T>(input).map((e) => List.from(e));
+  return letIterableOrNone<T>(input).map(List.from);
 }
 
 // Converts [input] to `Set<Option<T>>`, returning [None] on failure.
@@ -88,5 +88,5 @@ Option<List<Option<T>>> letListOrNone<T extends Object>(dynamic input) {
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
 Option<Set<Option<T>>> letSetOrNone<T extends Object>(dynamic input) {
-  return letIterableOrNone<T>(input).map((e) => Set.from(e));
+  return letIterableOrNone<T>(input).map(Set.from);
 }

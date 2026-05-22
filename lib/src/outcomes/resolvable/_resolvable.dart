@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: no_future_outcome_type_or_error
 
 part of '../outcome.dart';
 
@@ -100,11 +99,22 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
-    final result = mustAwaitAllFutures();
-    if (result is Future<T>) {
-      return Async(() => result, onError: onError, onFinalize: onFinalize);
-    } else {
-      return Sync(() => result, onError: onError, onFinalize: onFinalize);
+    // The closure invocation must NOT escape — a synchronous throw needs to
+    // become an Err on the returned Sync, not propagate to the caller. This
+    // is the library's core "absorb all throws" contract.
+    try {
+      final result = mustAwaitAllFutures();
+      if (result is Future<T>) {
+        return Async(() => result, onError: onError, onFinalize: onFinalize);
+      } else {
+        return Sync(() => result, onError: onError, onFinalize: onFinalize);
+      }
+    } catch (error, stackTrace) {
+      return Sync<T>(
+        () => throw Err<T>(error, stackTrace: stackTrace),
+        onError: onError,
+        onFinalize: onFinalize,
+      );
     }
   }
 
@@ -187,10 +197,13 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
     if (duration == null) {
       return input;
     }
-    return Future.wait([
-      Future.value(input),
+    // Wait for the value AND the minimum duration concurrently so the total
+    // wall-clock is max(valueTime, duration). The Dart-3 record `.wait`
+    // preserves per-position types, so `value` is `R` without any cast.
+    return (
+      Future<R>.value(input),
       Future<void>.delayed(duration),
-    ]).then((e) => e.first as R);
+    ).wait.then((rec) => rec.$1);
   }
 
   /// Converts this [Resolvable] to an [Async].

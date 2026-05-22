@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: no_future_outcome_type_or_error
 
 import '/_common.dart';
 
@@ -41,12 +40,13 @@ class SafeCompleter<T extends Object> {
     if (_isCompleting) {
       return Sync.err(Err('SafeCompleter<$T> is already resolving!'));
     }
-    _isCompleting = true;
-
-    if (isCompleted) {
-      _isCompleting = false;
+    // Check terminal state directly (do NOT read `isCompleted` here — that
+    // now includes the `_isCompleting` flag we're about to set below, which
+    // would always make this check trip).
+    if (_completer.isCompleted || _value.isSome()) {
       return Sync.err(Err('SafeCompleter<$T> is already completed!'));
     }
+    _isCompleting = true;
 
     // `ifOk` and `ifErr` are used to handle the two possible outcomes of the
     // resolvable, ensuring the completer is correctly handled in both cases.
@@ -89,9 +89,22 @@ class SafeCompleter<T extends Object> {
     });
   }
 
-  /// Indicates whether the completer has been fulfilled with a value or error.
+  /// Indicates whether the completer has been claimed for completion.
+  ///
+  /// Returns `true` once any of the following holds:
+  ///
+  /// 1. A resolve has been accepted (even if its underlying future has not
+  ///    yet settled — the completer is "committed" and subsequent resolves
+  ///    will be rejected with an [Err]).
+  /// 2. The wrapped [Completer] has been completed synchronously.
+  /// 3. The cached value has been populated.
+  ///
+  /// Reading this property does not race with an in-flight async resolve:
+  /// observers see `true` for the entire interval starting when [resolve]
+  /// accepts work, not only after the underlying future settles.
   @pragma('vm:prefer-inline')
-  bool get isCompleted => _completer.isCompleted || _value.isSome();
+  bool get isCompleted =>
+      _isCompleting || _completer.isCompleted || _value.isSome();
 
   /// Creates a new [SafeCompleter] by transforming the future value of this one.
   ///

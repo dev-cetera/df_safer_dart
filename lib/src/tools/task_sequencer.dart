@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: no_future_outcome_type_or_error
 
 import '/_common.dart';
 
@@ -33,7 +32,7 @@ class TaskSequencer<T extends Object> {
         final err = prev.err().orNull();
         final nextValue = handler(prevValue, err);
         if (nextValue is Future<T?>) {
-          return nextValue.then((e) => Option.from(e));
+          return nextValue.then(Option.from);
         }
         return Option.from(nextValue);
       });
@@ -70,6 +69,11 @@ class TaskSequencer<T extends Object> {
 
   /// A queue for tasks added via `then()` while the sequencer is busy.
   final _reentrantQueue = Queue<Task<T>>();
+
+  /// Re-entrancy guard for [_processReentrantQueue]. Without this, a long
+  /// chain of synchronous tasks would recurse one stack frame per task and
+  /// stack-overflow under abusive enqueue patterns.
+  bool _draining = false;
 
   /// Creates a new [SequencedTaskBatch] that is bound to this sequencer.
   SequencedTaskBatch<T> newBatch() => SequencedTaskBatch(sequencer: this);
@@ -115,10 +119,12 @@ class TaskSequencer<T extends Object> {
     // Decrement the execution counter and process the re-entrant queue
     // once the current task has fully completed (sync or async).
     if (currentValue is Future<TResultOption<T>>) {
-      currentValue.whenComplete(() {
-        _executionCount--;
-        _processReentrantQueue();
-      });
+      unawaited(
+        currentValue.whenComplete(() {
+          _executionCount--;
+          _processReentrantQueue();
+        }),
+      );
     } else {
       _executionCount--;
       _processReentrantQueue();
@@ -161,19 +167,39 @@ class TaskSequencer<T extends Object> {
       }
     }
 
-    // Execute the main task handler.
-    final output = task
-        .handler(previousResult)
-        .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    // Execute the main task handler. Catch synchronous throws from the
+    // handler so they cannot escape and leave _executionCount in a corrupt
+    // state — the contract is "throws become Err on the chain".
+    TResolvableOption<T> output;
+    try {
+      output = task
+          .handler(previousResult)
+          .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    } catch (error, stackTrace) {
+      output = Sync.err(
+        Err<Option<T>>(error, stackTrace: stackTrace),
+      );
+    }
     // Combine the task's result with any error-handling side effects.
     return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
   }
 
-  /// Processes the next task from the re-entrant queue if available.
+  /// Drains the re-entrant queue iteratively.
+  ///
+  /// `_chainTask` synchronously re-invokes this method for sync tasks, so a
+  /// naïve recursive implementation would consume one stack frame per
+  /// enqueued task. The [_draining] guard keeps the recursive entry a no-op
+  /// and lets the outer loop pick up the next task instead.
   void _processReentrantQueue() {
-    if (_reentrantQueue.isNotEmpty) {
-      final nextTask = _reentrantQueue.removeFirst();
-      _chainTask(nextTask).end();
+    if (_draining) return;
+    _draining = true;
+    try {
+      while (_reentrantQueue.isNotEmpty && !isExecuting) {
+        final nextTask = _reentrantQueue.removeFirst();
+        _chainTask(nextTask).end();
+      }
+    } finally {
+      _draining = false;
     }
   }
 }

@@ -1,4 +1,3 @@
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 import 'package:df_safer_dart/df_safer_dart.dart';
 
 void main() {

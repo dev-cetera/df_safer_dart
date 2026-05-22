@@ -68,7 +68,7 @@ extension ToUnitOnVoidResult on Result<void> {
 extension ToUnitOnVoidOk on Ok<void> {
   @visibleForTesting
   @pragma('vm:prefer-inline')
-  Ok<Unit> toUnit() => map((_) => Unit());
+  Result<Unit> toUnit() => map((_) => Unit());
 }
 
 extension ToUnitOnVoidErr on Err<void> {
@@ -121,7 +121,7 @@ extension ToUnitOnObjectResult on Result<Object> {
 
 extension ToUnitOnObjectOk on Ok<Object> {
   @pragma('vm:prefer-inline')
-  Ok<Unit> toUnit() => map((_) => Unit());
+  Result<Unit> toUnit() => map((_) => Unit());
 }
 
 extension ToUnitOnObjectErr on Err<Object> {

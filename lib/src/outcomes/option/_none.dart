@@ -93,7 +93,6 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
     try {
       return Ok(onNone(this) ?? this);
     } catch (error, stackTrace) {
-      assert(false, error);
       return Err(error, stackTrace: stackTrace);
     }
   }

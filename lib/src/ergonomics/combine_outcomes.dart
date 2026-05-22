@@ -11,7 +11,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// ignore_for_file: must_use_unsafe_wrapper_or_error
 
 import '/_common.dart';
 
@@ -36,23 +35,33 @@ Resolvable<List<Option<T>>> combineOutcome<T extends Object>(
 ///
 /// The result is an [Async] if any of the [resolvables] are [Async]
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
+///
+/// The input iterable is consumed exactly once, so it is safe to pass a
+/// single-pass iterable (e.g. a `sync*` generator).
 Resolvable<List<T>> combineResolvable<T extends Object>(
   Iterable<Resolvable<T>> resolvables, {
   @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
-  if (resolvables.isEmpty) {
+  // Materialize once. Single-pass iterables (sync* generators) would
+  // otherwise be exhausted by the `.any()` probe below and the subsequent
+  // `.map()` would silently see zero elements.
+  final list = resolvables.toList(growable: false);
+  if (list.isEmpty) {
     return Sync.okValue([]);
   }
 
   // If any resolvable is async, the result must be async.
-  if (resolvables.any((r) => r.isAsync())) {
-    final asyncs = resolvables.map((r) => r.toAsync());
-    return combineAsync(asyncs, onErr: onErr);
-  } else {
-    // All are sync, so we can proceed synchronously.
-    final syncs = resolvables.map((r) => r as Sync<T>);
-    return combineSync(syncs, onErr: onErr);
+  var hasAsync = false;
+  for (final r in list) {
+    if (r.isAsync()) {
+      hasAsync = true;
+      break;
+    }
   }
+  if (hasAsync) {
+    return combineAsync(list.map((r) => r.toAsync()), onErr: onErr);
+  }
+  return combineSync(list.map((r) => r as Sync<T>), onErr: onErr);
 }
 
 /// Combines an iterable of [Sync]s into one containing a list of their values.
