@@ -29,15 +29,18 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   bool _internalIsExecuting = false;
 
   @override
+  @pragma('vm:prefer-inline')
   int get executionIndex => _executionIndex;
   int _executionIndex = 0;
 
   @override
+  @pragma('vm:prefer-inline')
   int get executionCount =>
       tasks.length; // _executionCount will not always equal tasks.length
   int _executionCount = 0;
 
   @override
+  @pragma('vm:prefer-inline')
   double get executionProgress {
     if (_executionCount == 0.0) return 0.0;
     return _executionIndex / _executionCount;
@@ -46,6 +49,7 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   final TOnTaskConpletedCallback<T>? _onTaskCompleted;
 
   @override
+  @pragma('vm:prefer-inline')
   bool get isExecuting => _internalIsExecuting;
 
   ConcurrentTaskBatch({

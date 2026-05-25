@@ -68,6 +68,7 @@ class TaskSequencer<T extends Object> {
   final Duration? _minTaskDuration;
 
   /// A [Resolvable] that represents the final result of the entire sequence.
+  @pragma('vm:prefer-inline')
   TResolvableOption<T> get completion => _current;
 
   /// The current state of the sequence, initialized to an empty success state.
@@ -75,7 +76,9 @@ class TaskSequencer<T extends Object> {
 
   /// A counter to track active task executions.
   int _executionCount = 0;
+  @pragma('vm:prefer-inline')
   bool get isExecuting => _executionCount > 0;
+  @pragma('vm:prefer-inline')
   bool get isNotExecuting => !isExecuting;
 
   /// A queue for tasks added via `then()` while the sequencer is busy.
@@ -87,6 +90,7 @@ class TaskSequencer<T extends Object> {
   bool _draining = false;
 
   /// Creates a new [SequencedTaskBatch] that is bound to this sequencer.
+  @pragma('vm:prefer-inline')
   SequencedTaskBatch<T> newBatch() => SequencedTaskBatch(sequencer: this);
 
   /// Appends a new task to the sequence.
@@ -149,50 +153,66 @@ class TaskSequencer<T extends Object> {
     Task<T> task,
     TResultOption<T> previousResult,
   ) {
-    Resolvable errorResolvable;
-    errorResolvable = resolvableNone();
-    // If the previous task failed, run error handlers as side effects.
-    if (previousResult case Err err) {
-      final a = Option.from(
-        _onPrevError,
-      ).map((e) => Resolvable(() => e(err)).flatten());
-      final b = Option.from(
-        task.onError,
-      ).map((e) => Resolvable(() => e(err)).flatten());
-      if ((a, b)
-          case (
-            Some(value: final someValueA),
-            Some(value: final someValueB),
-          )) {
-        errorResolvable = Resolvable.combine2(someValueA, someValueB);
-      } else if (a case Some(value: final someValueA)) {
-        errorResolvable = someValueA;
-      } else if (b case Some(value: final someValueB)) {
-        errorResolvable = someValueB;
-      }
-
-      // If eager error is enabled, short-circuit the sequence immediately,
-      // but still allow the error handlers to complete.
-      if (task.eagerError ?? _eagerError) {
-        final output = Sync.result(previousResult);
-        return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
+    // Fast path: previous task succeeded, no error handlers can fire. Run the
+    // task handler and return its output directly — the previous form here
+    // always allocated a `resolvableNone()` plus a `Resolvable.combine2(...)
+    // .then((e) => e.$1)` even though both sides were no-ops on the Ok path.
+    if (previousResult is! Err) {
+      try {
+        return task
+            .handler(previousResult)
+            .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+      } on Err catch (err) {
+        // Preserve a user-thrown Err verbatim — statusCode and breadcrumbs
+        // are load-bearing in life-critical pipelines and must not be
+        // silently wrapped by an outer Err.
+        return Sync.err(err.transfErr<Option<T>>());
+      } catch (error, stackTrace) {
+        return Sync.err(Err<Option<T>>(error, stackTrace: stackTrace));
       }
     }
 
-    // Execute the main task handler. Catch synchronous throws from the
-    // handler so they cannot escape and leave _executionCount in a corrupt
-    // state — the contract is "throws become Err on the chain".
+    // Error path: build up an optional `errorResolvable` running each
+    // configured error handler as a side effect. Direct null checks avoid the
+    // `Option.from(...).map(...)` round-trip of the previous implementation.
+    final err = previousResult as Err<Option<T>>;
+    Resolvable<Object>? errorResolvable;
+    final onPrevError = _onPrevError;
+    if (onPrevError != null) {
+      errorResolvable = Resolvable(() => onPrevError(err)).flatten();
+    }
+    final taskOnError = task.onError;
+    if (taskOnError != null) {
+      final b = Resolvable(() => taskOnError(err)).flatten();
+      errorResolvable = errorResolvable == null
+          ? b
+          : Resolvable.combine2(errorResolvable, b);
+    }
+
+    // If eager error is enabled, short-circuit the sequence immediately but
+    // still allow the error handlers to complete.
+    if (task.eagerError ?? _eagerError) {
+      final shortCircuit = Sync.result(previousResult);
+      if (errorResolvable == null) return shortCircuit;
+      return Resolvable.combine2(shortCircuit, errorResolvable)
+          .then((e) => e.$1);
+    }
+
+    // Execute the main task handler. Catch synchronous throws so they cannot
+    // escape and leave _executionCount in a corrupt state — the contract is
+    // "throws become Err on the chain". `on Err catch` preserves user-thrown
+    // Err verbatim (statusCode/breadcrumbs intact).
     TResolvableOption<T> output;
     try {
       output = task
           .handler(previousResult)
           .withMinDuration(task.minTaskDuration ?? _minTaskDuration);
+    } on Err catch (err) {
+      output = Sync.err(err.transfErr<Option<T>>());
     } catch (error, stackTrace) {
-      output = Sync.err(
-        Err<Option<T>>(error, stackTrace: stackTrace),
-      );
+      output = Sync.err(Err<Option<T>>(error, stackTrace: stackTrace));
     }
-    // Combine the task's result with any error-handling side effects.
+    if (errorResolvable == null) return output;
     return Resolvable.combine2(output, errorResolvable).then((e) => e.$1);
   }
 

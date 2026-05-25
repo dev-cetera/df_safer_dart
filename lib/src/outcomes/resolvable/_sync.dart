@@ -108,24 +108,28 @@ final class Sync<T extends Object> extends Resolvable<T>
     @noFutures TVoidCallback? onFinalize,
   }) {
     assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
-    return Sync.result(() {
-      try {
-        return Ok(noFutures());
-      } on Err catch (err) {
-        return err.transfErr<T>();
-      } catch (error, stackTrace) {
+    // Compute the inner Result inline instead of wrapping the try/catch in an
+    // IIFE — the closure allocation that `() { ... }()` would force on every
+    // `Sync(...)` call is unnecessary, and the control flow reads the same.
+    Result<T> result;
+    try {
+      result = Ok(noFutures());
+    } on Err catch (err) {
+      result = err.transfErr<T>();
+    } catch (error, stackTrace) {
+      if (onError == null) {
+        result = Err<T>(error, stackTrace: stackTrace);
+      } else {
         try {
-          if (onError == null) {
-            rethrow;
-          }
-          return onError(error, stackTrace);
+          result = onError(error, stackTrace);
         } catch (error, stackTrace) {
-          return Err<T>(error, stackTrace: stackTrace);
+          result = Err<T>(error, stackTrace: stackTrace);
         }
-      } finally {
-        onFinalize?.call();
       }
-    }());
+    } finally {
+      onFinalize?.call();
+    }
+    return Sync.result(result);
   }
 
   @override
@@ -151,10 +155,21 @@ final class Sync<T extends Object> extends Resolvable<T>
   Sync<T> ifSync(
     @noFutures void Function(Sync<T> self, Sync<T> sync) noFutures,
   ) {
-    return Sync(() {
+    // Side-effect path: if the user callback throws, the absorbed error must
+    // surface as an Err on the returned Sync. Doing the catch inline avoids
+    // the `Sync(...).flatten().sync().unwrap()` chain that the previous
+    // implementation needed — that allocated four Outcomes per call.
+    try {
       noFutures(this, this);
       return this;
-    }).flatten().sync().unwrap();
+    } on Err catch (err) {
+      // Preserve a user-thrown `Err` verbatim — matches the behaviour of the
+      // `Sync(...)` factory's `on Err catch` clause that this refactor
+      // replaced. Wrapping it would lose statusCode/breadcrumbs/stackTrace.
+      return Sync.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      return Sync.err(Err<T>(error, stackTrace: stackTrace));
+    }
   }
 
   @override
@@ -166,29 +181,47 @@ final class Sync<T extends Object> extends Resolvable<T>
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Resolvable<T> ifOk(
     @noFutures void Function(Sync<T> self, Ok<T> ok) noFutures,
   ) {
-    return switch (value) {
-      Ok<T> ok => Resolvable(() {
-          noFutures(this, ok);
-          return value;
-        }).flatten(),
-      Err() => this,
-    };
+    final v = value;
+    if (v is Ok<T>) {
+      // Direct try/catch is two allocations cheaper than the old
+      // `Resolvable(() {...}).flatten()` path, which materialised a
+      // `Sync<Result<T>>` plus a `Sync<T>` on the success branch. The
+      // `on Err catch` clause preserves a user-thrown `Err` verbatim, matching
+      // the behaviour of the `Sync(...)` factory the previous form went
+      // through.
+      try {
+        noFutures(this, v);
+        return this;
+      } on Err catch (err) {
+        return Sync.err(err.transfErr<T>());
+      } catch (error, stackTrace) {
+        return Sync.err(Err<T>(error, stackTrace: stackTrace));
+      }
+    }
+    return this;
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Resolvable<T> ifErr(
     @noFutures void Function(Sync<T> self, Err<T> err) noFutures,
   ) {
-    return switch (value) {
-      Ok() => this,
-      Err<T> err => Sync(() {
-          noFutures(this, err);
-          return value;
-        }).flatten(),
-    };
+    final v = value;
+    if (v is Err<T>) {
+      try {
+        noFutures(this, v);
+        return this;
+      } on Err catch (err) {
+        return Sync.err(err.transfErr<T>());
+      } catch (error, stackTrace) {
+        return Sync.err(Err<T>(error, stackTrace: stackTrace));
+      }
+    }
+    return this;
   }
 
   @override
@@ -196,7 +229,18 @@ final class Sync<T extends Object> extends Resolvable<T>
   Sync<R> resultMap<R extends Object>(
     @noFutures Result<R> Function(Result<T> value) noFutures,
   ) {
-    return Sync(() => noFutures(value).unwrap());
+    // The mapper returns a `Result<R>` we can wrap directly; only the user
+    // callback itself can throw, so we catch around its invocation and skip
+    // the `Sync(() { ... .unwrap() })` round trip the previous form did.
+    // `on Err catch` preserves a user-thrown `Err` verbatim — matches the
+    // `Sync(...)` factory's behaviour the previous form went through.
+    try {
+      return Sync.result(noFutures(value));
+    } on Err catch (err) {
+      return Sync.err(err.transfErr<R>());
+    } catch (error, stackTrace) {
+      return Sync.err(Err<R>(error, stackTrace: stackTrace));
+    }
   }
 
   @override
@@ -285,7 +329,10 @@ final class Sync<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
-    return Sync(() => value.map((e) => noFutures(e)).unwrap());
+    // Pass the user callback directly to `Result.map` rather than wrapping it
+    // in `(e) => noFutures(e)` — that wrapper would allocate one closure per
+    // call for no semantic benefit.
+    return Sync(() => value.map(noFutures).unwrap());
   }
 
   /// Prefer using [map] for [Sync].
@@ -301,21 +348,30 @@ final class Sync<T extends Object> extends Resolvable<T>
   Resolvable<R> whenComplete<R extends Object>(
     @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   ) {
-    return Sync(() {
-      value.unwrap(); // unwrap to throw if value has an Err.
-      return Resolvable(() => noFutures(this));
-    }).flatten();
+    // The previous form built `Sync<Resolvable<R>>` and then `.flatten()`d it
+    // — two extra Outcome allocations per call. Inline the try/catch and
+    // return the user's Resolvable directly. `on Err catch` preserves a
+    // user-thrown `Err` verbatim — matches the `Sync(...)` factory's
+    // behaviour the previous form went through. The Err can come from either
+    // `value.unwrap()` (when `value` is an `Err`) or from the user callback.
+    try {
+      value.unwrap();
+      return noFutures(this);
+    } on Err catch (err) {
+      return Sync.err(err.transfErr<R>());
+    } catch (error, stackTrace) {
+      return Sync.err(Err<R>(error, stackTrace: stackTrace));
+    }
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Sync<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
-    return Sync(() {
-      final okOrErr = value.transf<R>(noFutures);
-      if (okOrErr.isErr()) {
-        throw okOrErr;
-      }
-      return okOrErr.unwrap();
-    });
+    // `Result.transf` already absorbs callback throws into an `Err` and
+    // never escapes, so we can wrap the result directly without going
+    // through `Sync(() { ... throw ... })`. Saves the inner closure
+    // allocation and the throw/catch round trip on every call.
+    return Sync.result(value.transf<R>(noFutures));
   }
 
   @override

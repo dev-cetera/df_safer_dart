@@ -62,30 +62,32 @@ Option<T> letOrNone<T extends Object>(dynamic input) {
   if (rawInput == null) return const None();
 
   // 3. Dispatch to specific conversion logic based on the target type.
-  final result = () {
-    if (typeEquality<T, double>() || typeEquality<T, double?>()) {
-      return letDoubleOrNone(rawInput);
-    } else if (typeEquality<T, int>() || typeEquality<T, int?>()) {
-      return letIntOrNone(rawInput);
-    } else if (typeEquality<T, bool>() || typeEquality<T, bool?>()) {
-      return letBoolOrNone(rawInput);
-    } else if (typeEquality<T, DateTime>() || typeEquality<T, DateTime?>()) {
-      return letDateTimeOrNone(rawInput);
-    } else if (typeEquality<T, Uri>() || typeEquality<T, Uri?>()) {
-      return letUriOrNone(rawInput);
-    } else if (isSubtype<T, List<dynamic>>()) {
-      return letListOrNone<Object>(rawInput);
-    } else if (isSubtype<T, Set<dynamic>>()) {
-      return letSetOrNone<Object>(rawInput);
-    } else if (isSubtype<T, Iterable<dynamic>>()) {
-      return letIterableOrNone<Object>(rawInput);
-    } else if (isSubtype<T, Map<dynamic, dynamic>>()) {
-      return letMapOrNone<Object, Object>(rawInput);
-    } else if (typeEquality<T, String>() || typeEquality<T, String?>()) {
-      return letAsStringOrNone(rawInput);
-    }
-    return rawInput;
-  }();
+  //    The dispatch is inline (not an IIFE) so the closure allocation that
+  //    a `() { ... }()` would force is avoided on the hot path.
+  final Object? result;
+  if (typeEquality<T, double>() || typeEquality<T, double?>()) {
+    result = letDoubleOrNone(rawInput);
+  } else if (typeEquality<T, int>() || typeEquality<T, int?>()) {
+    result = letIntOrNone(rawInput);
+  } else if (typeEquality<T, bool>() || typeEquality<T, bool?>()) {
+    result = letBoolOrNone(rawInput);
+  } else if (typeEquality<T, DateTime>() || typeEquality<T, DateTime?>()) {
+    result = letDateTimeOrNone(rawInput);
+  } else if (typeEquality<T, Uri>() || typeEquality<T, Uri?>()) {
+    result = letUriOrNone(rawInput);
+  } else if (isSubtype<T, List<dynamic>>()) {
+    result = letListOrNone<Object>(rawInput);
+  } else if (isSubtype<T, Set<dynamic>>()) {
+    result = letSetOrNone<Object>(rawInput);
+  } else if (isSubtype<T, Iterable<dynamic>>()) {
+    result = letIterableOrNone<Object>(rawInput);
+  } else if (isSubtype<T, Map<dynamic, dynamic>>()) {
+    result = letMapOrNone<Object, Object>(rawInput);
+  } else if (typeEquality<T, String>() || typeEquality<T, String?>()) {
+    result = letAsStringOrNone(rawInput);
+  } else {
+    result = rawInput;
+  }
 
   // 4. Perform a final safe cast on the result of the conversion.
   return letAsOrNone<T>(result);

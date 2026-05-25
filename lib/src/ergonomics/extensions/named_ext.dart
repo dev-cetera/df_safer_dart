@@ -21,6 +21,7 @@ import '/_common.dart';
 /// already carries breadcrumbs (an upstream node already claimed the failure),
 /// this is a no-op so the originating step keeps its credit.
 extension NamedResultExt<T extends Object> on Result<T> {
+  @pragma('vm:prefer-inline')
   Result<T> named(String label) {
     final self = this;
     if (self is Err<T> && self.breadcrumbs.isEmpty) {
@@ -33,12 +34,14 @@ extension NamedResultExt<T extends Object> on Result<T> {
 /// Adds [.named(label)][NamedSyncExt.named] to [Sync] with the same semantics
 /// as [NamedResultExt.named].
 extension NamedSyncExt<T extends Object> on Sync<T> {
+  @pragma('vm:prefer-inline')
   Sync<T> named(String label) => Sync.result(value.named(label));
 }
 
 /// Adds [.named(label)][NamedAsyncExt.named] to [Async] with the same
 /// semantics as [NamedResultExt.named].
 extension NamedAsyncExt<T extends Object> on Async<T> {
+  @pragma('vm:prefer-inline')
   Async<T> named(String label) =>
       Async.result(value.then((r) => r.named(label)));
 }
@@ -46,6 +49,7 @@ extension NamedAsyncExt<T extends Object> on Async<T> {
 /// Adds [.named(label)][NamedResolvableExt.named] to [Resolvable] so both
 /// [Sync] and [Async] subtypes are addressable through the base type.
 extension NamedResolvableExt<T extends Object> on Resolvable<T> {
+  @pragma('vm:prefer-inline')
   Resolvable<T> named(String label) {
     final self = this;
     if (self is Sync<T>) return self.named(label);

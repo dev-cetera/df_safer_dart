@@ -20,6 +20,7 @@ extension FlattenAsyncExt2<T extends Object> on Async<Async<T>> {
   Async<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Async<T> flatten2() {
     return Async(() async {
       final outerResult = await value;

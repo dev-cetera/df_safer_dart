@@ -20,6 +20,7 @@ import '/_common.dart';
 ///
 /// The result is an [Async] if any of the [outcomes] are [Async]
 /// If any resolvable contains an [Err], applies [onErr] to combine errors.
+@pragma('vm:prefer-inline')
 Resolvable<List<Option<T>>> combineOutcome<T extends Object>(
   Iterable<Outcome<T>> outcomes, {
   @noFutures
@@ -134,18 +135,30 @@ Result<List<T>> combineResult<T extends Object>(
   Iterable<Result<T>> results, {
   @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
-  final successes = <T>[];
+  // Fast path: when no aggregating error handler is configured we never need
+  // to keep the original list around — iterate the input directly and
+  // propagate the first Err immediately. Skips one List allocation per call.
+  if (onErr == null) {
+    final successes = <T>[];
+    for (final result in results) {
+      switch (result) {
+        case Ok(value: final value):
+          successes.add(value);
+        case final Err err:
+          return err.transfErr();
+      }
+    }
+    return Ok(successes);
+  }
+  // Slow path: onErr wants the full original list, so materialize once.
   final asList = results.toList();
+  final successes = <T>[];
   for (final result in asList) {
     switch (result) {
       case Ok(value: final value):
         successes.add(value);
-      case final Err err:
-        if (onErr != null) {
-          return onErr(asList);
-        } else {
-          return err.transfErr();
-        }
+      case final Err _:
+        return onErr(asList);
     }
   }
   return Ok(successes);

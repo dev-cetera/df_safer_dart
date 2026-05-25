@@ -20,6 +20,7 @@ extension FlattenResultExt2<T extends Object> on Result<Result<T>> {
   Result<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Result<T> flatten2() {
     switch (this) {
       case Ok(value: final innerResult):

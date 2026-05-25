@@ -63,7 +63,12 @@ final class Err<T extends Object> extends Result<T>
   })  : statusCode = Option.from(statusCode),
         stackTrace =
             stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
-        breadcrumbs = List.unmodifiable(breadcrumbs),
+        // Skip the `List.unmodifiable` allocation when no breadcrumbs were
+        // supplied — the default `const []` is already unmodifiable and is
+        // the dominant code path.
+        breadcrumbs = breadcrumbs.isEmpty
+            ? const <String>[]
+            : List.unmodifiable(breadcrumbs),
         super._();
 
   /// Creates an [Err] from an [ErrModel].

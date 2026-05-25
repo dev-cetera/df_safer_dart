@@ -89,14 +89,17 @@ class SafeCompleter<T extends Object> {
   /// containing the completer's future.
   @pragma('vm:prefer-inline')
   Resolvable<T> resolvable() {
-    return Resolvable(() {
-      switch (_value) {
-        case Some(value: final okValue):
-          return okValue;
-        case None():
-          return _completer.future;
-      }
-    });
+    // Dispatch inline. Going through `Resolvable.new(() {...})` would invoke
+    // the caller's closure to peek at the value, then allocate a second
+    // closure for the chosen `Sync()`/`Async()`. By branching here we save
+    // one closure allocation per call.
+    final v = _value;
+    if (v is Some<FutureOr<T>>) {
+      final inner = v.value;
+      if (inner is Future<T>) return Async<T>(() => inner);
+      return Sync.okValue(inner);
+    }
+    return Async<T>(() => _completer.future);
   }
 
   /// Indicates whether the completer has been claimed for completion.

@@ -18,19 +18,23 @@ import '/_common.dart';
 extension StringExt on String {
   // Returns this string wrapped in a [Some] if it's not empty,
   /// otherwise returns [None].
+  @pragma('vm:prefer-inline')
   Option<String> get noneIfEmpty {
     return Option.from(isEmpty ? null : this);
   }
 
   /// Returns the first character as a [Some], or [None] if the string is empty.
+  @pragma('vm:prefer-inline')
   Option<String> get firstOrNone => isEmpty ? const None() : Some(this[0]);
 
   /// Returns the last character as a [Some], or [None] if the string is empty.
+  @pragma('vm:prefer-inline')
   Option<String> get lastOrNone =>
       isEmpty ? const None() : Some(this[length - 1]);
 
   /// Returns the character at the given [index] as a [Some], or [None] if the
   /// index is out of bounds.
+  @pragma('vm:prefer-inline')
   Option<String> elementAtOrNone(int index) {
     if (index < 0 || index >= length) {
       return const None();

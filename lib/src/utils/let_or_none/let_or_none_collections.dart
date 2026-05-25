@@ -67,6 +67,7 @@ Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
 /// - [List]  (dynamic)
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
+@pragma('vm:prefer-inline')
 Option<List<Option<T>>> letListOrNone<T extends Object>(dynamic input) {
   return letIterableOrNone<T>(input).map(List.from);
 }
@@ -87,6 +88,7 @@ Option<List<Option<T>>> letListOrNone<T extends Object>(dynamic input) {
 /// - [List]  (dynamic)
 /// - [Set] (dynamic)
 /// - [Map] (dynamic, dynamic)
+@pragma('vm:prefer-inline')
 Option<Set<Option<T>>> letSetOrNone<T extends Object>(dynamic input) {
   return letIterableOrNone<T>(input).map(Set.from);
 }

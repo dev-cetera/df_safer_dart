@@ -32,6 +32,7 @@ abstract class TaskBatchBase<T extends Object> {
   /// This is used as a guard to prevent queue modifications during execution.
   bool get isExecuting;
 
+  @pragma('vm:prefer-inline')
   bool get isNotExecuting => !isExecuting;
 
   /// The index of the currently executing task. Zero-based.
@@ -76,76 +77,66 @@ abstract class TaskBatchBase<T extends Object> {
   /// Adds a pre-configured [Task] to the end of the queue.
   ///
   /// Throws an [AssertionError] if the batch is currently executing.
+  @pragma('vm:prefer-inline')
   void addTask(Task<T> task) {
-    _ifNotExecuting(() => tasks.add(task));
+    // Inline the guard directly instead of `_ifNotExecuting(() => ...)`. The
+    // helper is convenient but it allocates a closure per call; the inline
+    // form is identical in semantics and allocates nothing.
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
+    if (isNotExecuting) tasks.add(task);
   }
 
   /// Adds multiple [Task] objects to the end of the queue.
   ///
   /// Throws an [AssertionError] if the batch is currently executing.
+  @pragma('vm:prefer-inline')
   void addAllTasks(Iterable<Task<T>> newTasks) {
-    _ifNotExecuting(() => tasks.addAll(newTasks));
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
+    if (isNotExecuting) tasks.addAll(newTasks);
   }
 
   /// Removes a specific [task] from the queue.
   ///
   /// Returns `true` if the task was found and removed, `false` otherwise.
+  @pragma('vm:prefer-inline')
   bool removeTask(Task<T> task) {
-    return _ifNotExecuting(() => tasks.remove(task)) ?? false;
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
+    if (isNotExecuting) return tasks.remove(task);
+    return false;
   }
 
   /// Clears all tasks from the queue.
   ///
   /// Returns `true` if the queue was not empty before clearing, `false` otherwise.
+  @pragma('vm:prefer-inline')
   bool clearTasks() {
-    return _ifNotExecuting(() {
-          final wasNotEmpty = tasks.isNotEmpty;
-          if (wasNotEmpty) {
-            tasks.clear();
-          }
-          return wasNotEmpty;
-        }) ??
-        false;
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
+    if (!isNotExecuting) return false;
+    final wasNotEmpty = tasks.isNotEmpty;
+    if (wasNotEmpty) tasks.clear();
+    return wasNotEmpty;
   }
 
   /// Removes the first task from the queue.
   ///
   /// Returns `true` if a task was removed, `false` if the queue was empty.
+  @pragma('vm:prefer-inline')
   bool removeFirstTask() {
-    return _ifNotExecuting(() {
-          if (tasks.isNotEmpty) {
-            tasks.removeFirst();
-            return true;
-          }
-          return false;
-        }) ??
-        false;
+    assert(isNotExecuting, 'Cannot modify while tasks are executing.');
+    if (!isNotExecuting || tasks.isEmpty) return false;
+    tasks.removeFirst();
+    return true;
   }
 
   /// Removes the last task from the queue.
   ///
   /// Returns `true` if a task was removed, `false` if the queue was empty.
+  @pragma('vm:prefer-inline')
   bool removeLastTask() {
-    return _ifNotExecuting(() {
-          if (tasks.isNotEmpty) {
-            tasks.removeLast();
-            return true;
-          }
-          return false;
-        }) ??
-        false;
-  }
-
-  /// A guard that runs [caller] only if [isNotExecuting] is true.
-  ///
-  /// Asserts against modification during execution and returns `null` if the
-  /// guard condition is not met, preventing the call.
-  R? _ifNotExecuting<R>(R Function() caller) {
     assert(isNotExecuting, 'Cannot modify while tasks are executing.');
-    if (isNotExecuting) {
-      return caller();
-    }
-    return null;
+    if (!isNotExecuting || tasks.isEmpty) return false;
+    tasks.removeLast();
+    return true;
   }
 }
 

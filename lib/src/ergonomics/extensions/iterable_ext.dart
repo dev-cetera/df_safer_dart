@@ -22,15 +22,18 @@ import '/_common.dart';
 extension IterableExt<T extends Object> on Iterable<T> {
   /// Returns this [Iterable] wrapped in a [Some] if it's not empty,
   /// otherwise returns [None].
+  @pragma('vm:prefer-inline')
   Option<Iterable<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
 
   /// Returns the first element as a [Some], or [None] if the [Iterable] is empty.
+  @pragma('vm:prefer-inline')
   Option<T> get firstOrNone {
     final it = iterator;
     return it.moveNext() ? Some(it.current) : const None();
   }
 
   /// Returns the last element as a [Some], or [None] if the [Iterable] is empty.
+  @pragma('vm:prefer-inline')
   Option<T> get lastOrNone => isEmpty ? const None() : Some(last);
 
   /// Returns the single element as a [Some], or [None] if the [Iterable] does
@@ -104,12 +107,14 @@ extension IterableExt<T extends Object> on Iterable<T> {
 extension NoneIfEmptyOnListExt<T extends Object> on List<T> {
   /// Returns this list wrapped in a [Some] if it's not empty, otherwise
   /// returns [None].
+  @pragma('vm:prefer-inline')
   Option<List<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
 }
 
 extension NoneIfEmptyOnSetExt<T extends Object> on Set<T> {
   /// Returns this set wrapped in a [Some] if it's not empty, otherwise returns
   /// [None].
+  @pragma('vm:prefer-inline')
   Option<Set<T>> get noneIfEmpty => isEmpty ? const None() : Some(this);
 }
 
@@ -121,14 +126,17 @@ extension NoneIfEmptyOnSetExt<T extends Object> on Set<T> {
 
 extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
   /// Filters for [Some] elements, returning an iterable of the [Some] instances.
+  @pragma('vm:prefer-inline')
   Iterable<Some<T>> whereSome() =>
       where((e) => e.isSome()).map((e) => e.some().unwrap());
 
   /// Filters for [None] elements, returning an iterable of the [None] instances.
+  @pragma('vm:prefer-inline')
   Iterable<None<T>> whereNone() =>
       where((e) => e.isNone()).map((e) => e.none().unwrap());
 
   /// Returns a new [Iterable] containing only the values from [Some] elements.
+  @pragma('vm:prefer-inline')
   Iterable<T> get values => where((e) => e.isSome()).map((e) => e.unwrap());
 
   /// Turns an `Iterable<Option<T>>` into an `Option<List<T>>`.
@@ -182,34 +190,41 @@ extension IterableOptionExt<T extends Object> on Iterable<Option<T>> {
 extension IterableFutureOptionExt<T extends Object>
     on Iterable<Future<Option<T>>> {
   /// Awaits all futures and then filters for [Some] elements.
+  @pragma('vm:prefer-inline')
   Future<Iterable<Some<T>>> whereSome() =>
       Future.wait(this).then((e) => e.whereSome());
 
   /// Awaits all futures and then filters for [None] elements.
+  @pragma('vm:prefer-inline')
   Future<Iterable<None<T>>> whereNone() =>
       Future.wait(this).then((e) => e.whereNone());
 }
 
 extension IterableSomeExt<T extends Object> on Iterable<Some<T>> {
   /// Extracts the value from every [Some] element in the iterable.
+  @pragma('vm:prefer-inline')
   Iterable<T> unwrapAll() => map((e) => e.value);
 }
 
 extension FutureIterableSomeExt<T extends Object> on Future<Iterable<Some<T>>> {
   /// Awaits and then extracts the value from every [Some] element.
+  @pragma('vm:prefer-inline')
   Future<Iterable<T>> unwrapAll() => then((e) => e.unwrapAll());
 }
 
 extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
   /// Filters for [Ok] elements, returning an iterable of the [Ok] instances.
+  @pragma('vm:prefer-inline')
   Iterable<Ok<T>> whereOk() =>
       where((e) => e.isOk()).map((e) => e.ok().unwrap());
 
   /// Filters for [Err] elements, returning an iterable of the [Err] instances.
+  @pragma('vm:prefer-inline')
   Iterable<Err<T>> whereErr() =>
       where((e) => e.isErr()).map((e) => e.err().unwrap());
 
   /// Returns a new [Iterable] containing only the values from [Ok] elements.
+  @pragma('vm:prefer-inline')
   Iterable<T> get values => where((e) => e.isOk()).map((e) => e.unwrap());
 
   /// Turns an `Iterable<Result<T>>` into an `Option<List<T>>`.
@@ -263,34 +278,41 @@ extension IterableResultExt<T extends Object> on Iterable<Result<T>> {
 extension IterableFutureResultExt<T extends Object>
     on Iterable<Future<Result<T>>> {
   /// Awaits all futures and then filters for [Ok] elements.
+  @pragma('vm:prefer-inline')
   Future<Iterable<Ok<T>>> whereOk() =>
       Future.wait(this).then((e) => e.whereOk());
 
   /// Awaits all futures and then filters for [Err] elements.
+  @pragma('vm:prefer-inline')
   Future<Iterable<Err<T>>> whereErr() =>
       Future.wait(this).then((e) => e.whereErr());
 }
 
 extension IterableOkExt<T extends Object> on Iterable<Ok<T>> {
   /// Extracts the value from every [Ok] element in the iterable.
+  @pragma('vm:prefer-inline')
   Iterable<T> unwrapAll() => map((e) => e.value);
 }
 
 extension FutureIterableOkExt<T extends Object> on Future<Iterable<Ok<T>>> {
   /// Awaits and then extracts the value from every [Ok] element.
+  @pragma('vm:prefer-inline')
   Future<Iterable<T>> unwrapAll() => then((e) => e.unwrapAll());
 }
 
 extension IterableResolvableExt<T extends Object> on Iterable<Resolvable<T>> {
   /// Filters for [Sync] elements, returning an iterable of the [Sync] instances.
+  @pragma('vm:prefer-inline')
   Iterable<Sync<T>> whereSync() =>
       where((e) => e.isSync()).map((e) => e.sync().unwrap());
 
   /// Filters for [Async] elements, returning an iterable of the [Async] instances.
+  @pragma('vm:prefer-inline')
   Iterable<Async<T>> whereAsync() =>
       where((e) => e.isAsync()).map((e) => e.async().unwrap());
 
   /// Converts every [Resolvable] in the iterable to an [Async].
+  @pragma('vm:prefer-inline')
   Iterable<Async<T>> mapToAsync() => map((e) => e.toAsync());
 
   /// Partitions the iterable into `syncParts` and `asyncParts` in a single pass.
@@ -311,6 +333,7 @@ extension IterableResolvableExt<T extends Object> on Iterable<Resolvable<T>> {
 
 extension IterableSyncExt<T extends Object> on Iterable<Sync<T>> {
   /// Extracts the inner [Result] from each [Sync] element.
+  @pragma('vm:prefer-inline')
   Iterable<Result<T>> mapToResults() => map((e) => e.value);
 
   Sync<List<T>> resolveInSequence() {
@@ -330,6 +353,7 @@ extension IterableSyncExt<T extends Object> on Iterable<Sync<T>> {
 
 extension IterableAsyncExt<T extends Object> on Iterable<Async<T>> {
   /// Extracts the inner `Future<Result>` from each [Async] element.
+  @pragma('vm:prefer-inline')
   Iterable<Future<Result<T>>> mapToResults() => map((e) => e.value);
 }
 

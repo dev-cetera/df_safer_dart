@@ -21,6 +21,7 @@ extension FlattenResolvableResultExt2<T extends Object>
   Resolvable<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Resolvable<T> flatten2() {
     switch (value) {
       case Future<Result<Result<T>>> value:

@@ -20,6 +20,7 @@ extension FlattenResolvableExt2<T extends Object> on Resolvable<Resolvable<T>> {
   Resolvable<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Resolvable<T> flatten2() {
     switch (this) {
       case Sync(value: final outerResult):

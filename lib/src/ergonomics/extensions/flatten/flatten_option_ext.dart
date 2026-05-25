@@ -20,6 +20,7 @@ extension FlattenOptionExt2<T extends Object> on Option<Option<T>> {
   Option<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Option<T> flatten2() {
     switch (this) {
       case Some(value: final innerResult):

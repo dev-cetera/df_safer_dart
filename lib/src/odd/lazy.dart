@@ -41,10 +41,13 @@ class Lazy<T extends Object> {
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    return (currentInstance.isNone()
-            ? currentInstance = Some(_constructor())
-            : currentInstance)
-        .unwrap();
+    // Cached fast path: skip the `Option.unwrap()` round-trip the previous
+    // form did. We pattern-match on `Some` directly and return its value.
+    final cached = currentInstance;
+    if (cached is Some<Resolvable<T>>) return cached.value;
+    final fresh = _constructor();
+    currentInstance = Some(fresh);
+    return fresh;
   }
 
   /// Returns a new instance of [T] each time, acting as a factory.

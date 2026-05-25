@@ -56,6 +56,7 @@ sealed class Option<T extends Object> extends Outcome<T>
   /// Creates an [Option] from a nullable value.
   ///
   /// Returns [Some] if the [value] is not `null`, otherwise returns [None].
+  @pragma('vm:prefer-inline')
   factory Option.from(T? value) {
     // This is already safe and idiomatic, no switch needed here.
     if (value != null) {
@@ -66,6 +67,7 @@ sealed class Option<T extends Object> extends Outcome<T>
   }
 
   @Deprecated('Use "Option.from(T? value)" instead.')
+  @pragma('vm:prefer-inline')
   factory Option.fromNullable(T? value) => Option.from(value);
 
   /// Returns `this` as a base [Option] type.

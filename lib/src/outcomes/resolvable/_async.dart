@@ -74,7 +74,16 @@ final class Async<T extends Object> extends Resolvable<T>
 
   @override
   @pragma('vm:prefer-inline')
-  Future<Result<T>> get value => Future.value(super.value);
+  Future<Result<T>> get value {
+    final raw = super.value;
+    // `Async.new` always stores a `Future<Result<T>>` directly, so the common
+    // path is a single type check + cast — no allocation. Only `Sync.toAsync()`
+    // (which stores a synchronous `Result<T>` in the base field) needs the
+    // `Future.value(...)` wrap, and even that allocation now happens at most
+    // once per `.value` read on those rarer instances.
+    if (raw is Future<Result<T>>) return raw;
+    return Future<Result<T>>.value(raw as FutureOr<Result<T>>);
+  }
 
   @unsafeOrError
   Async.result(super.value)
@@ -170,42 +179,54 @@ final class Async<T extends Object> extends Resolvable<T>
   Async<T> ifAsync(
     @noFutures void Function(Async<T> self, Async<T> async) noFutures,
   ) {
-    return Sync(() {
+    // The side-effect is synchronous (the callback is `void` and `@noFutures`)
+    // so we can run it inline. Absorbed errors must surface on the returned
+    // `Async`, which we build directly with `Async.err(...)` instead of going
+    // through `Sync(...).flatten().toAsync()` (which allocated four
+    // intermediate Outcomes per call). `on Err catch` preserves a user-thrown
+    // `Err` verbatim — matches the `Sync(...)` factory's behaviour the
+    // previous form went through.
+    try {
       noFutures(this, this);
       return this;
-    }).flatten().toAsync();
+    } on Err catch (err) {
+      return Async.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      return Async.err(Err<T>(error, stackTrace: stackTrace));
+    }
   }
 
   @override
   Resolvable<T> ifOk(
     @noFutures void Function(Async<T> self, Ok<T> ok) noFutures,
   ) {
-    return Async(() async {
+    // The old implementation built `Async<Resolvable<T>>` then flattened — that
+    // was four allocations per call on the Ok path (outer Async, inner
+    // Resolvable, two flatten-results). Throwing the absorbed `Err` inside
+    // the `Async()` factory lets it do the catch in one place, with one
+    // allocation total.
+    return Async<T>(() async {
       final awaitedValue = await value;
-      return switch (awaitedValue) {
-        Ok<T> ok => Resolvable(() {
-            noFutures(this, ok);
-            return awaitedValue;
-          }).flatten(),
-        Err() => this,
-      };
-    }).flatten();
+      if (awaitedValue case Ok<T> ok) {
+        noFutures(this, ok);
+        return ok.value;
+      }
+      throw awaitedValue as Err<T>;
+    });
   }
 
   @override
   Resolvable<T> ifErr(
     @noFutures void Function(Async<T> self, Err<T> err) noFutures,
   ) {
-    return Async(() async {
+    return Async<T>(() async {
       final awaitedValue = await value;
-      return switch (awaitedValue) {
-        Ok() => this,
-        Err<T> err => Sync(() {
-            noFutures(this, err);
-            return awaitedValue;
-          }).flatten(),
-      };
-    }).flatten();
+      if (awaitedValue case Err<T> err) {
+        noFutures(this, err);
+        throw err;
+      }
+      return (awaitedValue as Ok<T>).value;
+    });
   }
 
   @override
@@ -346,11 +367,15 @@ final class Async<T extends Object> extends Resolvable<T>
   Async<R> whenComplete<R extends Object>(
     @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   ) {
-    return Async(() async {
-      final result = (await value);
-      result.unwrap(); // unwrap to throw if value has an Err.
-      return Resolvable(() => noFutures(Sync<T>.result(result)));
-    }).flatten().toAsync();
+    // Build a single `Async<R>` directly. The previous form built
+    // `Async<Resolvable<R>>` then `.flatten().toAsync()`, which allocated
+    // four intermediate Outcomes per call.
+    return Async<R>(() async {
+      final result = await value;
+      result.unwrap(); // surface any Err as a throw caught by Async() below.
+      // Now invoke the user callback once and await its produced Resolvable.
+      return await noFutures(Sync<T>.result(result)).unwrap();
+    });
   }
 
   @override

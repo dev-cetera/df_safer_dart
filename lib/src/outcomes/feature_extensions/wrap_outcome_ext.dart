@@ -31,6 +31,7 @@ extension WrapOnOutcomeExt<T extends Object, M extends Outcome<T>> on M {
   @pragma('vm:prefer-inline')
   Async<M> wrapInAsync() => Async.okValue(this);
 
+  @pragma('vm:prefer-inline')
   Outcome<Some<T>> wrapValueInSome() => map(Some.new);
 
   @pragma('vm:prefer-inline')

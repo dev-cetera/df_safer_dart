@@ -20,6 +20,7 @@ extension FlattenSyncExt2<T extends Object> on Sync<Sync<T>> {
   Sync<T> flatten() => flatten2();
 
   @protected
+  @pragma('vm:prefer-inline')
   Sync<T> flatten2() {
     switch (value) {
       case Ok(value: final innerSync):

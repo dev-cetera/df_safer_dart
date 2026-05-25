@@ -22,11 +22,13 @@ import '/_common.dart';
 extension MapExt<K, V extends Object> on Map<K, V> {
   /// Returns this map wrapped in a [Some] if it's not empty,
   /// otherwise returns [None].
+  @pragma('vm:prefer-inline')
   Option<Map<K, V>> get noneIfEmpty {
     return isEmpty ? const None() : Some(this);
   }
 
   /// Safely gets the value for a given [key], returning an [Option].
+  @pragma('vm:prefer-inline')
   Option<V> getOption(K key) {
     // V does not need to extend Object here because this[key] can be null.
     // Option.from() correctly handles creating a Some<V> or a None<V>.
