@@ -195,7 +195,21 @@ Option<num> letNumOrNone(dynamic input) {
 /// - [String]
 Option<int> letIntOrNone(dynamic input) {
   return letNumOrNone(input).flatMap((n) {
-    if (n is int) return Some(n);
+    if (n is int) {
+      // dart2js quirk: every integer-valued double satisfies `is int`,
+      // including `double.infinity` and out-of-range doubles. On the VM and
+      // WASM the two types are disjoint, but on dart2js they collapse into a
+      // single JS-Number — so we apply the same finite + int64-range guards
+      // we use on a raw double whenever the runtime additionally reports the
+      // value as a double (true only on dart2js).
+      if (n is double) {
+        if (!n.isFinite) return const None();
+        if (n >= 9223372036854775808.0 || n < -9223372036854775808.0) {
+          return const None();
+        }
+      }
+      return Some(n);
+    }
     final d = n.toDouble();
     if (!d.isFinite) return const None();
     // int64 bounds. 9.223372036854776e18 is the smallest double > int64.max,

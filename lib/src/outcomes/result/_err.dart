@@ -199,7 +199,7 @@ final class Err<T extends Object> extends Result<T>
       type: type,
       error: error,
       statusCode: statusCode.orNull(),
-      stackTrace: stackTrace.frames.map((e) => e.toString()).toList(),
+      stackTrace: _safeFrameLines(stackTrace),
     );
   }
 
@@ -243,11 +243,20 @@ final class Err<T extends Object> extends Result<T>
   }
 
   @override
-  @unsafeOrError
   @pragma('vm:prefer-inline')
   String toString() {
-    final encoder = const JsonEncoder.withIndent('  ');
-    return encoder.convert(toJson());
+    try {
+      final encoder = const JsonEncoder.withIndent('  ');
+      return encoder.convert(toJson());
+    } catch (_) {
+      // Defensive: on dart2wasm the underlying `Trace.frames` parser can
+      // return frames whose `.toString()` itself throws (the WASM-native
+      // stack format isn't fully understood by `package:stack_trace`).
+      // Fall back to a minimal representation so logging/asserting on an
+      // `Err` never crashes the host process — life-critical callers must
+      // be able to surface the error, not vanish in a runtime crash.
+      return 'Err<$T>(${_safeToString(value)})';
+    }
   }
 }
 
@@ -258,5 +267,25 @@ String _safeToString(Object? obj) {
     return obj.toString();
   } catch (_) {
     return '${obj.runtimeType}@${obj.hashCode.toRadixString(16)}';
+  }
+}
+
+/// Returns one string per frame in [trace], swallowing any per-frame
+/// stringification errors. Returns an empty list if the whole `frames`
+/// iteration throws — that happens on `dart2wasm` where the native stack
+/// format isn't fully parsed by `package:stack_trace`.
+List<String> _safeFrameLines(Trace trace) {
+  try {
+    final out = <String>[];
+    for (final f in trace.frames) {
+      try {
+        out.add(f.toString());
+      } catch (_) {
+        // Skip the unparseable frame, keep the surrounding ones.
+      }
+    }
+    return out;
+  } catch (_) {
+    return const [];
   }
 }

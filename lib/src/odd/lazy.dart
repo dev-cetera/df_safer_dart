@@ -16,6 +16,17 @@ import '/_common.dart';
 // ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 /// A class that provides lazy initialization for instances of type [T].
+///
+/// ### Isolate sendability
+///
+/// A [Lazy] is sendable through `SendPort` iff:
+///
+/// 1. The [_constructor] is a top-level function or a static method (enforced
+///    by the `@sendable` lint at construction sites).
+/// 2. The cached [currentInstance], if present, holds a [Sync] outcome —
+///    [Async] outcomes wrap an isolate-local `Future` and are not sendable.
+///    A freshly-constructed [Lazy] whose [singleton] has not yet been read
+///    holds `None` and is unconditionally sendable.
 class Lazy<T extends Object> {
   /// Holds the current singleton instance of type [T] or `null` if no
   /// [singleton] instance was created.
@@ -25,7 +36,7 @@ class Lazy<T extends Object> {
   /// A constructor function that creates instances of type [T].
   final LazyConstructor<T> _constructor;
 
-  Lazy(this._constructor);
+  Lazy(@sendable this._constructor);
 
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
   @pragma('vm:prefer-inline')

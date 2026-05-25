@@ -15,3 +15,7 @@
 library;
 
 export 'src/_src.g.dart';
+// Re-export the annotation classes (e.g. @sendable, @noFutures,
+// @mustBeAnonymous) so consumers don't need a separate dependency on
+// df_safer_dart_annotations to use the public API.
+export 'package:df_safer_dart_annotations/df_safer_dart_annotations.dart';

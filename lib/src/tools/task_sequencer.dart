@@ -21,9 +21,21 @@ import '/_common.dart';
 /// the completed task to the next one in the chain. It supports both sync and
 /// async tasks and includes a re-entrant queue to handle new tasks that are
 /// added while an existing sequence is already running.
+///
+/// ### Isolate sendability
+///
+/// A [TaskSequencer] is sendable through `SendPort` iff:
+///
+/// 1. Every handler ever passed to [then] / [TaskSequencer.new] (including
+///    `onPrevError`) is a top-level function or static method — enforced by
+///    the `@sendable` lint.
+/// 2. The current [_current] result is a [Sync] (synchronous) outcome — the
+///    moment any handler returns an [Async], `_current` becomes
+///    isolate-local until that future settles. A freshly-constructed
+///    sequencer satisfies this trivially.
 class TaskSequencer<T extends Object> {
   static TTaskHandler<T> convertHandler<T extends Object>(
-    FutureOr<T?> Function(T? prev, Err? err) handler,
+    @sendable FutureOr<T?> Function(T? prev, Err? err) handler,
   ) {
     return (prev) {
       return Resolvable(() {
@@ -39,7 +51,7 @@ class TaskSequencer<T extends Object> {
   }
 
   TaskSequencer({
-    @noFutures TOnTaskError? onPrevError,
+    @noFutures @sendable TOnTaskError? onPrevError,
     bool eagerError = false,
     Duration? minTaskDuration,
   })  : _onPrevError = onPrevError,
@@ -83,8 +95,8 @@ class TaskSequencer<T extends Object> {
   /// queue to be processed after the current task completes. Otherwise, it is
   /// executed immediately.
   TResolvableOption<T> then(
-    @noFutures TTaskHandler<T> handler, {
-    @noFutures TOnTaskError? onPrevError,
+    @noFutures @sendable TTaskHandler<T> handler, {
+    @noFutures @sendable TOnTaskError? onPrevError,
     bool? eagerError,
     Duration? minTaskDuration,
   }) {
@@ -232,8 +244,8 @@ final class Task<T extends Object> {
   final Duration? minTaskDuration;
 
   const Task({
-    required this.handler,
-    required this.onError,
+    @sendable required this.handler,
+    @sendable required this.onError,
     required this.eagerError,
     required this.minTaskDuration,
   });

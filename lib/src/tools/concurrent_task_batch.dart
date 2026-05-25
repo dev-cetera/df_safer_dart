@@ -23,6 +23,7 @@ import '/_common.dart';
 class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   final Duration? _minTaskDuration;
   final bool _eagerError;
+  @sendable
   final TOnTaskError? _onError;
 
   bool _internalIsExecuting = false;
@@ -50,8 +51,8 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   ConcurrentTaskBatch({
     bool eagerError = true,
     Duration? minTaskDuration,
-    TOnTaskError? onError,
-    TOnTaskConpletedCallback<T>? onTaskCompleted,
+    @sendable TOnTaskError? onError,
+    @sendable TOnTaskConpletedCallback<T>? onTaskCompleted,
   })  : _onTaskCompleted = onTaskCompleted,
         _eagerError = eagerError,
         _minTaskDuration = minTaskDuration,
@@ -72,8 +73,8 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
   /// Adds a task, applying batch-level defaults for any unspecified parameters.
   @override
   void add(
-    @noFutures TTaskHandler<T> handler, {
-    @noFutures TOnTaskError? onError,
+    @noFutures @sendable TTaskHandler<T> handler, {
+    @noFutures @sendable TOnTaskError? onError,
     bool? eagerError,
     Duration? minTaskDuration,
   }) {

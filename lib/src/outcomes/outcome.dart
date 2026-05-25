@@ -30,7 +30,17 @@ part 'impl/_async_impl.dart';
 
 /// The foundational sealed class for all [Outcome] types like [Option],
 /// [Result] and [Resolvable].
-sealed class Outcome<T extends Object> implements Equatable {
+///
+/// Equality is value-based via [props]. Two `Outcome` instances of the same
+/// runtime type compare equal iff their [props] are equal — so
+/// `Some(42) == Some(42)` is `true` even for non-`const` instances, and
+/// `Err('x') == Err('x')` is `true` regardless of where each was constructed.
+///
+/// `Async` instances follow the same rule but `value` is a `Future`, so two
+/// `Async`s built from separate `() async => …` closures hold different
+/// futures and therefore compare unequal — to compare on the awaited result,
+/// `await` both and compare the resulting `Result`s.
+sealed class Outcome<T extends Object> extends Equatable {
   const Outcome(this.value);
 
   final FutureOr<Object> value;

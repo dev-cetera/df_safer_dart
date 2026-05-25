@@ -47,7 +47,7 @@ class SequencedTaskBatch<T extends Object> extends TaskBatchBase<T> {
 
   SequencedTaskBatch({
     TaskSequencer<T>? sequencer,
-    TOnTaskConpletedCallback<T>? onTaskCompleted,
+    @sendable TOnTaskConpletedCallback<T>? onTaskCompleted,
   })  : _onTaskCompleted = onTaskCompleted,
         _sequencer = sequencer ?? TaskSequencer<T>();
 

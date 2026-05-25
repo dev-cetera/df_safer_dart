@@ -58,8 +58,8 @@ abstract class TaskBatchBase<T extends Object> {
   ///
   /// Throws an [AssertionError] if the batch is currently executing.
   void add(
-    @noFutures TTaskHandler<T> handler, {
-    @noFutures TOnTaskError? onError,
+    @noFutures @sendable TTaskHandler<T> handler, {
+    @noFutures @sendable TOnTaskError? onError,
     bool? eagerError,
     Duration? minTaskDuration,
   }) {

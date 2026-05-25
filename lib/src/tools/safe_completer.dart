@@ -21,6 +21,20 @@ import '/_common.dart';
 /// It provides an API for resolving a value and safely accessing the result
 /// via a [Resolvable]. This is useful for managing one-off asynchronous
 /// operations where multiple callers might attempt to set the result.
+///
+/// ### Isolate sendability (current state)
+///
+/// `SafeCompleter` is **not yet sendable** through `SendPort`: it wraps a
+/// `dart:async` [Completer], which is bound to the isolate that created it.
+/// Sending a `SafeCompleter` will throw at runtime. A future phase will
+/// replace the internal completer with a conditional `SendPort` broker on VM
+/// platforms so the completer itself can travel between isolates. Web
+/// platforms have no isolates, so the current implementation is appropriate
+/// there.
+///
+/// In the meantime, ship the **result** instead: await the completer locally,
+/// then send the resulting [Result] (which is fully sendable) to the
+/// destination isolate.
 class SafeCompleter<T extends Object> {
   final _completer = Completer<T>();
 
@@ -108,7 +122,7 @@ class SafeCompleter<T extends Object> {
   /// function (or cast if null), and the result will be used to resolve the
   /// new completer.
   SafeCompleter<R> transf<R extends Object>([
-    @noFutures R Function(T e)? noFutures,
+    @noFutures @sendable R Function(T e)? noFutures,
   ]) {
     final newCompleter = SafeCompleter<R>();
     resolvable().then((e) {

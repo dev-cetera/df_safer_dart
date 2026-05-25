@@ -149,6 +149,7 @@ void main() {
     test('onPrevError is invoked on error', () async {
       var hit = 0;
       final seq = TaskSequencer<int>(
+        // ignore: sendable, tests local hit-counter side-effect, not isolate sendability.
         onPrevError: (err) {
           hit++;
           return Sync.okValue(const None());
@@ -278,6 +279,7 @@ void main() {
   group('Lazy', () {
     test('singleton constructs once, returns same Resolvable', () {
       var calls = 0;
+      // ignore: sendable, tests local construct-once behavior, not isolate sendability.
       final lazy = Lazy<int>(() {
         calls++;
         return Sync.okValue(42);
@@ -290,6 +292,7 @@ void main() {
 
     test('factory constructs on every access', () {
       var calls = 0;
+      // ignore: sendable, tests local call-count behavior, not isolate sendability.
       final lazy = Lazy<int>(() {
         calls++;
         return Sync.okValue(42);
@@ -301,6 +304,7 @@ void main() {
 
     test('resetSingleton triggers reconstruction', () {
       var calls = 0;
+      // ignore: sendable, tests local reset-and-reconstruct behavior.
       final lazy = Lazy<int>(() {
         calls++;
         return Sync.okValue(42);
