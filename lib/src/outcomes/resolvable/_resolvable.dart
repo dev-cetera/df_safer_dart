@@ -108,12 +108,34 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
       } else {
         return Sync(() => result, onError: onError, onFinalize: onFinalize);
       }
+    } on Err catch (err) {
+      // Preserve a user-thrown Err verbatim — statusCode and breadcrumbs are
+      // load-bearing for life-critical callers and must not be discarded by
+      // an outer wrapping. `onError` does NOT fire for Err throws (an Err
+      // is a structured error value already; nothing for `onError` to add).
+      onFinalize?.call();
+      return Sync.err(err.transfErr<T>());
     } catch (error, stackTrace) {
-      return Sync<T>(
-        () => throw Err<T>(error, stackTrace: stackTrace),
-        onError: onError,
-        onFinalize: onFinalize,
-      );
+      // Non-Err throw — route through `onError` if the caller supplied one.
+      // The previous form here wrapped the throw inside a fresh `Sync()`
+      // factory which then caught it via its `on Err catch` clause, silently
+      // bypassing `onError` entirely. That's a behaviour bug: `onError` is
+      // exactly the hook callers expect to invoke on a raw throw.
+      if (onError == null) {
+        onFinalize?.call();
+        return Sync.err(Err<T>(error, stackTrace: stackTrace));
+      }
+      try {
+        final recovered = onError(error, stackTrace);
+        onFinalize?.call();
+        return Sync.result(recovered);
+      } on Err catch (err) {
+        onFinalize?.call();
+        return Sync.err(err.transfErr<T>());
+      } catch (error, stackTrace) {
+        onFinalize?.call();
+        return Sync.err(Err<T>(error, stackTrace: stackTrace));
+      }
     }
   }
 

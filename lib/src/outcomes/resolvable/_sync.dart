@@ -122,6 +122,10 @@ final class Sync<T extends Object> extends Resolvable<T>
       } else {
         try {
           result = onError(error, stackTrace);
+        } on Err catch (err) {
+          // `onError` itself can throw an `Err` — preserve its statusCode
+          // and breadcrumbs rather than nesting it as another Err's value.
+          result = err.transfErr<T>();
         } catch (error, stackTrace) {
           result = Err<T>(error, stackTrace: stackTrace);
         }

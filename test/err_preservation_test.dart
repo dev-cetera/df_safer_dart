@@ -25,6 +25,11 @@
 //
 // In life-critical pipelines a lost statusCode can change the operator's
 // response (e.g. retry vs. escalate), so these tests are non-negotiable.
+//
+// The Lazy tests use inline lambdas (which the `@sendable` lint flags)
+// because they exercise local construct-fault behaviour, not isolate
+// sendability.
+// ignore_for_file: sendable
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
@@ -174,6 +179,281 @@ void main() {
       expect(result, isA<Err<int>>());
       expect((result as Err<int>).statusCode.unwrap(), 500);
       expect(result.error, 'async-cleanup');
+    });
+  });
+
+  group('Sync.new onError — Err preservation', () {
+    test('onError that throws Err preserves statusCode', () {
+      final s = Sync<int>(
+        () => throw StateError('primary'),
+        onError: (_, __) => throw Err<int>('recovery-fault', statusCode: 503),
+      );
+      expect(s.value, isA<Err<int>>());
+      expect((s.value as Err<int>).statusCode.unwrap(), 503);
+      expect((s.value as Err<int>).error, 'recovery-fault');
+    });
+  });
+
+  group('Async.new onError — Err preservation', () {
+    test('onError that throws Err preserves statusCode', () async {
+      final a = Async<int>(
+        () async => throw StateError('primary'),
+        onError: (_, __) => throw Err<int>(
+          'async-recovery-fault',
+          statusCode: 504,
+        ),
+      );
+      final result = await a.value;
+      expect(result, isA<Err<int>>());
+      expect((result as Err<int>).statusCode.unwrap(), 504);
+      expect(result.error, 'async-recovery-fault');
+    });
+  });
+
+  group('Ok.map / Ok.flatMap / Ok.fold / Ok.transf — Err preservation', () {
+    test('Ok.map preserves user-thrown Err statusCode', () {
+      final r = const Ok<int>(1).map<int>(
+        (_) => throw Err<int>('ok-map-fault', statusCode: 410),
+      );
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).statusCode.unwrap(), 410);
+      expect(r.error, 'ok-map-fault');
+    });
+
+    test('Ok.flatMap preserves user-thrown Err statusCode', () {
+      final r = const Ok<int>(1).flatMap<int>(
+        (_) => throw Err<int>('ok-flatmap-fault', statusCode: 411),
+      );
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).statusCode.unwrap(), 411);
+      expect(r.error, 'ok-flatmap-fault');
+    });
+
+    test('Ok.fold preserves user-thrown Err statusCode', () {
+      final r = const Ok<int>(1).fold(
+        (_) => throw Err<int>('ok-fold-fault', statusCode: 412),
+        (_) => null,
+      );
+      expect(r, isA<Err>());
+      expect((r as Err).statusCode.unwrap(), 412);
+      expect(r.error, 'ok-fold-fault');
+    });
+
+    test('Ok.transf preserves user-thrown Err statusCode', () {
+      final r = const Ok<int>(1).transf<int>(
+        (_) => throw Err<int>('ok-transf-fault', statusCode: 413),
+      );
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).statusCode.unwrap(), 413);
+      expect(r.error, 'ok-transf-fault');
+    });
+  });
+
+  group('Some.fold / Some.transf / None.fold — Err preservation', () {
+    test('Some.fold preserves user-thrown Err statusCode', () {
+      final r = const Some<int>(1).fold(
+        (_) => throw Err<int>('some-fold-fault', statusCode: 420),
+        (_) => null,
+      );
+      expect(r, isA<Err>());
+      final err = r as Err;
+      expect(err.statusCode.unwrap(), 420);
+      expect(err.error, 'some-fold-fault');
+    });
+
+    test('Some.transf preserves user-thrown Err statusCode', () {
+      final r = const Some<int>(1).transf<int>(
+        (_) => throw Err<int>('some-transf-fault', statusCode: 421),
+      );
+      expect(r, isA<Err>());
+      final err = r as Err;
+      expect(err.statusCode.unwrap(), 421);
+      expect(err.error, 'some-transf-fault');
+    });
+
+    test('None.fold preserves user-thrown Err statusCode', () {
+      final r = const None<int>().fold(
+        (_) => null,
+        (_) => throw Err<int>('none-fold-fault', statusCode: 430),
+      );
+      expect(r, isA<Err>());
+      final err = r as Err;
+      expect(err.statusCode.unwrap(), 430);
+      expect(err.error, 'none-fold-fault');
+    });
+  });
+
+  group('Resolvable.new — Err preservation', () {
+    test('user-thrown Err statusCode survives Resolvable factory', () {
+      final r = Resolvable<int>(
+        () => throw Err<int>('resolvable-new-fault', statusCode: 599),
+      );
+      expect(r, isA<Sync<int>>());
+      final result = (r as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect((result as Err<int>).statusCode.unwrap(), 599);
+      expect(result.error, 'resolvable-new-fault');
+    });
+
+    test('non-Err throw routes through caller-provided onError', () {
+      // Previously the factory wrapped a non-Err throw into a fresh `Sync()`
+      // factory whose `on Err catch` clause fired BEFORE `onError` could run.
+      // That bypass meant `onError` was effectively unreachable through
+      // `Resolvable.new`. The clean fix routes it correctly.
+      final r = Resolvable<int>(
+        () => throw StateError('primary'),
+        onError: (e, s) => Err<int>('handled-by-onError', statusCode: 451),
+      );
+      expect(r, isA<Sync<int>>());
+      final result = (r as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect((result as Err<int>).error, 'handled-by-onError');
+      expect(result.statusCode.unwrap(), 451);
+    });
+
+    test('onError that itself throws Err preserves statusCode', () {
+      final r = Resolvable<int>(
+        () => throw StateError('primary'),
+        onError: (e, s) =>
+            throw Err<int>('onError-rethrow', statusCode: 452),
+      );
+      final result = (r as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect((result as Err<int>).error, 'onError-rethrow');
+      expect(result.statusCode.unwrap(), 452);
+    });
+
+    test('onFinalize fires on every throw path', () {
+      var finalizeHits = 0;
+      void hit() => finalizeHits++;
+
+      // Path 1: synchronous Err throw.
+      Resolvable<int>(
+        () => throw Err<int>('e'),
+        onFinalize: hit,
+      ).end();
+      expect(finalizeHits, 1);
+
+      // Path 2: synchronous non-Err throw, no onError.
+      Resolvable<int>(
+        () => throw StateError('x'),
+        onFinalize: hit,
+      ).end();
+      expect(finalizeHits, 2);
+
+      // Path 3: synchronous non-Err throw + onError returns Result.
+      Resolvable<int>(
+        () => throw StateError('x'),
+        onError: (e, s) => Err<int>('handled'),
+        onFinalize: hit,
+      ).end();
+      expect(finalizeHits, 3);
+
+      // Path 4: onError itself throws.
+      Resolvable<int>(
+        () => throw StateError('x'),
+        onError: (e, s) => throw StateError('y'),
+        onFinalize: hit,
+      ).end();
+      expect(finalizeHits, 4);
+    });
+  });
+
+  group('Lazy — never throws (constructor faults become Sync.err)', () {
+    test('singleton absorbs a non-Err throw into Sync.err', () {
+      final lazy = Lazy<int>(() => throw StateError('boot-fail'));
+      final s = lazy.singleton;
+      expect(s, isA<Sync<int>>());
+      expect((s as Sync<int>).value, isA<Err<int>>());
+      expect(((s).value as Err<int>).error, isA<StateError>());
+    });
+
+    test('singleton preserves a user-thrown Err verbatim', () {
+      final lazy = Lazy<int>(
+        () => throw Err<int>('config-missing', statusCode: 412),
+      );
+      final s = lazy.singleton;
+      final err = (s as Sync<int>).value;
+      expect(err, isA<Err<int>>());
+      expect((err as Err<int>).statusCode.unwrap(), 412);
+      expect(err.error, 'config-missing');
+    });
+
+    test('singleton caches the failed Sync.err just like a successful one',
+        () {
+      var calls = 0;
+      final lazy = Lazy<int>(() {
+        calls++;
+        throw StateError('boot-fail');
+      });
+      final a = lazy.singleton;
+      final b = lazy.singleton;
+      expect(identical(a, b), isTrue);
+      expect(calls, 1, reason: 'constructor must run exactly once');
+    });
+
+    test('factory absorbs a throw into Sync.err on every read', () {
+      var calls = 0;
+      final lazy = Lazy<int>(() {
+        calls++;
+        throw Err<int>('factory-fault', statusCode: 503);
+      });
+      final a = lazy.factory;
+      final b = lazy.factory;
+      expect((a as Sync<int>).value, isA<Err<int>>());
+      expect((b as Sync<int>).value, isA<Err<int>>());
+      expect(calls, 2, reason: 'factory runs every access');
+      expect((a.value as Err<int>).statusCode.unwrap(), 503);
+    });
+
+    test('resetSingleton lets a previously-failed Lazy retry', () {
+      var attempt = 0;
+      final lazy = Lazy<int>(() {
+        attempt++;
+        if (attempt == 1) throw StateError('first-boot-fail');
+        return Sync.okValue(42);
+      });
+      final first = (lazy.singleton as Sync<int>).value;
+      expect(first, isA<Err<int>>());
+      lazy.resetSingleton();
+      final second = (lazy.singleton as Sync<int>).value;
+      expect(second, isA<Ok<int>>());
+      expect((second as Ok<int>).value, 42);
+    });
+  });
+
+  group('SafeCompleter.transf — Err preservation', () {
+    test('user-thrown Err in transform callback preserves statusCode',
+        () async {
+      final c = SafeCompleter<int>();
+      c.complete(7).end();
+      final transformed = c.transf<int>(
+        (_) => throw Err<int>('completer-transf-fault', statusCode: 503),
+      );
+      // The transformed completer should resolve to an Err with intact code.
+      final r = await transformed.resolvable().value;
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).statusCode.unwrap(), 503);
+      expect(r.error, 'completer-transf-fault');
+    });
+  });
+
+  group('Err.new — never throws on construction', () {
+    test('Err with empty StackTrace constructs without throwing', () {
+      // Direct exercise of the defensive `_safeStackTrace` path: a
+      // `StackTrace.empty` is unusual but well-formed; the constructor
+      // must complete without throwing.
+      expect(
+        () => Err<int>('x', stackTrace: StackTrace.empty),
+        returnsNormally,
+      );
+    });
+
+    test('Err with non-empty but unusual StackTrace still constructs', () {
+      expect(
+        () => Err<int>('x', stackTrace: StackTrace.fromString('garbage')),
+        returnsNormally,
+      );
     });
   });
 

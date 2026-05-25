@@ -92,6 +92,8 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   ) {
     try {
       return Ok(onSome(this) ?? this);
+    } on Err catch (err) {
+      return err.transfErr<Option<Object>>();
     } catch (error, stackTrace) {
       return Err(error, stackTrace: stackTrace);
     }
@@ -128,6 +130,11 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
       final a = value;
       final b = noFutures?.call(a) ?? a as R;
       return Ok(Option.from(b));
+    } on Err catch (err) {
+      // If the user-supplied transformer throws an `Err`, preserve it
+      // verbatim — wrapping it as a string in another Err would discard the
+      // statusCode/breadcrumbs that life-critical callers may rely on.
+      return err.transfErr<Option<R>>();
     } catch (error, stackTrace) {
       return Err(
         'Cannot transform $T to $R: $error',

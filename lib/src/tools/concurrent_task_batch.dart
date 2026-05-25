@@ -118,7 +118,12 @@ class ConcurrentTaskBatch<T extends Object> extends TaskBatchBase<T> {
         (_) => const None(),
         eagerError: _eagerError,
         onError: (error, stackTrace) {
-          return _onError?.call(Err(error, stackTrace: stackTrace)).value;
+          // Preserve a thrown Err verbatim — only wrap non-Err errors. A task
+          // handler that threw `Err('alarm', statusCode: 503)` must reach the
+          // user's `onError` with its statusCode intact.
+          final err =
+              error is Err ? error : Err<Object>(error, stackTrace: stackTrace);
+          return _onError?.call(err).value;
         },
       ),
     ).whenComplete((e) {

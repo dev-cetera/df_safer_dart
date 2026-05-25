@@ -139,6 +139,10 @@ final class Async<T extends Object> extends Resolvable<T>
             rethrow;
           }
           return onError(error, stackTrace);
+        } on Err catch (err) {
+          // `onError` itself can throw an `Err` — preserve its statusCode
+          // and breadcrumbs rather than nesting it as another Err's value.
+          return err.transfErr<T>();
         } catch (error, stackTrace) {
           return Err<T>(error, stackTrace: stackTrace);
         }

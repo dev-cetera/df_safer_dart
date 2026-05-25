@@ -132,9 +132,13 @@ class SafeCompleter<T extends Object> {
       try {
         final result = noFutures != null ? noFutures(e) : (e as R);
         newCompleter.complete(result).end();
+      } on Err catch (err) {
+        // Preserve a user-thrown Err's statusCode/breadcrumbs verbatim
+        // rather than re-wrapping it inside another Err.
+        newCompleter.resolve(Sync.err(err.transfErr<R>())).end();
       } catch (error, stackTrace) {
         newCompleter
-            .resolve(Sync.err(Err(error, stackTrace: stackTrace)))
+            .resolve(Sync.err(Err<R>(error, stackTrace: stackTrace)))
             .end();
       }
       return e;

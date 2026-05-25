@@ -61,8 +61,13 @@ final class Err<T extends Object> extends Result<T>
     StackTrace? stackTrace,
     List<String> breadcrumbs = const [],
   })  : statusCode = Option.from(statusCode),
-        stackTrace =
-            stackTrace != null ? Trace.from(stackTrace) : Trace.current(),
+        // Defensive trace capture. `Trace.from`/`Trace.current` can throw
+        // `FormatException` on malformed native stack-trace strings (most
+        // visibly on dart2wasm). The whole point of `df_safer_dart` is that
+        // error handling never itself throws — so the trace is computed via
+        // a safe helper that falls back to an empty `Trace` rather than
+        // letting the throw escape every `Err(...)` call site.
+        stackTrace = _safeStackTrace(stackTrace),
         // Skip the `List.unmodifiable` allocation when no breadcrumbs were
         // supplied — the default `const []` is already unmodifiable and is
         // the dominant code path.
@@ -70,6 +75,16 @@ final class Err<T extends Object> extends Result<T>
             ? const <String>[]
             : List.unmodifiable(breadcrumbs),
         super._();
+
+  /// Captures a [Trace] from [stackTrace] (or the current call site if null),
+  /// falling back to an empty trace if `stack_trace`'s parser throws.
+  static Trace _safeStackTrace(StackTrace? stackTrace) {
+    try {
+      return stackTrace != null ? Trace.from(stackTrace) : Trace.current();
+    } catch (_) {
+      return Trace(const []);
+    }
+  }
 
   /// Creates an [Err] from an [ErrModel].
   @pragma('vm:prefer-inline')
@@ -154,6 +169,9 @@ final class Err<T extends Object> extends Result<T>
   ) {
     try {
       return onErr(this) ?? this;
+    } on Err catch (err) {
+      // Preserve user-thrown Err verbatim — statusCode/breadcrumbs matter.
+      return err.transfErr<Object>();
     } catch (error, stackTrace) {
       return Err(error, stackTrace: stackTrace);
     }

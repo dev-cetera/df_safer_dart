@@ -92,6 +92,8 @@ final class None<T extends Object> extends Option<T> implements SyncImpl<T> {
   ) {
     try {
       return Ok(onNone(this) ?? this);
+    } on Err catch (err) {
+      return err.transfErr<Option<Object>>();
     } catch (error, stackTrace) {
       return Err(error, stackTrace: stackTrace);
     }

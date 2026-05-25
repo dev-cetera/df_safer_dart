@@ -39,20 +39,42 @@ class Lazy<T extends Object> {
   Lazy(@sendable this._constructor);
 
   /// Returns the singleton instance [currentInstance], or creating it if necessary.
+  ///
+  /// If `_constructor` itself throws, the throw is absorbed into a
+  /// `Sync.err(...)` so this getter honours the package contract that only
+  /// `@unsafeOrError` members can escape with a thrown exception. The failed
+  /// `Sync.err` is cached just like a successful construction would be —
+  /// subsequent reads see the same Err until [resetSingleton] is called.
   @pragma('vm:prefer-inline')
   Resolvable<T> get singleton {
-    // Cached fast path: skip the `Option.unwrap()` round-trip the previous
-    // form did. We pattern-match on `Some` directly and return its value.
     final cached = currentInstance;
     if (cached is Some<Resolvable<T>>) return cached.value;
-    final fresh = _constructor();
+    Resolvable<T> fresh;
+    try {
+      fresh = _constructor();
+    } on Err catch (err) {
+      fresh = Sync.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      fresh = Sync.err(Err<T>(error, stackTrace: stackTrace));
+    }
     currentInstance = Some(fresh);
     return fresh;
   }
 
   /// Returns a new instance of [T] each time, acting as a factory.
+  ///
+  /// If `_constructor` throws, the throw is absorbed into a `Sync.err(...)`
+  /// just like [singleton] does — see that getter's doc for the rationale.
   @pragma('vm:prefer-inline')
-  Resolvable<T> get factory => _constructor();
+  Resolvable<T> get factory {
+    try {
+      return _constructor();
+    } on Err catch (err) {
+      return Sync.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      return Sync.err(Err<T>(error, stackTrace: stackTrace));
+    }
+  }
 
   /// Resets the singleton instance, by setting [currentInstance] back to `null`
   /// allowing it to be re-created via [singleton].

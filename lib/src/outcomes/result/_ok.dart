@@ -70,6 +70,11 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   ) {
     try {
       return noFutures(unwrap());
+    } on Err catch (err) {
+      // Preserve a user-thrown Err's statusCode/breadcrumbs verbatim — the
+      // package contract is that thrown Err values propagate without being
+      // re-wrapped.
+      return err.transfErr<R>();
     } catch (error, stackTrace) {
       return Err<R>(error, stackTrace: stackTrace);
     }
@@ -82,6 +87,8 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   Result<T> mapOk(@noFutures Ok<T> Function(Ok<T> ok) noFutures) {
     try {
       return noFutures(this);
+    } on Err catch (err) {
+      return err.transfErr<T>();
     } catch (error, stackTrace) {
       return Err<T>(error, stackTrace: stackTrace);
     }
@@ -101,6 +108,8 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   ) {
     try {
       return onOk(this) ?? this;
+    } on Err catch (err) {
+      return err.transfErr<Object>();
     } catch (error, stackTrace) {
       return Err(error, stackTrace: stackTrace);
     }
@@ -130,6 +139,8 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   Result<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
     try {
       return Ok(noFutures(value));
+    } on Err catch (err) {
+      return err.transfErr<R>();
     } catch (error, stackTrace) {
       return Err<R>(error, stackTrace: stackTrace);
     }
@@ -141,6 +152,11 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
       final a = value;
       final b = noFutures?.call(a) ?? a as R;
       return Ok(b);
+    } on Err catch (err) {
+      // If the user-supplied transformer throws an `Err`, preserve it
+      // verbatim — wrapping it as a string in another Err would discard the
+      // statusCode/breadcrumbs that life-critical callers may rely on.
+      return err.transfErr<R>();
     } catch (error, stackTrace) {
       return Err(
         'Cannot transform $T to $R: $error',
