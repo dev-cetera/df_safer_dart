@@ -9,6 +9,8 @@
 
 ---
 
+<!-- BEGIN _README_CONTENT -->
+
 ## Summary
 
 `df_safer_dart` is a foundation layer for **mission-critical Dart and Flutter
@@ -174,6 +176,8 @@ analyzer:
     test_types_in_equals: error
     recursive_getters: error
 ```
+
+<!-- END _README_CONTENT -->
 
 ---
 
