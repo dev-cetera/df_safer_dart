@@ -38,13 +38,13 @@ void main() {
       test('whereSome keeps only Some entries', () {
         final out = source.whereSome();
         expect(out.keys.toSet(), {'a', 'c'});
-        expect(out.values.every((v) => v is Some<int>), isTrue);
+        expect(out.values, everyElement(isA<Some<int>>()));
       });
 
       test('whereNone keeps only None entries', () {
         final out = source.whereNone();
         expect(out.keys.toSet(), {'b'});
-        expect(out.values.every((v) => v is None<int>), isTrue);
+        expect(out.values, everyElement(isA<None<int>>()));
       });
 
       test('someValues unwraps Some values', () {
@@ -82,13 +82,13 @@ void main() {
       test('whereOk keeps only Ok entries', () {
         final out = source.whereOk();
         expect(out.keys.toSet(), {'a', 'c'});
-        expect(out.values.every((v) => v is Ok<int>), isTrue);
+        expect(out.values, everyElement(isA<Ok<int>>()));
       });
 
       test('whereErr keeps only Err entries', () {
         final out = source.whereErr();
         expect(out.keys.toSet(), {'b'});
-        expect(out.values.every((v) => v is Err<int>), isTrue);
+        expect(out.values, everyElement(isA<Err<int>>()));
       });
 
       test('okValues unwraps Ok values', () {

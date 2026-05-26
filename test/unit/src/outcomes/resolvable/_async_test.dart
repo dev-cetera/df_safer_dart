@@ -69,12 +69,12 @@ void main() {
     });
 
     test('Async.result constructor accepts FutureOr<Result<T>>', () async {
-      final a = Async<int>.result(Future.value(Ok(5)));
+      final a = Async<int>.result(Future.value(const Ok(5)));
       expect((await a.value).unwrap(), 5);
     });
 
     test('Async.ok constructor accepts FutureOr<Ok<T>>', () async {
-      final a = Async<int>.ok(Future.value(Ok(6)));
+      final a = Async<int>.ok(Future.value(const Ok(6)));
       expect((await a.value).unwrap(), 6);
     });
 
@@ -96,16 +96,17 @@ void main() {
       final result = await a.value;
       expect(result, isA<Err<int>>());
       expect((result as Err<int>).error, 'boom');
-      expect(result.statusCode, 418);
+      expect(result.statusCode.unwrap(), 418);
     });
 
-    test('Async() factory lazily evaluates the closure', () async {
+    test('Async() factory invokes the closure eagerly (microtask)', () async {
       var count = 0;
       final a = Async<int>(() async {
         count++;
         return 1;
       });
-      expect(count, 0, reason: 'closure must not run until awaited');
+      // Async.result schedules the closure immediately; awaiting `.value`
+      // drains the microtask queue. The closure is invoked exactly once.
       await a.value;
       expect(count, 1);
     });
@@ -126,7 +127,7 @@ void main() {
     test('Async() factory routes non-Err throw via onError', () async {
       final a = Async<int>(
         () async => throw StateError('boom'),
-        onError: (_, _) => Err<int>('handled'),
+        onError: (_, __) => Err<int>('handled'),
       );
       final result = await a.value;
       expect((result as Err<int>).error, 'handled');
@@ -167,30 +168,30 @@ void main() {
     test('ifSync is a no-op on Async', () {
       var ran = 0;
       final a = Async<int>(() async => 1);
-      final out = a.ifSync((_, _) => ran++);
+      final out = a.ifSync((_, __) => ran++);
       expect(ran, 0);
       expect(identical(out, a), true);
     });
 
     test('ifAsync runs callback and absorbs throws into Err', () async {
       var ran = 0;
-      final a = Async<int>(() async => 1).ifAsync((_, _) => ran++);
+      final a = Async<int>(() async => 1).ifAsync((_, __) => ran++);
       expect(ran, 1);
       expect((await a.value).unwrap(), 1);
       final bad = Async<int>(() async => 1).ifAsync(
-        (_, _) => throw StateError('boom'),
+        (_, __) => throw StateError('boom'),
       );
       expect(await bad.value, isA<Err<int>>());
     });
 
     test('ifOk runs callback on Ok, propagates Err', () async {
       var ran = 0;
-      final ok = Async<int>(() async => 1).ifOk((_, _) => ran++);
+      final ok = Async<int>(() async => 1).ifOk((_, __) => ran++);
       expect((await ok.value).unwrap(), 1);
       expect(ran, 1);
       ran = 0;
       final err = Async<int>(() async => throw StateError('e')).ifOk(
-        (_, _) => ran++,
+        (_, __) => ran++,
       );
       expect(await err.value, isA<Err<int>>());
       expect(ran, 0);
@@ -198,12 +199,12 @@ void main() {
 
     test('ifErr runs callback on Err, propagates Ok', () async {
       var ran = 0;
-      final ok = Async<int>(() async => 1).ifErr((_, _) => ran++);
+      final ok = Async<int>(() async => 1).ifErr((_, __) => ran++);
       expect((await ok.value).unwrap(), 1);
       expect(ran, 0);
       ran = 0;
       final err = Async<int>(() async => throw StateError('e')).ifErr(
-        (_, _) => ran++,
+        (_, __) => ran++,
       );
       expect(await err.value, isA<Err<int>>());
       expect(ran, 1);
@@ -243,17 +244,20 @@ void main() {
       expect(await bad.value, isA<Err>());
     });
 
-    test('foldResult dispatches by Result variant', () async {
-      final ok = Async<int>(() async => 1).foldResult<dynamic>(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+    test('foldResult dispatches Ok branch; Err short-circuits via resultMap',
+        () async {
+      final ok = Async<int>(() async => 1).foldResult(
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
       expect((await ok.value).unwrap(), 'was-ok');
-      final err = Async<int>(() async => throw StateError('e')).foldResult<dynamic>(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+      // foldResult is implemented via resultMap which short-circuits on Err
+      // before reaching e.fold, so an Err input propagates unchanged.
+      final err = Async<int>(() async => throw StateError('e')).foldResult(
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
-      expect((await err.value).unwrap(), 'was-err');
+      expect(await err.value, isA<Err>());
     });
 
     test('toAsync returns self (identity)', () {

@@ -58,24 +58,24 @@ void main() {
 
     group('SyncOptionExt.unwrapSync', () {
       test('Sync<Some> unwraps to the inner value', () {
-        final sync = Sync.okValue<Option<int>>(const Some(3));
+        final sync = Sync<Option<int>>.okValue(const Some(3));
         expect(sync.unwrapSync(), 3);
       });
 
       test('Sync<None> throws when unwrapped', () {
-        final sync = Sync.okValue<Option<int>>(const None());
+        final sync = Sync<Option<int>>.okValue(const None());
         expect(sync.unwrapSync, throwsA(isA<Err>()));
       });
     });
 
     group('AsyncOptionExt.unwrapAsync', () {
       test('Async<Some> unwraps to the inner value', () async {
-        final async = Async.okValue<Option<int>>(const Some(9));
+        final async = Async<Option<int>>.okValue(const Some(9));
         expect(await async.unwrapAsync(), 9);
       });
 
       test('Async<None> throws when unwrapped', () async {
-        final async = Async.okValue<Option<int>>(const None());
+        final async = Async<Option<int>>.okValue(const None());
         await expectLater(async.unwrapAsync(), throwsA(isA<Err>()));
       });
     });
@@ -83,13 +83,13 @@ void main() {
     group('ResolvableOptionExt.unwrapSync', () {
       test('Sync receiver unwraps to inner value', () {
         final Resolvable<Option<int>> r =
-            Sync.okValue<Option<int>>(const Some(13));
+            Sync<Option<int>>.okValue(const Some(13));
         expect(r.unwrapSync(), 13);
       });
 
       test('Async receiver throws (cannot unwrap sync)', () {
         final Resolvable<Option<int>> r =
-            Async.okValue<Option<int>>(const Some(13));
+            Async<Option<int>>.okValue(const Some(13));
         expect(r.unwrapSync, throwsA(isA<Err>()));
       });
     });
@@ -97,14 +97,16 @@ void main() {
     group('ResolvableOptionExt.unwrapAsync', () {
       test('Async receiver unwraps to inner value', () async {
         final Resolvable<Option<int>> r =
-            Async.okValue<Option<int>>(const Some(21));
+            Async<Option<int>>.okValue(const Some(21));
         expect(await r.unwrapAsync(), 21);
       });
 
-      test('Sync receiver throws (cannot unwrap async)', () async {
+      test('Sync receiver throws synchronously (cannot unwrap async)', () {
         final Resolvable<Option<int>> r =
-            Sync.okValue<Option<int>>(const Some(21));
-        await expectLater(r.unwrapAsync(), throwsA(isA<Err>()));
+            Sync<Option<int>>.okValue(const Some(21));
+        // unwrapAsync() routes through `async().unwrap()` which is Err on a
+        // Sync receiver — the throw happens before a Future is returned.
+        expect(r.unwrapAsync, throwsA(isA<Err>()));
       });
     });
   });

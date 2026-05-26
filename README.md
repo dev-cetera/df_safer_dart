@@ -1,5 +1,5 @@
 [![pub](https://img.shields.io/pub/v/df_safer_dart.svg)](https://pub.dev/packages/df_safer_dart)
-[![tag](https://img.shields.io/badge/Tag-v0.20.0-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.20.0)
+[![tag](https://img.shields.io/badge/Tag-v0.21.0-purple?logo=github)](https://github.com/dev-cetera/df_safer_dart/tree/v0.21.0)
 [![buymeacoffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/dev_cetera)
 [![sponsor](https://img.shields.io/badge/Sponsor-grey?logo=github-sponsors&logoColor=pink)](https://github.com/sponsors/dev-cetera)
 [![patreon](https://img.shields.io/badge/Patreon-grey?logo=patreon)](https://www.patreon.com/robelator)
@@ -11,39 +11,49 @@
 
 <!-- BEGIN _README_CONTENT -->
 
-## Summary
+## Stop writing defensive code. Write the happy path.
 
-`df_safer_dart` is a foundation layer for **mission-critical Dart and Flutter
-code** — built around three sealed types that turn `null`, exceptions, and
-`Future`s into values the compiler forces you to handle.
+Dart code leaks risk in three places: nullable values, thrown exceptions, and
+unawaited futures. `df_safer_dart` turns all three into typed values the
+compiler tracks for you — so the noisy parts of your code disappear and the
+intent stays.
 
-- `Option<T>` = `Some<T>` ∣ `None<T>` — absence-as-data, no null checks.
-- `Result<T>` = `Ok<T>` ∣ `Err<T>` — fallibility-as-data, no `try/catch`.
-- `Resolvable<T>` = `Sync<T>` ∣ `Async<T>` — sync/async unified, both wrap a `Result`.
+```dart
+import 'package:df_safer_dart/df_safer_dart.dart';
+import 'dart:convert';
 
-Companion packages enforce the safety contracts at compile time:
+Async<Option<String>> notificationSound(int userId) =>
+    fetchUserData(userId)                                  // Async<String>
+        .map((body) => UNSAFE(() => jsonDecode(body)))     // Async<dynamic>
+        .map((data) => getFromMap<Map>(data, 'config')     // -> Option chain
+            .flatMap((c) => getFromMap<Map>(c, 'notifications'))
+            .flatMap((n) => getFromMap<String>(n, 'sound')));
+```
 
-- [`df_safer_dart_annotations`](https://pub.dev/packages/df_safer_dart_annotations) —
-  marker annotations (`@noFutures`, `@unsafeOrError`, `@mustBeAnonymous`,
-  `@mustAwaitAllFutures`, `@mustHandleReturn`, `@mustBeStrongRef`).
-- [`df_safer_dart_lints`](https://pub.dev/packages/df_safer_dart_lints) — a
-  `custom_lint` plugin that turns the annotations into real lint errors.
+No `try / catch`. No `await`. No `if (x != null)`. If anything throws or a key
+is missing, the chain short-circuits and the failure arrives at the end with
+the original stack trace intact.
 
-See [`ARTICLE.md`](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)
-for a tutorial-style walkthrough and `example/lib/example.dart` for an
-end-to-end runnable pipeline.
+## Three sealed types do all the work
 
-## Installation
+| Type | Variants | What it replaces |
+|------|----------|------------------|
+| `Option<T>` | `Some<T>` ∣ `None<T>` | nullable `T?`, null checks |
+| `Result<T>` | `Ok<T>` ∣ `Err<T>` | thrown exceptions, `try / catch` |
+| `Resolvable<T>` | `Sync<T>` ∣ `Async<T>` | the `T` vs. `Future<T>` split |
+
+They share a common `Outcome<T>` interface — `map`, `flatMap`, `fold`,
+`unwrap`, `named` work uniformly across all three. Sync stays sync;
+asynchrony only appears when something genuinely is async.
+
+## Install
 
 ```sh
 dart pub add df_safer_dart
 dart pub add --dev custom_lint df_safer_dart_lints
-# or, for a Flutter project:
-flutter pub add df_safer_dart
-flutter pub add --dev custom_lint df_safer_dart_lints
 ```
 
-Then enable the lint plugin in `analysis_options.yaml`:
+Enable the lint plugin in `analysis_options.yaml`:
 
 ```yaml
 analyzer:
@@ -51,131 +61,53 @@ analyzer:
     - custom_lint
 ```
 
-## Quick taste
+## The compiler enforces the discipline
+
+The companion [`df_safer_dart_lints`](https://pub.dev/packages/df_safer_dart_lints)
+plugin makes the safety rules non-negotiable. A few examples of what it catches:
+
+- Dropping an `Outcome` on the floor.
+- Declaring a `Future<Outcome<T>>` (use `Async<T>` instead).
+- Calling `.unwrap()` outside an `UNSAFE(() => ...)` block.
+- `async`/`await` inside a function marked `@noFutures`.
+
+You don't have to remember the rules. The analyzer remembers them for you.
+
+## Know which step failed
+
+Every `Err` carries a list of `breadcrumbs`. Tag any step with `.named(label)`
+and you'll know exactly where a failure originated:
 
 ```dart
-import 'package:df_safer_dart/df_safer_dart.dart';
+parseInt('not-a-number')
+    .named('parse')
+    .map((n) => n * 2)
+    .named('double');
 
-Result<int> parseInt(String s) => Sync(() => int.parse(s)).value;
-
-void main() {
-  final r = parseInt('42').map((n) => n * 2);
-
-  switch (r) {
-    case Ok(value: final n): print('got $n');     // → got 84
-    case Err err:            print('failed: ${err.error}');
-  }
-}
+// → Err(FormatException..., breadcrumbs: ['parse'])
 ```
 
-## Reliability guarantees
+## Built for code that can't fail
 
 This package is held to a **military-/medical-grade reliability** standard.
-The
-[`test/hardening_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/hardening_test.dart)
-and
-[`test/propagation_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/propagation_test.dart)
-suites encode the rules:
+Every guarantee is backed by an abuse test in
+[`test/hardening_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/hardening_test.dart):
 
-- **No stack overflows on deep nesting.** `Outcome.reduce()` and
-  `Outcome.raw()` flatten iteratively. A chain of 10,000 nested
-  `Some(Some(Ok(Ok(...))))` collapses without consuming 10,000 frames.
-- **Stack traces survive transformations.** `Err.transfErr()` preserves the
-  original `stackTrace` and `statusCode`.
-- **Debug and release behave identically.** Errors thrown inside `fold()` and
-  `transf()` always become an `Err` carrying the original stack — no
-  `assert(false)` divergence.
-- **Throws inside `map` / `flatMap` / `mapOk` are absorbed.** `Ok.map<R>`,
-  `Ok.flatMap<R>` and `Ok.mapOk` return `Result<R>` (not `Ok<R>`); a throwing
-  callback becomes an `Err` instead of escaping the pipeline.
-- **Concurrency primitives don't blow the stack.** `TaskSequencer` drains its
-  re-entrant queue iteratively. `SafeCompleter.isCompleted` flips the moment
-  a resolve is accepted, making the resolve-once invariant observable.
-- **Safe numeric coercion.** `letIntOrNone` returns `None` for `NaN`,
-  `±Infinity`, and out-of-range doubles instead of throwing.
-- **Iteration-safe combinators.** `combineResolvable` materializes its input
-  once, so single-pass `sync*` generators are handled correctly.
+- 10,000-deep nested outcomes flatten without blowing the stack.
+- Throws inside `map` / `flatMap` are absorbed — they never escape the pipeline.
+- Stack traces survive every transformation, including type changes.
+- Debug and release behave identically — no `assert(false)` divergence.
+- Numeric coercions return `None` for `NaN` / `±Infinity` instead of throwing.
+- Concurrency primitives (`TaskSequencer`, `SafeCompleter`) drain iteratively
+  under reentrant bursts.
 
-### Failure attribution: `Err.breadcrumbs` and `.named(label)`
+## Learn more
 
-Every `Err` carries a `List<String> breadcrumbs` — ordered labels identifying
-the pipeline step(s) that produced it. Tag steps with `.named(label)` on any
-`Result`, `Sync`, `Async`, or `Resolvable`. The first failing step wins
-attribution; downstream `.named(...)` calls don't overwrite it.
-
-```dart
-final r = parseInt('not-a-number')
-  .named('parse')
-  .map((n) => n * 2)
-  .named('double');
-
-// r is Err(..., breadcrumbs: ['parse'])
-```
-
-The 30-test propagation matrix in `propagation_test.dart` verifies that every
-combinator on every concrete `Outcome` flavour preserves error attribution
-through multi-step pipelines.
-
-## Compile-time enforcement
-
-The custom_lint plugin in `df_safer_dart_lints` (re-)expresses the same rules
-at compile time. Every rule is covered by a fixture under
-[`df_safer_dart_lints/example/lib/fixtures/`](https://github.com/dev-cetera/df_safer_dart_lints/tree/main/example/lib/fixtures)
-and run by an end-to-end test:
-
-| Lint code                                                | Severity        | What it stops |
-|----------------------------------------------------------|-----------------|---------------|
-| `must_use_outcome_or_error`                              | error           | dropping an `Outcome` on the floor |
-| `no_future_outcome_type_or_error`                        | error           | `Future<Outcome<T>>` / `Outcome<Future<T>>` types |
-| `no_futures` / `no_futures_or_error`                     | warning / error | `async`/`await`/`Future` inside `@noFutures` |
-| `must_await_all_futures` / `_or_error`                   | warning / error | unhandled futures inside `@mustAwaitAllFutures` |
-| `must_be_anonymous` / `_or_error`                        | warning / error | passing a named ref where an inline lambda is required |
-| `must_be_strong_ref` / `_or_error`                       | warning / error | passing an anonymous closure where a strong ref is required |
-| `must_handle_return` / `_or_error`                       | warning / error | dropping the return value of an annotated function |
-| `must_use_unsafe_wrapper` / `_or_error`                  | warning / error | calling `@unsafe` / `@unsafeOrError` code outside an `UNSAFE(() => ...)` block |
-
-## Recommended consumer setup
-
-Drop this into your project's `analysis_options.yaml` to opt into the same
-strict-but-additive baseline df_safer_dart uses for itself:
-
-```yaml
-include: package:lints/recommended.yaml
-
-linter:
-  rules:
-    unawaited_futures: true
-    discarded_futures: true
-    cancel_subscriptions: true
-    close_sinks: true
-    control_flow_in_finally: true
-    throw_in_finally: true
-    empty_catches: true
-    void_checks: true
-    cast_nullable_to_non_nullable: true
-    null_check_on_nullable_type_parameter: true
-    hash_and_equals: true
-    test_types_in_equals: true
-    recursive_getters: true
-
-analyzer:
-  plugins:
-    - custom_lint
-  language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
-  errors:
-    unawaited_futures: error
-    cancel_subscriptions: error
-    empty_catches: error
-    void_checks: error
-    cast_nullable_to_non_nullable: error
-    null_check_on_nullable_type_parameter: error
-    hash_and_equals: error
-    test_types_in_equals: error
-    recursive_getters: error
-```
+- **[ARTICLE.md](https://github.com/dev-cetera/df_safer_dart/blob/main/ARTICLE.md)** —
+  tutorial-style walkthrough of `Option`, `Result`, and `Resolvable` with
+  worked examples.
+- **[example/lib/example.dart](https://github.com/dev-cetera/df_safer_dart/blob/main/example/lib/example.dart)** —
+  the JSON-fetch pipeline above, runnable end to end.
 
 <!-- END _README_CONTENT -->
 

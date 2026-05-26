@@ -70,7 +70,7 @@ void main() {
       final s = Sync<int>.errValue('boom', statusCode: 500);
       expect(s.value, isA<Err<int>>());
       expect((s.value as Err<int>).error, 'boom');
-      expect((s.value as Err<int>).statusCode, 500);
+      expect((s.value as Err<int>).statusCode.unwrap(), 500);
     });
 
     test('Sync() factory wraps return value as Ok', () {
@@ -214,7 +214,9 @@ void main() {
         (sync) => Sync.okValue('sync-branch'),
         (async) => Sync.okValue('async-branch'),
       );
-      expect((s.value as Ok<String>).value, 'sync-branch');
+      // fold's inferred R is Object since branches return different generic
+      // arguments — runtime payload is Ok<Object> wrapping a String.
+      expect((s.value as Ok).value, 'sync-branch');
       final bad = Sync.okValue(1).fold(
         (sync) => throw StateError('boom'),
         (async) => Sync.okValue('async-branch'),
@@ -224,13 +226,13 @@ void main() {
 
     test('foldResult dispatches by Result variant', () {
       final ok = Sync.okValue(1).foldResult(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
       expect((ok.value as Ok<String>).value, 'was-ok');
       final err = Sync<int>.errValue('e').foldResult(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
       expect((err.value as Ok<String>).value, 'was-err');
     });

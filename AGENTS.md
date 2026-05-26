@@ -8,7 +8,7 @@ Working notes for AI agents collaborating on this package. The user has stated t
 
 | Package | Path | Role |
 | --- | --- | --- |
-| `df_safer_dart` *(this)* | `.` | Core types (`Option`, `Result`, `Resolvable`), extensions, concurrency tools (`SafeCompleter`, `TaskSequencer`) |
+| `df_safer_dart` *(this)* | `.` | Core types (`Option`, `Result`, `Resolvable`), extensions, concurrency tools (`SafeCompleter`, `TaskSequencer`, `ConcurrentTaskBatch`, `SequencedTaskBatch` on a shared `TaskBatchBase`) |
 | `df_di` | `../df_di` | DI container hierarchy (`DI.root`/`global`/`session`/`user`), `Service`/`ServiceMixin`, `StreamServiceMixin`, `PollingStreamServiceMixin` |
 | `df_pod` | `../df_pod` | Reactive containers (`Pod<T>`, `ChildPod`, `ReducerPod`, `SharedPod`), `WeakChangeNotifier`, `PodBuilder` and friends |
 | `df_flutter_services` | `../df_flutter_services` | `ObservedService`, `ObservedDataStreamService`, `HandleServiceLifecycleStateMixin` (Flutter app-lifecycle glue) |
@@ -55,7 +55,10 @@ Everything is exported by `lib/df_safer_dart.dart` → `lib/src/_src.g.dart` (ge
 
 ## Tests
 
-Test files live in `test/` and follow the standard `*_test.dart` naming, so `dart test` discovers them all.
+Test files live in `test/` and follow the standard `*_test.dart` naming, so `dart test` discovers them all. Two zones:
+
+- `test/*.dart` — broad behaviour suites: `hardening_test.dart`, `propagation_test.dart`, the `abuse_*_test.dart` family, `medical_grade_test.dart`, `chain_propagation_test.dart`, `err_preservation_test.dart`, `error_propagation_systematic_test.dart`, `audit_round_test.dart`, `isolate_sendability_test.dart`, `int64_boundary_vm_test.dart`, `safe_completer_test.dart`. Add new abuse/hardening cases here.
+- `test/unit/src/…` — mirror of `lib/src/…`. New unit tests for a source file at `lib/src/foo/bar.dart` go to `test/unit/src/foo/bar_test.dart`, not the top level.
 
 Runnable sequencer demos (no `test()` calls) live under `example/lib/sequencer_demos/` — they are not tests.
 

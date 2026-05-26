@@ -77,7 +77,7 @@ void main() {
       final err = events.single;
       expect(err, isA<Err<int>>());
       expect((err as Err<int>).error, 'upstream');
-      expect(err.statusCode, 418);
+      expect(err.statusCode.unwrap(), 418);
     });
 
     test('done event closes the safe stream', () async {

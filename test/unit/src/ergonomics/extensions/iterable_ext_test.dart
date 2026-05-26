@@ -122,7 +122,7 @@ void main() {
       test('whereSome keeps only Some entries', () {
         final out = source.whereSome().toList();
         expect(out, hasLength(2));
-        expect(out.every((e) => e is Some<int>), isTrue);
+        expect(out, everyElement(isA<Some<int>>()));
       });
 
       test('whereNone keeps only None entries', () {
@@ -169,7 +169,7 @@ void main() {
         ];
         final out = (await futures.whereSome()).toList();
         expect(out, hasLength(2));
-        expect(out.every((e) => e is Some<int>), isTrue);
+        expect(out, everyElement(isA<Some<int>>()));
       });
 
       test('whereNone awaits and filters None', () async {
@@ -206,7 +206,7 @@ void main() {
       test('whereOk keeps only Ok entries', () {
         final out = source.whereOk().toList();
         expect(out, hasLength(2));
-        expect(out.every((e) => e is Ok<int>), isTrue);
+        expect(out, everyElement(isA<Ok<int>>()));
       });
 
       test('whereErr keeps only Err entries', () {
@@ -253,7 +253,7 @@ void main() {
         ];
         final out = (await futures.whereOk()).toList();
         expect(out, hasLength(2));
-        expect(out.every((e) => e is Ok<int>), isTrue);
+        expect(out, everyElement(isA<Ok<int>>()));
       });
 
       test('whereErr awaits and filters Err', () async {
@@ -292,7 +292,7 @@ void main() {
       test('whereSync keeps only Sync entries', () {
         final out = source.whereSync().toList();
         expect(out, hasLength(2));
-        expect(out.every((e) => e is Sync<int>), isTrue);
+        expect(out, everyElement(isA<Sync<int>>()));
       });
 
       test('whereAsync keeps only Async entries', () {
@@ -304,7 +304,7 @@ void main() {
       test('mapToAsync converts every entry to Async', () {
         final out = source.mapToAsync().toList();
         expect(out, hasLength(3));
-        expect(out.every((e) => e is Async<int>), isTrue);
+        expect(out, everyElement(isA<Async<int>>()));
       });
 
       test('partition splits sync/async in one pass', () {
@@ -332,7 +332,7 @@ void main() {
         final out = list.resolveInSequence();
         // Underlying TaskSequencer schedules microtasks — await the value to
         // observe the final list.
-        final result = await out.value;
+        final result = out.value;
         expect(result, isA<Ok<List<int>>>());
         expect(result.unwrap(), [1, 2, 3]);
       });

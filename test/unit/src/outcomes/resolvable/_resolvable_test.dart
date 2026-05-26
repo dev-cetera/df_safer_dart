@@ -223,15 +223,15 @@ void main() {
 
     test('foldResult dispatches to onOk vs onErr', () async {
       final ok = Sync.okValue(1).foldResult(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
       final err = Sync<int>.errValue('x').foldResult(
-        (o) => Ok<String>('was-ok'),
-        (e) => Ok<String>('was-err'),
+        (o) => const Ok<String>('was-ok'),
+        (e) => const Ok<String>('was-err'),
       );
-      expect((await ok.value).unwrap(), 'was-ok');
-      expect((await err.value).unwrap(), 'was-err');
+      expect((ok.value).unwrap(), 'was-ok');
+      expect((err.value).unwrap(), 'was-err');
     });
 
     test('withMinDuration(null) returns same instance', () {

@@ -18,14 +18,14 @@ void main() {
     });
 
     test('ToVoidOnSyncExt.toVoid returns the same instance typed as Sync<void>', () {
-      final Sync<int> source = Sync<int>.okValue(3);
+      final source = Sync<int>.okValue(3);
       final result = source.toVoid();
       expect(result, isA<Sync<void>>());
       expect(identical(result, source), isTrue);
     });
 
     test('ToVoidOnAsyncExt.toVoid returns the same instance typed as Async<void>', () async {
-      final Async<int> source = Async<int>.okValue(4);
+      final source = Async<int>.okValue(4);
       final result = source.toVoid();
       expect(result, isA<Async<void>>());
       expect(identical(result, source), isTrue);
@@ -48,14 +48,14 @@ void main() {
     });
 
     test('ToVoidOnSomeExt.toVoid returns the same Some instance typed as Some<void>', () {
-      const Some<int> source = Some<int>(6);
+      const source = Some<int>(6);
       final result = source.toVoid();
       expect(result, isA<Some<void>>());
       expect(identical(result, source), isTrue);
     });
 
     test('ToVoidOnNoneExt.toVoid returns the same None instance typed as None<void>', () {
-      const None<int> source = None<int>();
+      const source = None<int>();
       final result = source.toVoid();
       expect(result, isA<None<void>>());
       expect(identical(result, source), isTrue);
@@ -76,14 +76,14 @@ void main() {
     });
 
     test('ToVoidOnOkExt.toVoid returns the same Ok instance typed as Ok<void>', () {
-      const Ok<int> source = Ok<int>(8);
+      const source = Ok<int>(8);
       final result = source.toVoid();
       expect(result, isA<Ok<void>>());
       expect(identical(result, source), isTrue);
     });
 
     test('ToVoidOnErrExt.toVoid returns the same Err instance typed as Err<void>', () {
-      final Err<int> source = Err<int>('void-err');
+      final source = Err<int>('void-err');
       final result = source.toVoid();
       expect(result, isA<Err<void>>());
       expect(identical(result, source), isTrue);
