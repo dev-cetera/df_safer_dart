@@ -17,8 +17,7 @@ void main() {
       expect((resolved as Ok).value, 42);
     });
 
-    test('AsyncImpl.value resolves to an Err when the chain failed',
-        () async {
+    test('AsyncImpl.value resolves to an Err when the chain failed', () async {
       final AsyncImpl<int> impl =
           Async<int>.errValue((error: 'bad', statusCode: null));
       final resolved = await impl.value;
@@ -38,11 +37,8 @@ void main() {
       expect(Err<int>('e') is AsyncImpl, isFalse);
     });
 
-    test('private impl — covered transitively via Async round-trip',
-        () async {
-      final async = Async<int>.okValue(3)
-          .map((v) => v + 1)
-          .map((v) => v * 2);
+    test('private impl — covered transitively via Async round-trip', () async {
+      final async = Async<int>.okValue(3).map((v) => v + 1).map((v) => v * 2);
       expect(async, isA<AsyncImpl<int>>());
       expect(await async.unwrap(), 8);
     });

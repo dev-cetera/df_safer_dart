@@ -53,8 +53,11 @@ void expectErrWithStatus(Object outcome, String label, int code) {
 void expectWrappedStateError(Object outcome, String message) {
   expect(outcome, isA<Err>(), reason: 'expected Err but got $outcome');
   final err = outcome as Err;
-  expect(err.error, isA<StateError>(),
-      reason: 'non-Err throw not wrapped as Err.error',);
+  expect(
+    err.error,
+    isA<StateError>(),
+    reason: 'non-Err throw not wrapped as Err.error',
+  );
   expect((err.error as StateError).message, message);
 }
 
@@ -99,8 +102,7 @@ void main() {
       expectErrWithStatus(r, 'm', 110);
     });
     test('Ok.map: callback throws non-Err is wrapped', () {
-      final r =
-          Ok<int>(1).map<String>((_) => throw StateError('map-boom'));
+      final r = Ok<int>(1).map<String>((_) => throw StateError('map-boom'));
       expectWrappedStateError(r, 'map-boom');
     });
     test('Err.map: callback never runs', () {
@@ -378,8 +380,7 @@ void main() {
       );
       expectErrWithStatus(await a.value, 'amap', 221);
     });
-    test('Async.resultMap: callback throws Err preserves statusCode',
-        () async {
+    test('Async.resultMap: callback throws Err preserves statusCode', () async {
       final a = Async.okValue(1).resultMap<int>(
         (_) => throw Err<int>('arm', statusCode: 222),
       );
@@ -493,7 +494,9 @@ void main() {
     test('eagerError short-circuits and preserves statusCode', () async {
       // With eagerError, subsequent handlers don't run; the Err survives.
       final seq = TaskSequencer<int>(eagerError: true);
-      seq.then((_) => Sync.err(Err<Option<int>>('seed', statusCode: 272))).end();
+      seq
+          .then((_) => Sync.err(Err<Option<int>>('seed', statusCode: 272)))
+          .end();
       seq.then((_) => Sync.okValue(const Some(99))).end();
       final r = await seq.completion.value;
       expectErrWithStatus(r, 'seed', 272);

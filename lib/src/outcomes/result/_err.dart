@@ -88,8 +88,7 @@ final class Err<T extends Object> extends Result<T>
   /// WASM. Stack info there is recoverable via the original `StackTrace`
   /// passed by the caller, if any (we deliberately don't store it on the Err
   /// to keep field shape unchanged).
-  static const bool _isDart2Wasm =
-      bool.fromEnvironment('dart.tool.dart2wasm');
+  static const bool _isDart2Wasm = bool.fromEnvironment('dart.tool.dart2wasm');
 
   /// Captures a [Trace] from [stackTrace] (or the current call site if null),
   /// falling back to an empty trace if `stack_trace`'s parser throws or if

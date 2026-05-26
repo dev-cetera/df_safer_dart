@@ -12,7 +12,8 @@ void main() {
       expect((inner as Ok<None<int>>).unwrap(), isA<None<int>>());
     });
 
-    test('SwapNoneAsyncExt.swap turns None<Async<T>> into Async<None<T>>', () async {
+    test('SwapNoneAsyncExt.swap turns None<Async<T>> into Async<None<T>>',
+        () async {
       const input = None<Async<int>>();
       final swapped = input.swap();
       expect(swapped, isA<Async<None<int>>>());
@@ -21,7 +22,9 @@ void main() {
       expect((inner as Ok<None<int>>).unwrap(), isA<None<int>>());
     });
 
-    test('SwapNoneResolvableExt.swap turns None<Resolvable<T>> into Resolvable<None<T>>', () async {
+    test(
+        'SwapNoneResolvableExt.swap turns None<Resolvable<T>> into Resolvable<None<T>>',
+        () async {
       const input = None<Resolvable<int>>();
       final swapped = input.swap();
       expect(swapped, isA<Resolvable<None<int>>>());

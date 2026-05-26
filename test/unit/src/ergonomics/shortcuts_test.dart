@@ -36,7 +36,9 @@ void main() {
       expect(r.unwrap(), isA<None<int>>());
     });
 
-    test('syncSome<T>(value) returns Sync<Some<T>> resolving to Ok(Some(value))', () {
+    test(
+        'syncSome<T>(value) returns Sync<Some<T>> resolving to Ok(Some(value))',
+        () {
       final s = syncSome<int>(42);
       expect(s, isA<Sync<Some<int>>>());
       final r = s.value;
@@ -46,7 +48,8 @@ void main() {
       expect(inner.value, 42);
     });
 
-    test('asyncUnit() returns Async<Unit> resolving to Ok(Unit.instance)', () async {
+    test('asyncUnit() returns Async<Unit> resolving to Ok(Unit.instance)',
+        () async {
       final a = asyncUnit();
       expect(a, isA<Async<Unit>>());
       final r = await a.value;
@@ -54,7 +57,8 @@ void main() {
       expect(r.unwrap(), same(UNIT));
     });
 
-    test('asyncNone<T>() returns Async<None<T>> resolving to Ok(None)', () async {
+    test('asyncNone<T>() returns Async<None<T>> resolving to Ok(None)',
+        () async {
       final a = asyncNone<int>();
       expect(a, isA<Async<None<int>>>());
       final r = await a.value;
@@ -62,7 +66,9 @@ void main() {
       expect(r.unwrap(), isA<None<int>>());
     });
 
-    test('asyncSome<T>(value) returns Async<Some<T>> resolving to Ok(Some(value))', () async {
+    test(
+        'asyncSome<T>(value) returns Async<Some<T>> resolving to Ok(Some(value))',
+        () async {
       final a = asyncSome<int>(7);
       expect(a, isA<Async<Some<int>>>());
       final r = await a.value;
@@ -87,7 +93,8 @@ void main() {
       expect(inner.unwrap(), isA<None<int>>());
     });
 
-    test('resolvableSome<T>(value) returns a Resolvable<Some<T>> Sync variant', () {
+    test('resolvableSome<T>(value) returns a Resolvable<Some<T>> Sync variant',
+        () {
       final r = resolvableSome<int>(5);
       expect(r, isA<Resolvable<Some<int>>>());
       expect(r, isA<Sync<Some<int>>>());

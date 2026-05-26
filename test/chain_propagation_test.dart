@@ -476,9 +476,8 @@ void main() {
 
     test('Throwing a raw int does not crash; reaches end wrapped', () {
       // Yes, you can `throw 42` in Dart. The pipeline must still survive.
-      final out = Sync.okValue(1)
-          .map<int>((_) => throw 42)
-          .named('int-throw-step');
+      final out =
+          Sync.okValue(1).map<int>((_) => throw 42).named('int-throw-step');
       expect(out.value, isA<Err<int>>());
       expect((out.value as Err<int>).error, 42);
       expect((out.value as Err<int>).breadcrumbs, ['int-throw-step']);
@@ -576,7 +575,8 @@ void main() {
 
       Async<int> failingBranch() => Async.okValue(1)
           .then((v) => v + 1)
-          .then<int>((_) => throw Err<int>('async-branch-fail', statusCode: 461))
+          .then<int>(
+              (_) => throw Err<int>('async-branch-fail', statusCode: 461))
           .named('async-failing-branch');
 
       final combined = combineAsync<int>([
@@ -597,7 +597,8 @@ void main() {
       final combined = combineResolvable<int>([
         Sync.okValue(1).named('sync-leg'),
         Async.okValue(2)
-            .then<int>((_) => throw Err<int>('mixed-branch-fail', statusCode: 462))
+            .then<int>(
+                (_) => throw Err<int>('mixed-branch-fail', statusCode: 462))
             .named('async-leg'),
         Sync.okValue(3),
       ]);
@@ -621,28 +622,22 @@ void main() {
       final chain = Sync.okValue(1)
           .map<int>((_) => throw Err<int>('boom', statusCode: 470))
           .named('boom-step');
-      final out = chain
-          .map((v) {
-            afterCount++;
-            return v;
-          })
-          .map((v) {
-            afterCount++;
-            return v;
-          })
-          .map((v) {
-            afterCount++;
-            return v;
-          })
-          .map((v) {
-            afterCount++;
-            return v;
-          })
-          .map((v) {
-            afterCount++;
-            return v;
-          })
-          .named('never-runs');
+      final out = chain.map((v) {
+        afterCount++;
+        return v;
+      }).map((v) {
+        afterCount++;
+        return v;
+      }).map((v) {
+        afterCount++;
+        return v;
+      }).map((v) {
+        afterCount++;
+        return v;
+      }).map((v) {
+        afterCount++;
+        return v;
+      }).named('never-runs');
       expect(afterCount, 0);
       expectFailure(
         out.value,
@@ -781,14 +776,22 @@ void main() {
 
     test('Sync side: nested thrower at step 4 of 8', () {
       final out = Sync.okValue(0)
-          .map((v) => v + 1).named('s1')
-          .resultMap<int>((r) => Ok(r.unwrap() + 1)).named('s2')
-          .transf<int>((v) => v + 1).named('s3')
-          .map<int>(nestedThrower).named('s4-throws')
-          .ifOk((_, __) {}).named('s5')
-          .then((v) => v + 1).named('s6')
-          .whenComplete<int>((s) => s).named('s7')
-          .then((v) => v + 1).named('s8');
+          .map((v) => v + 1)
+          .named('s1')
+          .resultMap<int>((r) => Ok(r.unwrap() + 1))
+          .named('s2')
+          .transf<int>((v) => v + 1)
+          .named('s3')
+          .map<int>(nestedThrower)
+          .named('s4-throws')
+          .ifOk((_, __) {})
+          .named('s5')
+          .then((v) => v + 1)
+          .named('s6')
+          .whenComplete<int>((s) => s)
+          .named('s7')
+          .then((v) => v + 1)
+          .named('s8');
       // After the `whenComplete`, we have a Resolvable<int>; cast through Sync.
       final settled = (out as Sync<int>).value;
       expectFailure(
@@ -801,13 +804,20 @@ void main() {
 
     test('Async side: nested thrower with toAsync bridge', () async {
       final out = await Sync.okValue(0)
-          .map((v) => v + 1).named('a1')
-          .transf<int>((v) => v + 1).named('a2')
-          .toAsync().named('a-bridge')
-          .then((v) => v + 1).named('a3')
-          .then<int>(nestedThrower).named('a4-throws')
-          .then((v) => v + 1).named('a5')
-          .then((v) => v + 1).named('a6')
+          .map((v) => v + 1)
+          .named('a1')
+          .transf<int>((v) => v + 1)
+          .named('a2')
+          .toAsync()
+          .named('a-bridge')
+          .then((v) => v + 1)
+          .named('a3')
+          .then<int>(nestedThrower)
+          .named('a4-throws')
+          .then((v) => v + 1)
+          .named('a5')
+          .then((v) => v + 1)
+          .named('a6')
           .value;
       expectFailure(
         out,

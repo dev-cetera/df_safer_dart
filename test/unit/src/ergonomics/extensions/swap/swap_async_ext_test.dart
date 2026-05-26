@@ -3,7 +3,8 @@ import 'package:test/test.dart';
 
 void main() {
   group('swap_async_ext', () {
-    test('SwapAsyncSomeExt.swap turns Async<Some<T>> into Some<Async<T>>', () async {
+    test('SwapAsyncSomeExt.swap turns Async<Some<T>> into Some<Async<T>>',
+        () async {
       final input = Async<Some<int>>(() async => const Some(7));
       final swapped = input.swap();
       final inner = swapped.unwrap();

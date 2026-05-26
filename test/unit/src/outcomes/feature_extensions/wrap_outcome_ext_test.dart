@@ -19,7 +19,8 @@ void main() {
       expect(identical(wrapped.value, some), isTrue);
     });
 
-    test('WrapOnOutcomeExt.wrapInResolvable wraps the outcome in a Resolvable', () async {
+    test('WrapOnOutcomeExt.wrapInResolvable wraps the outcome in a Resolvable',
+        () async {
       const some = Some<int>(3);
       final wrapped = some.wrapInResolvable();
       expect(wrapped, isA<Resolvable<Some<int>>>());
@@ -34,7 +35,8 @@ void main() {
       expect(identical(wrapped.value.unwrap(), some), isTrue);
     });
 
-    test('WrapOnOutcomeExt.wrapInAsync wraps the outcome in an Async', () async {
+    test('WrapOnOutcomeExt.wrapInAsync wraps the outcome in an Async',
+        () async {
       const some = Some<int>(5);
       final wrapped = some.wrapInAsync();
       expect(wrapped, isA<Async<Some<int>>>());
@@ -60,7 +62,9 @@ void main() {
       expect(inner.value, 7);
     });
 
-    test('WrapOnOutcomeExt.wrapValueInResolvable maps the value to Sync.okValue(value)', () async {
+    test(
+        'WrapOnOutcomeExt.wrapValueInResolvable maps the value to Sync.okValue(value)',
+        () async {
       const some = Some<int>(8);
       final wrapped = some.wrapValueInResolvable();
       expect(wrapped, isA<Outcome<Resolvable<int>>>());
@@ -70,7 +74,9 @@ void main() {
       expect(settled.unwrap(), 8);
     });
 
-    test('WrapOnOutcomeExt.wrapValueInSync maps the value to Sync.okValue(value)', () {
+    test(
+        'WrapOnOutcomeExt.wrapValueInSync maps the value to Sync.okValue(value)',
+        () {
       const some = Some<int>(9);
       final wrapped = some.wrapValueInSync();
       expect(wrapped, isA<Outcome<Sync<int>>>());
@@ -79,7 +85,9 @@ void main() {
       expect(inner.value.unwrap(), 9);
     });
 
-    test('WrapOnOutcomeExt.wrapValueInAsync maps the value to Async.okValue(value)', () async {
+    test(
+        'WrapOnOutcomeExt.wrapValueInAsync maps the value to Async.okValue(value)',
+        () async {
       const some = Some<int>(10);
       final wrapped = some.wrapValueInAsync();
       expect(wrapped, isA<Outcome<Async<int>>>());
@@ -91,7 +99,9 @@ void main() {
 
     // ─── WrapOnResolvableExt<T> ─────────────────────────────────────────────
 
-    test('WrapOnResolvableExt.wrapValueInSome maps the resolved value to Some(value)', () async {
+    test(
+        'WrapOnResolvableExt.wrapValueInSome maps the resolved value to Some(value)',
+        () async {
       final Resolvable<int> source = Sync<int>.okValue(11);
       final wrapped = source.wrapValueInSome();
       expect(wrapped, isA<Resolvable<Some<int>>>());
@@ -99,7 +109,9 @@ void main() {
       expect(settled.unwrap().value, 11);
     });
 
-    test('WrapOnResolvableExt.wrapValueInOk maps the resolved value to Ok(value)', () async {
+    test(
+        'WrapOnResolvableExt.wrapValueInOk maps the resolved value to Ok(value)',
+        () async {
       final Resolvable<int> source = Sync<int>.okValue(12);
       final wrapped = source.wrapValueInOk();
       expect(wrapped, isA<Resolvable<Ok<int>>>());
@@ -107,7 +119,9 @@ void main() {
       expect(settled.unwrap().value, 12);
     });
 
-    test('WrapOnResolvableExt.wrapValueInResolvable maps the resolved value to Sync.okValue(value)', () async {
+    test(
+        'WrapOnResolvableExt.wrapValueInResolvable maps the resolved value to Sync.okValue(value)',
+        () async {
       final Resolvable<int> source = Sync<int>.okValue(13);
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Resolvable<Resolvable<int>>>());
@@ -117,7 +131,9 @@ void main() {
       expect(innerSettled.unwrap(), 13);
     });
 
-    test('WrapOnResolvableExt.wrapValueInSync maps the resolved value to Sync.okValue(value)', () async {
+    test(
+        'WrapOnResolvableExt.wrapValueInSync maps the resolved value to Sync.okValue(value)',
+        () async {
       final Resolvable<int> source = Sync<int>.okValue(14);
       final wrapped = source.wrapValueInSync();
       expect(wrapped, isA<Resolvable<Sync<int>>>());
@@ -125,7 +141,9 @@ void main() {
       expect(settled.unwrap().value.unwrap(), 14);
     });
 
-    test('WrapOnResolvableExt.wrapValueInAsync maps the resolved value to Async.okValue(value)', () async {
+    test(
+        'WrapOnResolvableExt.wrapValueInAsync maps the resolved value to Async.okValue(value)',
+        () async {
       final Resolvable<int> source = Sync<int>.okValue(15);
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Resolvable<Async<int>>>());
@@ -151,7 +169,8 @@ void main() {
       expect(wrapped.value.unwrap().value, 22);
     });
 
-    test('WrapOnSyncExt.wrapValueInResolvable maps Sync value to Sync.okValue', () {
+    test('WrapOnSyncExt.wrapValueInResolvable maps Sync value to Sync.okValue',
+        () {
       final source = Sync<int>.okValue(23);
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Sync<Resolvable<int>>>());
@@ -167,7 +186,8 @@ void main() {
       expect(wrapped.value.unwrap().value.unwrap(), 24);
     });
 
-    test('WrapOnSyncExt.wrapValueInAsync maps Sync value to Async.okValue', () async {
+    test('WrapOnSyncExt.wrapValueInAsync maps Sync value to Async.okValue',
+        () async {
       final source = Sync<int>.okValue(25);
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Sync<Async<int>>>());
@@ -194,7 +214,9 @@ void main() {
       expect(settled.unwrap().value, 32);
     });
 
-    test('WrapOnAsyncExt.wrapValueInResolvable maps Async value to Sync.okValue', () async {
+    test(
+        'WrapOnAsyncExt.wrapValueInResolvable maps Async value to Sync.okValue',
+        () async {
       final source = Async<int>.okValue(33);
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Async<Resolvable<int>>>());
@@ -204,7 +226,8 @@ void main() {
       expect(innerSettled.unwrap(), 33);
     });
 
-    test('WrapOnAsyncExt.wrapValueInSync maps Async value to Sync.okValue', () async {
+    test('WrapOnAsyncExt.wrapValueInSync maps Async value to Sync.okValue',
+        () async {
       final source = Async<int>.okValue(34);
       final wrapped = source.wrapValueInSync();
       expect(wrapped, isA<Async<Sync<int>>>());
@@ -212,7 +235,8 @@ void main() {
       expect(settled.unwrap().value.unwrap(), 34);
     });
 
-    test('WrapOnAsyncExt.wrapValueInAsync maps Async value to Async.okValue', () async {
+    test('WrapOnAsyncExt.wrapValueInAsync maps Async value to Async.okValue',
+        () async {
       final source = Async<int>.okValue(35);
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Async<Async<int>>>());
@@ -224,7 +248,8 @@ void main() {
 
     // ─── WrapOnOptionExt<T> ─────────────────────────────────────────────────
 
-    test('WrapOnOptionExt.wrapValueInSome on Some maps to Some(Some(value))', () {
+    test('WrapOnOptionExt.wrapValueInSome on Some maps to Some(Some(value))',
+        () {
       final Option<int> source = const Some<int>(41);
       final wrapped = source.wrapValueInSome();
       expect(wrapped, isA<Option<Some<int>>>());
@@ -244,7 +269,9 @@ void main() {
       expect(wrapped.unwrap().value, 42);
     });
 
-    test('WrapOnOptionExt.wrapValueInResolvable on Some maps to Some(Sync(value))', () {
+    test(
+        'WrapOnOptionExt.wrapValueInResolvable on Some maps to Some(Sync(value))',
+        () {
       final Option<int> source = const Some<int>(43);
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Option<Resolvable<int>>>());
@@ -252,14 +279,16 @@ void main() {
       expect(inner, isA<Sync<int>>());
     });
 
-    test('WrapOnOptionExt.wrapValueInSync on Some maps to Some(Sync(value))', () {
+    test('WrapOnOptionExt.wrapValueInSync on Some maps to Some(Sync(value))',
+        () {
       final Option<int> source = const Some<int>(44);
       final wrapped = source.wrapValueInSync();
       expect(wrapped, isA<Option<Sync<int>>>());
       expect(wrapped.unwrap().value.unwrap(), 44);
     });
 
-    test('WrapOnOptionExt.wrapValueInAsync on Some maps to Some(Async(value))', () async {
+    test('WrapOnOptionExt.wrapValueInAsync on Some maps to Some(Async(value))',
+        () async {
       final Option<int> source = const Some<int>(45);
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Option<Async<int>>>());
@@ -361,7 +390,8 @@ void main() {
       expect(wrapped.unwrap().value, 62);
     });
 
-    test('WrapOnResultExt.wrapValueInResolvable on Ok maps to Ok(Sync(value))', () {
+    test('WrapOnResultExt.wrapValueInResolvable on Ok maps to Ok(Sync(value))',
+        () {
       final Result<int> source = const Ok<int>(63);
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Result<Resolvable<int>>>());
@@ -375,7 +405,8 @@ void main() {
       expect(wrapped.unwrap().value.unwrap(), 64);
     });
 
-    test('WrapOnResultExt.wrapValueInAsync on Ok maps to Ok(Async(value))', () async {
+    test('WrapOnResultExt.wrapValueInAsync on Ok maps to Ok(Async(value))',
+        () async {
       final Result<int> source = const Ok<int>(65);
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Result<Async<int>>>());
@@ -425,7 +456,8 @@ void main() {
 
     // ─── WrapOnErrExt<T> ────────────────────────────────────────────────────
 
-    test('WrapOnErrExt.wrapValueInSome returns an Err preserving the error', () {
+    test('WrapOnErrExt.wrapValueInSome returns an Err preserving the error',
+        () {
       final source = Err<int>('e-some');
       final wrapped = source.wrapValueInSome();
       expect(wrapped, isA<Err<Some<int>>>());
@@ -439,21 +471,25 @@ void main() {
       expect(wrapped.error, 'e-ok');
     });
 
-    test('WrapOnErrExt.wrapValueInResolvable returns an Err preserving the error', () {
+    test(
+        'WrapOnErrExt.wrapValueInResolvable returns an Err preserving the error',
+        () {
       final source = Err<int>('e-resolvable');
       final wrapped = source.wrapValueInResolvable();
       expect(wrapped, isA<Err<Resolvable<int>>>());
       expect(wrapped.error, 'e-resolvable');
     });
 
-    test('WrapOnErrExt.wrapValueInSync returns an Err preserving the error', () {
+    test('WrapOnErrExt.wrapValueInSync returns an Err preserving the error',
+        () {
       final source = Err<int>('e-sync');
       final wrapped = source.wrapValueInSync();
       expect(wrapped, isA<Err<Sync<int>>>());
       expect(wrapped.error, 'e-sync');
     });
 
-    test('WrapOnErrExt.wrapValueInAsync returns an Err preserving the error', () {
+    test('WrapOnErrExt.wrapValueInAsync returns an Err preserving the error',
+        () {
       final source = Err<int>('e-async');
       final wrapped = source.wrapValueInAsync();
       expect(wrapped, isA<Err<Async<int>>>());

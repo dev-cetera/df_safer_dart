@@ -69,9 +69,8 @@ void main() {
         originalTrace = st;
       }
 
-      final sub = ctrl.stream
-          .toSafeStream(cancelOnError: false)
-          .listen(captured.add);
+      final sub =
+          ctrl.stream.toSafeStream(cancelOnError: false).listen(captured.add);
 
       ctrl.addError(Exception('boom'), originalTrace);
       await Future<void>.delayed(Duration.zero);
@@ -92,8 +91,7 @@ void main() {
         expect(
           err.stackTrace.toString(),
           contains('audit_round_test.dart'),
-          reason:
-              'toSafeStream dropped the stack trace passed to handleError; '
+          reason: 'toSafeStream dropped the stack trace passed to handleError; '
               'a medical-grade audit trail requires it.',
         );
       }
@@ -111,9 +109,8 @@ void main() {
         ),
       );
 
-      final sub = ctrl.stream
-          .toSafeStream(cancelOnError: false)
-          .listen(captured.add);
+      final sub =
+          ctrl.stream.toSafeStream(cancelOnError: false).listen(captured.add);
 
       ctrl.addError(original);
       await Future<void>.delayed(Duration.zero);
@@ -192,7 +189,9 @@ void main() {
       final source = SafeCompleter<int>();
       final transformed = source.transf<String>((e) => '$e');
 
-      source.resolve(Sync.err(Err<int>('upstream-fail', statusCode: 500))).end();
+      source
+          .resolve(Sync.err(Err<int>('upstream-fail', statusCode: 500)))
+          .end();
 
       // The transformed completer must surface the original error within a
       // bounded amount of time — not hang. Async.value is a Future.

@@ -3,7 +3,8 @@ import 'package:test/test.dart';
 
 void main() {
   group('swap_sync_ext', () {
-    test('SwapSyncAsyncExt.swap on Sync(Ok(Async)) yields Async<Sync>', () async {
+    test('SwapSyncAsyncExt.swap on Sync(Ok(Async)) yields Async<Sync>',
+        () async {
       final input = Sync<Async<int>>.okValue(Async<int>(() async => 1));
       final swapped = input.swap();
       final outer = await swapped.value;
@@ -12,7 +13,8 @@ void main() {
       expect((innerSync.value as Ok<int>).unwrap(), 1);
     });
 
-    test('SwapSyncAsyncExt.swap on Sync.err(Async) yields Async<Sync<Err>>', () async {
+    test('SwapSyncAsyncExt.swap on Sync.err(Async) yields Async<Sync<Err>>',
+        () async {
       final input = Sync<Async<int>>.err(Err<Async<int>>('bad'));
       final swapped = input.swap();
       final outer = await swapped.value;
@@ -22,7 +24,9 @@ void main() {
       expect((innerSync.value as Err<int>).error, 'bad');
     });
 
-    test('SwapSyncResolvableExt.swap on Sync(Ok(Sync)) yields Sync wrapping Sync', () async {
+    test(
+        'SwapSyncResolvableExt.swap on Sync(Ok(Sync)) yields Sync wrapping Sync',
+        () async {
       final Resolvable<int> r = Sync.okValue(2);
       final input = Sync<Resolvable<int>>.okValue(r);
       final swapped = input.swap();
@@ -32,7 +36,8 @@ void main() {
       expect((innerSync.value as Ok<int>).unwrap(), 2);
     });
 
-    test('SwapSyncResolvableExt.swap on Sync(Ok(Async)) yields Async<Sync>', () async {
+    test('SwapSyncResolvableExt.swap on Sync(Ok(Async)) yields Async<Sync>',
+        () async {
       final Resolvable<int> r = Async<int>(() async => 3);
       final input = Sync<Resolvable<int>>.okValue(r);
       final swapped = input.swap();
@@ -42,9 +47,10 @@ void main() {
       expect((innerSync.value as Ok<int>).unwrap(), 3);
     });
 
-    test('SwapSyncResolvableExt.swap on Sync.err yields Sync wrapping failed Sync', () async {
-      final input =
-          Sync<Resolvable<int>>.err(Err<Resolvable<int>>('e'));
+    test(
+        'SwapSyncResolvableExt.swap on Sync.err yields Sync wrapping failed Sync',
+        () async {
+      final input = Sync<Resolvable<int>>.err(Err<Resolvable<int>>('e'));
       final swapped = input.swap();
       final outer = await swapped.value;
       final innerSync = (outer as Ok<Sync<int>>).unwrap();
@@ -89,7 +95,8 @@ void main() {
       final input = Sync<Result<int>>.okValue(const Ok(7));
       final swapped = input.swap();
       expect(swapped, isA<Ok<Sync<int>>>());
-      expect(((swapped as Ok<Sync<int>>).unwrap().value as Ok<int>).unwrap(), 7);
+      expect(
+          ((swapped as Ok<Sync<int>>).unwrap().value as Ok<int>).unwrap(), 7);
     });
 
     test('SwapSyncResultExt.swap on Sync(Ok(Err)) yields Err', () {

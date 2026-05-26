@@ -22,12 +22,14 @@ void main() {
 
     test('isExecuting — true while an async task is in flight', () async {
       final seq = TaskSequencer<int>();
-      seq.then(
-        (_) => Async(() async {
-          await Future<void>.delayed(const Duration(milliseconds: 30));
-          return const Some(1);
-        }),
-      ).end();
+      seq
+          .then(
+            (_) => Async(() async {
+              await Future<void>.delayed(const Duration(milliseconds: 30));
+              return const Some(1);
+            }),
+          )
+          .end();
       expect(seq.isExecuting, isTrue);
       await seq.completion.value;
       expect(seq.isExecuting, isFalse);
@@ -75,7 +77,8 @@ void main() {
       expect(seen, 50);
     });
 
-    test('then — reentrant add of 200 nested sync tasks does not stack overflow',
+    test(
+        'then — reentrant add of 200 nested sync tasks does not stack overflow',
         () async {
       // CLAUDE.md hardening: drains iteratively via _draining guard.
       final seq = TaskSequencer<int>();

@@ -5,7 +5,8 @@ void main() {
   group('to_unit_on_outcome_ext', () {
     // Void receivers.
 
-    test('ToUnitOnVoidOutcome.toUnit returns Outcome<Unit> with Unit value', () {
+    test('ToUnitOnVoidOutcome.toUnit returns Outcome<Unit> with Unit value',
+        () {
       final Outcome<void> outcome = const Some<int>(1);
       final result = outcome.toUnit();
       expect(result, isA<Outcome<Unit>>());

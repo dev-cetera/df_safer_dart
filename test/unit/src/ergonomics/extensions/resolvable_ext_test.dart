@@ -33,8 +33,7 @@ void main() {
       });
 
       test('thrown future error becomes Err', () async {
-        final async =
-            Future<int>.error(StateError('boom')).toAsync();
+        final async = Future<int>.error(StateError('boom')).toAsync();
         final result = await async.value;
         expect(result, isA<Err<int>>());
       });

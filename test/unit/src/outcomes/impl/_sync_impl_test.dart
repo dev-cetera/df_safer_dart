@@ -48,9 +48,7 @@ void main() {
     });
 
     test('private impl — covered transitively via Sync round-trip', () {
-      final sync = Sync<int>.okValue(3)
-          .map((v) => v + 1)
-          .map((v) => v * 2);
+      final sync = Sync<int>.okValue(3).map((v) => v + 1).map((v) => v * 2);
       expect(sync, isA<SyncImpl<int>>());
       expect(sync.unwrap(), 8);
     });

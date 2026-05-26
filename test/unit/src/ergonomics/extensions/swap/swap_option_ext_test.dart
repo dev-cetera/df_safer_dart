@@ -34,7 +34,9 @@ void main() {
       expect((inner as Ok<Option<int>>).unwrap(), isA<None<int>>());
     });
 
-    test('SwapOptionResolvableExt.swap on Some<Resolvable> yields Resolvable<Some>', () async {
+    test(
+        'SwapOptionResolvableExt.swap on Some<Resolvable> yields Resolvable<Some>',
+        () async {
       final Resolvable<int> r = Sync.okValue(3);
       final Option<Resolvable<int>> input = Some(r);
       final swapped = input.swap();
@@ -42,7 +44,9 @@ void main() {
       expect((inner as Ok<Option<int>>).unwrap(), isA<Some<int>>());
     });
 
-    test('SwapOptionResolvableExt.swap on None<Resolvable> yields Resolvable<None>', () async {
+    test(
+        'SwapOptionResolvableExt.swap on None<Resolvable> yields Resolvable<None>',
+        () async {
       const Option<Resolvable<int>> input = None();
       final swapped = input.swap();
       final inner = await swapped.value;

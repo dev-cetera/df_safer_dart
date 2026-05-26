@@ -64,7 +64,8 @@ void main() {
         expect((inner as Err).error, 'bad');
       });
 
-      test('Err.reduce preserves breadcrumbs across the type transfer', () async {
+      test('Err.reduce preserves breadcrumbs across the type transfer',
+          () async {
         final source = Err<int>(
           'broken',
           breadcrumbs: const ['stepA', 'stepB'],
@@ -235,8 +236,7 @@ void main() {
         expect(none.unwrapOr(-1), -1);
       });
 
-      test('Async.unwrapOr returns fallback when Async holds an Err',
-          () async {
+      test('Async.unwrapOr returns fallback when Async holds an Err', () async {
         final a = Async<int>.errValue((error: 'nope', statusCode: null));
         expect(await a.unwrapOr(42), 42);
       });
@@ -301,8 +301,7 @@ void main() {
         expect(((out).value as Ok).value, 'v=2');
       });
 
-      test('transf on Async wraps a converted value asynchronously',
-          () async {
+      test('transf on Async wraps a converted value asynchronously', () async {
         final out = Async<int>.okValue(2).transf<String>((v) => 'v=$v');
         final settled = await (out as Async).value;
         expect((settled as Ok).value, 'v=2');
@@ -400,7 +399,11 @@ void main() {
           Async<int>.okValue(1),
         ]) {
           expect(
-            o is Some || o is None || o is Ok || o is Err || o is Sync ||
+            o is Some ||
+                o is None ||
+                o is Ok ||
+                o is Err ||
+                o is Sync ||
                 o is Async,
             isTrue,
           );

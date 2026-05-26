@@ -52,9 +52,12 @@ void main() {
 
     test('complete — forwards a future value', () async {
       final c = SafeCompleter<String>();
-      c.complete(
-        Future<String>.delayed(const Duration(milliseconds: 5), () => 'fut'),
-      ).end();
+      c
+          .complete(
+            Future<String>.delayed(
+                const Duration(milliseconds: 5), () => 'fut'),
+          )
+          .end();
       expect(await c.resolvable().unwrap(), 'fut');
     });
 
@@ -68,9 +71,11 @@ void main() {
     test('resolvable — returns Async while a future is still in-flight',
         () async {
       final c = SafeCompleter<int>();
-      c.complete(
-        Future<int>.delayed(const Duration(milliseconds: 10), () => 9),
-      ).end();
+      c
+          .complete(
+            Future<int>.delayed(const Duration(milliseconds: 10), () => 9),
+          )
+          .end();
       final r = c.resolvable();
       expect(r, isA<Async<int>>());
       expect(await r.unwrap(), 9);
@@ -79,9 +84,11 @@ void main() {
     test('isCompleted — observable as true during in-flight async resolve',
         () async {
       final c = SafeCompleter<int>();
-      c.complete(
-        Future<int>.delayed(const Duration(milliseconds: 15), () => 1),
-      ).end();
+      c
+          .complete(
+            Future<int>.delayed(const Duration(milliseconds: 15), () => 1),
+          )
+          .end();
       // Per CLAUDE.md hardening notes — committed point is observable.
       expect(c.isCompleted, isTrue);
       await c.resolvable().value;
@@ -95,15 +102,17 @@ void main() {
       expect(await strC.resolvable().unwrap(), 'v3');
     });
 
-    test('transf — without mapper performs a cast and surfaces TypeError',
-        () async {
-      final intC = SafeCompleter<int>();
-      final strC = intC.transf<String>();
-      intC.complete(3).end();
-      final r = await strC.resolvable().value;
-      expect(r, isA<Err>());
-    },
-        testOn: 'vm',);
+    test(
+      'transf — without mapper performs a cast and surfaces TypeError',
+      () async {
+        final intC = SafeCompleter<int>();
+        final strC = intC.transf<String>();
+        intC.complete(3).end();
+        final r = await strC.resolvable().value;
+        expect(r, isA<Err>());
+      },
+      testOn: 'vm',
+    );
 
     test('transf — propagates source Err to the new completer', () async {
       final intC = SafeCompleter<int>();

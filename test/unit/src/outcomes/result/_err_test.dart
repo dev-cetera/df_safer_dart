@@ -201,8 +201,7 @@ void main() {
       expect(err.matchError<FormatException>(), isA<None<FormatException>>());
     });
 
-    test(
-        'transfErr — preserves error, stackTrace, statusCode and breadcrumbs',
+    test('transfErr — preserves error, stackTrace, statusCode and breadcrumbs',
         () {
       final st = StackTrace.current;
       final err = Err<int>(

@@ -19,7 +19,8 @@ void main() {
       expect(value, 99);
     });
 
-    test('UNSAFE re-throws the original error unchanged (does NOT swallow)', () {
+    test('UNSAFE re-throws the original error unchanged (does NOT swallow)',
+        () {
       final boom = StateError('boom');
       expect(
         () => UNSAFE<int>(() => throw boom),

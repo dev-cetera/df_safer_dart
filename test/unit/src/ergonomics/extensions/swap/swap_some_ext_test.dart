@@ -11,7 +11,8 @@ void main() {
       expect((inner as Ok<Some<int>>).unwrap().unwrap(), 1);
     });
 
-    test('SwapSomeAsyncExt.swap turns Some<Async<T>> into Async<Some<T>>', () async {
+    test('SwapSomeAsyncExt.swap turns Some<Async<T>> into Async<Some<T>>',
+        () async {
       final input = Some<Async<int>>(Async<int>(() async => 2));
       final swapped = input.swap();
       final inner = await swapped.value;
@@ -19,7 +20,9 @@ void main() {
       expect((inner as Ok<Some<int>>).unwrap().unwrap(), 2);
     });
 
-    test('SwapSomeResolvableExt.swap turns Some<Resolvable<T>> into Resolvable<Some<T>>', () async {
+    test(
+        'SwapSomeResolvableExt.swap turns Some<Resolvable<T>> into Resolvable<Some<T>>',
+        () async {
       final Resolvable<int> r = Sync.okValue(3);
       final input = Some<Resolvable<int>>(r);
       final swapped = input.swap();

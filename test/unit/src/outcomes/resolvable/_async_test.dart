@@ -358,8 +358,8 @@ void main() {
       expect(ran, 1);
 
       ran = 0;
-      final err = Async<int>(() async => throw StateError('e'))
-          .whenComplete<int>((s) {
+      final err =
+          Async<int>(() async => throw StateError('e')).whenComplete<int>((s) {
         ran++;
         return Sync.okValue(99);
       });

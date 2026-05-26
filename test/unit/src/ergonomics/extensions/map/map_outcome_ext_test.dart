@@ -100,8 +100,7 @@ void main() {
     group('MapOutcomeExt7.map7', () {
       test('maps deepest value and flattens 7-deep chain', () async {
         final Outcome<
-                Outcome<
-                    Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>
+                Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>
             nested = const Some(Some(Some(Some(Some(Some(Some<Object>(7)))))));
         final reduced = nested.map7((Object e) => (e as int) * 3);
         final result = await reduced.value;
@@ -110,8 +109,7 @@ void main() {
 
       test('None at the deepest layer collapses to None', () async {
         final Outcome<
-                Outcome<
-                    Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>
+                Outcome<Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>
             nested = const Some(Some(Some(Some(Some(Some(None<Object>()))))));
         final reduced = nested.map7((Object e) => (e as int) * 3);
         final result = await reduced.value;
@@ -129,9 +127,8 @@ void main() {
         final Outcome<
                 Outcome<
                     Outcome<
-                        Outcome<
-                            Outcome<
-                                Outcome<Outcome<Outcome<Object>>>>>>>> nested =
+                        Outcome<Outcome<Outcome<Outcome<Outcome<Object>>>>>>>>
+            nested =
             const Some(Some(Some(Some(Some(Some(Some(Some<Object>(8))))))));
         final reduced = nested.map8((Object e) => (e as int) - 1);
         final result = await reduced.value;

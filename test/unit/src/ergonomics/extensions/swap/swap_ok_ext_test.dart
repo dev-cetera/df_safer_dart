@@ -21,7 +21,9 @@ void main() {
       expect((inner as Ok<Ok<int>>).unwrap().unwrap(), 9);
     });
 
-    test('SwapOkResolvableExt.swap turns Ok<Resolvable<T>> into Resolvable<Ok<T>>', () async {
+    test(
+        'SwapOkResolvableExt.swap turns Ok<Resolvable<T>> into Resolvable<Ok<T>>',
+        () async {
       final Resolvable<int> r = Sync.okValue(5);
       final input = Ok<Resolvable<int>>(r);
       final swapped = input.swap();

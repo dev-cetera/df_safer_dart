@@ -36,14 +36,19 @@ void main() {
       expect(inner.unwrap(), isA<Err<int>>());
     });
 
-    test('SwapResultResolvableExt.swap on Ok<Resolvable> yields Resolvable<Result>', () async {
-      final Result<Resolvable<int>> input = Ok(Sync.okValue(3) as Resolvable<int>);
+    test(
+        'SwapResultResolvableExt.swap on Ok<Resolvable> yields Resolvable<Result>',
+        () async {
+      final Result<Resolvable<int>> input =
+          Ok(Sync.okValue(3) as Resolvable<int>);
       final swapped = input.swap();
       final inner = await swapped.value;
       expect(inner, isA<Ok<Result<int>>>());
     });
 
-    test('SwapResultResolvableExt.swap on Err<Resolvable> yields Resolvable<Err>', () async {
+    test(
+        'SwapResultResolvableExt.swap on Err<Resolvable> yields Resolvable<Err>',
+        () async {
       final Result<Resolvable<int>> input = Err<Resolvable<int>>('e');
       final swapped = input.swap();
       final inner = await swapped.value;
