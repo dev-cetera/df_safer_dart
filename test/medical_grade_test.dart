@@ -11,8 +11,7 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 //.title~
 
-// Regression tests for the three medical-grade defects discovered during the
-// 2026-05-25 verification audit:
+// Regression tests for three medical-grade defects:
 //
 //   A. `implements Equatable` instead of `extends Equatable` meant
 //      Some(42) == Some(42) was `false` for non-const instances.
@@ -95,20 +94,11 @@ void main() {
       expect(letIntOrNone(-1e30), isA<None<int>>());
     });
 
-    test('Dart-VM int64.max still passes', () {
-      // 0x7FFFFFFFFFFFFFFF == int64.max. On the VM this is a real int and
-      // must survive the new finite-bounds check. On dart2js this literal
-      // would already be rounded by the JS-Number representation, but the
-      // test harness runs on the VM so we lock in VM-side correctness.
-      expect(letIntOrNone(0x7FFFFFFFFFFFFFFF).unwrap(), 0x7FFFFFFFFFFFFFFF);
-    });
-
-    test('Dart-VM int64.min still passes', () {
-      expect(
-        letIntOrNone(-0x8000000000000000).unwrap(),
-        -0x8000000000000000,
-      );
-    });
+    // The int64 boundary literals `0x7FFFFFFFFFFFFFFF` / `-0x8000000000000000`
+    // can't be represented in JS-Numbers and dart2js refuses to compile them.
+    // Those VM/WASM-specific bound tests live in
+    // `test/int64_boundary_vm_test.dart`, which is gated with `@TestOn('vm')`
+    // so the literals never reach dart2js.
 
     test('plain finite doubles continue to convert', () {
       expect(letIntOrNone(42.0).unwrap(), 42);

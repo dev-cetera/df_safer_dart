@@ -34,7 +34,10 @@ extension ToSafeStreamExt<T extends Object> on Stream<T> {
           if (error is Err) {
             sink.add(error.transfErr());
           } else {
-            sink.add(Err<T>(error));
+            // Forward the trace handed to us by the upstream stream — a
+            // life-critical audit trail can't reconstruct where the error
+            // originated from a trace captured at the Err() call site.
+            sink.add(Err<T>(error, stackTrace: stackTrace));
           }
           if (cancelOnError) {
             sink.close();

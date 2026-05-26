@@ -154,9 +154,7 @@ class TaskSequencer<T extends Object> {
     TResultOption<T> previousResult,
   ) {
     // Fast path: previous task succeeded, no error handlers can fire. Run the
-    // task handler and return its output directly — the previous form here
-    // always allocated a `resolvableNone()` plus a `Resolvable.combine2(...)
-    // .then((e) => e.$1)` even though both sides were no-ops on the Ok path.
+    // task handler and return its output directly.
     if (previousResult is! Err) {
       try {
         return task
@@ -173,8 +171,7 @@ class TaskSequencer<T extends Object> {
     }
 
     // Error path: build up an optional `errorResolvable` running each
-    // configured error handler as a side effect. Direct null checks avoid the
-    // `Option.from(...).map(...)` round-trip of the previous implementation.
+    // configured error handler as a side effect.
     final err = previousResult as Err<Option<T>>;
     Resolvable<Object>? errorResolvable;
     final onPrevError = _onPrevError;

@@ -76,9 +76,26 @@ final class Err<T extends Object> extends Result<T>
             : List.unmodifiable(breadcrumbs),
         super._();
 
+  /// Compile-time flag set by dart2wasm. On WASM we cannot use the
+  /// `stack_trace` package's `Trace` parsing or formatting — both code paths
+  /// reach into the `path` package's `Style.platform` static initializer,
+  /// which calls `Uri.base` and hits an unrecoverable SDK assertion (a
+  /// WASM-host trap that escapes regular Dart `catch`). The price of touching
+  /// any frame's `toString()` is a process crash. Keeping the field type
+  /// (`Trace`) stable while substituting an empty `Trace` for the value
+  /// preserves the API and means callers can still read `err.stackTrace`
+  /// without crashing the isolate — at the cost of no captured frames on
+  /// WASM. Stack info there is recoverable via the original `StackTrace`
+  /// passed by the caller, if any (we deliberately don't store it on the Err
+  /// to keep field shape unchanged).
+  static const bool _isDart2Wasm =
+      bool.fromEnvironment('dart.tool.dart2wasm');
+
   /// Captures a [Trace] from [stackTrace] (or the current call site if null),
-  /// falling back to an empty trace if `stack_trace`'s parser throws.
+  /// falling back to an empty trace if `stack_trace`'s parser throws or if
+  /// the host is dart2wasm (see [_isDart2Wasm] for why).
   static Trace _safeStackTrace(StackTrace? stackTrace) {
+    if (_isDart2Wasm) return Trace(const []);
     try {
       return stackTrace != null ? Trace.from(stackTrace) : Trace.current();
     } catch (_) {
@@ -158,7 +175,17 @@ final class Err<T extends Object> extends Result<T>
   @override
   @pragma('vm:prefer-inline')
   Err<T> mapErr(@noFutures Err<T> Function(Err<T> err) noFutures) {
-    return noFutures(this);
+    // Absorb throws from the user callback so `Err.mapErr` honours the
+    // package-wide "no throws outside @unsafeOrError" contract. `on Err
+    // catch` preserves a user-thrown `Err` verbatim — statusCode and
+    // breadcrumbs survive intact.
+    try {
+      return noFutures(this);
+    } on Err catch (err) {
+      return err.transfErr<T>();
+    } catch (error, stackTrace) {
+      return Err<T>(error, stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -296,8 +323,12 @@ String _safeToString(Object? obj) {
 /// Returns one string per frame in [trace], swallowing any per-frame
 /// stringification errors. Returns an empty list if the whole `frames`
 /// iteration throws — that happens on `dart2wasm` where the native stack
-/// format isn't fully parsed by `package:stack_trace`.
+/// format isn't fully parsed by `package:stack_trace`. On dart2wasm we
+/// skip iteration entirely, because touching even one `Frame.toString()`
+/// can hit a host-level WASM trap (in `path.Style.platform` → `Uri.base`)
+/// that escapes ordinary Dart `catch`.
 List<String> _safeFrameLines(Trace trace) {
+  if (Err._isDart2Wasm) return const [];
   try {
     final out = <String>[];
     for (final f in trace.frames) {

@@ -107,20 +107,14 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
       if (v is Future<T>) {
         return Async(() => v, onError: onError, onFinalize: onFinalize);
       }
-      // Synchronous value — assemble Result inline, then finalize-with-absorb.
       result = Ok(v);
     } on Err catch (err) {
       // Preserve a user-thrown Err verbatim — statusCode and breadcrumbs are
-      // load-bearing for life-critical callers and must not be discarded by
-      // an outer wrapping. `onError` does NOT fire for Err throws (an Err
-      // is a structured error value already; nothing for `onError` to add).
+      // load-bearing for life-critical callers. `onError` does NOT fire for
+      // Err throws: an Err is already a structured error value.
       result = err.transfErr<T>();
     } catch (error, stackTrace) {
       // Non-Err throw — route through `onError` if the caller supplied one.
-      // The previous form here wrapped the throw inside a fresh `Sync()`
-      // factory which then caught it via its `on Err catch` clause, silently
-      // bypassing `onError` entirely. That's a behaviour bug: `onError` is
-      // exactly the hook callers expect to invoke on a raw throw.
       if (onError == null) {
         result = Err<T>(error, stackTrace: stackTrace);
       } else {
@@ -176,6 +170,25 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
   /// Performs a side-effect if this is [Async].
   Resolvable<T> ifAsync(
     @noFutures void Function(Resolvable<T> self, Async<T> async) noFutures,
+  );
+
+  /// Transforms the inner [Sync] instance if this is a [Sync].
+  ///
+  /// Provided for pair-axis symmetry with [Result.mapOk]/[Result.mapErr] —
+  /// real code almost always wants [resultMap], [fold], or [foldResult]
+  /// instead, since those operate on the inner [Result] where the
+  /// meaningful payload lives.
+  @visibleForTesting
+  Resolvable<T> mapSync(@noFutures Sync<T> Function(Sync<T> sync) noFutures);
+
+  /// Transforms the inner [Async] instance if this is an [Async].
+  ///
+  /// Provided for pair-axis symmetry with [Result.mapOk]/[Result.mapErr] —
+  /// real code almost always wants [resultMap], [fold], or [foldResult]
+  /// instead.
+  @visibleForTesting
+  Resolvable<T> mapAsync(
+    @noFutures Async<T> Function(Async<T> async) noFutures,
   );
 
   /// Performs a side-effect if this is [Ok].
@@ -276,6 +289,17 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
 
   Resolvable<R> then<R extends Object>(
     @noFutures R Function(T value) noFutures,
+  );
+
+  /// Chains another [Resolvable]-producing operation: the monadic bind for
+  /// [Resolvable]. If this is in an [Err] state, the chain short-circuits
+  /// with that [Err]. If [noFutures] throws, the throw is absorbed into an
+  /// [Err].
+  ///
+  /// Equivalent to `.then(...)` followed by `.flatten()`, with the
+  /// short-circuit and throw-absorption wired in.
+  Resolvable<R> flatMap<R extends Object>(
+    @noFutures Resolvable<R> Function(T value) noFutures,
   );
 
   Resolvable<R> whenComplete<R extends Object>(

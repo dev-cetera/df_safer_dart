@@ -36,7 +36,7 @@ Async<None<T>> asyncNone<T extends Object>() => Async.okValue(const None());
 
 @pragma('vm:prefer-inline')
 Async<Some<T>> asyncSome<T extends Object>(FutureOr<T> value) {
-  assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
+  assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.');
   return Async(() async => Some(await value));
 }
 

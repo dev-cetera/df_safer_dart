@@ -43,10 +43,15 @@ Option<Iterable<Option<T>>> letIterableOrNone<T extends Object>(dynamic input) {
     };
   }
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
-    final Iterable<dynamic> i => Some(i.map((e) => letOrNone<T>(e))),
+    // Materialize eagerly so the returned iterable is safe to iterate
+    // multiple times and so a single-pass source (custom Iterable whose
+    // `.iterator` getter throws after first use) is consumed exactly once.
+    final Iterable<dynamic> i => Some(
+        i.map((e) => letOrNone<T>(e)).toList(growable: false),
+      ),
     final String s => jsonDecodeOrNone<Iterable<dynamic>>(
         s,
-      ).map((i) => i.map((e) => letOrNone<T>(e))),
+      ).map((i) => i.map((e) => letOrNone<T>(e)).toList(growable: false)),
     _ => const None(),
   };
 }

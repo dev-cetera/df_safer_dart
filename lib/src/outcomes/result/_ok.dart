@@ -60,9 +60,8 @@ final class Ok<T extends Object> extends Result<T> implements SyncImpl<T> {
   T? orNull() => value;
 
   /// Returns `noFutures(value)`, absorbing any throw from the callback into an
-  /// [Err]. Widened from `Ok<R>` to `Result<R>` so the absorbed error has a
-  /// place to live — callers that previously type-annotated as `Ok<R>` will
-  /// need to switch to `Result<R>`.
+  /// [Err]. The return type is widened from `Ok<R>` to `Result<R>` so the
+  /// absorbed error has a place to live.
   @override
   @pragma('vm:prefer-inline')
   Result<R> flatMap<R extends Object>(

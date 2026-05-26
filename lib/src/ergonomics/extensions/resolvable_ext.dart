@@ -32,7 +32,7 @@ extension ToAsyncExt<T extends Object> on Future<T> {
     @noFutures TVoidCallback? onFinalize,
   }) {
     assert(
-      !isSubtype<T, Future<Object>>(),
+      isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
       'Do not call toAsync on nested futures: $T.',
     );
     return Async(() => this, onError: onError, onFinalize: onFinalize);
@@ -46,7 +46,7 @@ extension ToSync<T extends Object> on T {
     @noFutures TVoidCallback? onFinalize,
   }) {
     assert(
-      !isSubtype<T, Future<Object>>(),
+      isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
       'Do not call toSync on futures: $T.',
     );
     return Sync(() => this, onError: onError, onFinalize: onFinalize);

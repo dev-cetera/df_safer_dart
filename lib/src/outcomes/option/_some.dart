@@ -71,6 +71,13 @@ final class Some<T extends Object> extends Option<T> implements SyncImpl<T> {
   }
 
   @override
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  Some<T> mapNone(@noFutures None<T> Function(None<T> none) noFutures) {
+    return this;
+  }
+
+  @override
   @pragma('vm:prefer-inline')
   Option<R> flatMap<R extends Object>(
     @noFutures Option<R> Function(T value) noFutures,

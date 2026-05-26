@@ -45,15 +45,13 @@ Option<Map<K, Option<V>>> letMapOrNone<K extends Object, V extends Object>(
     };
   }
 
+  // The `input is Outcome` branch above already unwraps Outcomes, so the
+  // switch here only ever sees raw values.
   return switch (input is NoStackOverflowWrapper ? input.value : input) {
     final Map<dynamic, dynamic> m => _convertMapOrNone<K, V>(m),
     final String s => jsonDecodeOrNone<Map<dynamic, dynamic>>(
         s.trim(),
       ).map((d) => _convertMapOrNone<K, V>(d)).flatten(),
-    final Outcome m => switch (m.rawSync().value) {
-        Ok(value: final okValue) => letMapOrNone<K, V>(okValue),
-        Err() => const None(),
-      },
     _ => const None(),
   };
 }

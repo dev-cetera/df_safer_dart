@@ -128,21 +128,32 @@ class SafeCompleter<T extends Object> {
     @noFutures @sendable R Function(T e)? noFutures,
   ]) {
     final newCompleter = SafeCompleter<R>();
-    resolvable().then((e) {
-      try {
-        final result = noFutures != null ? noFutures(e) : (e as R);
-        newCompleter.complete(result).end();
-      } on Err catch (err) {
-        // Preserve a user-thrown Err's statusCode/breadcrumbs verbatim
-        // rather than re-wrapping it inside another Err.
-        newCompleter.resolve(Sync.err(err.transfErr<R>())).end();
-      } catch (error, stackTrace) {
-        newCompleter
-            .resolve(Sync.err(Err<R>(error, stackTrace: stackTrace)))
-            .end();
-      }
-      return e;
-    }).end();
+    resolvable()
+        .then((e) {
+          try {
+            final result = noFutures != null ? noFutures(e) : (e as R);
+            newCompleter.complete(result).end();
+          } on Err catch (err) {
+            // Preserve a user-thrown Err's statusCode/breadcrumbs verbatim
+            // rather than re-wrapping it inside another Err.
+            newCompleter.resolve(Sync.err(err.transfErr<R>())).end();
+          } catch (error, stackTrace) {
+            newCompleter
+                .resolve(Sync.err(Err<R>(error, stackTrace: stackTrace)))
+                .end();
+          }
+          return e;
+        })
+        // Forward errors from the source completer. Without this, an Err
+        // source would silently leave `newCompleter` dangling forever —
+        // `then((e) => ...)` only fires on Ok, so the new completer would
+        // never be resolved and any awaiter would hang.
+        .ifErr((_, err) {
+          if (!newCompleter.isCompleted) {
+            newCompleter.resolve(Sync.err(err.transfErr<R>())).end();
+          }
+        })
+        .end();
     return newCompleter;
   }
 }

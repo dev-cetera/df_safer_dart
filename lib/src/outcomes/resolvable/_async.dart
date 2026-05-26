@@ -76,38 +76,36 @@ final class Async<T extends Object> extends Resolvable<T>
   @pragma('vm:prefer-inline')
   Future<Result<T>> get value {
     final raw = super.value;
-    // `Async.new` always stores a `Future<Result<T>>` directly, so the common
-    // path is a single type check + cast — no allocation. Only `Sync.toAsync()`
-    // (which stores a synchronous `Result<T>` in the base field) needs the
-    // `Future.value(...)` wrap, and even that allocation now happens at most
-    // once per `.value` read on those rarer instances.
+    // `Async.new` always stores a `Future<Result<T>>` directly. Only
+    // `Sync.toAsync()` (which stores a synchronous `Result<T>` in the base
+    // field) needs the `Future.value(...)` wrap.
     if (raw is Future<Result<T>>) return raw;
     return Future<Result<T>>.value(raw as FutureOr<Result<T>>);
   }
 
   @unsafeOrError
   Async.result(super.value)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.result();
 
   @unsafeOrError
   Async.ok(super.ok)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.ok();
 
   @unsafeOrError
   Async.okValue(FutureOr<T> okValue)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.ok(Future.value(okValue).then(Ok.new));
 
   @unsafeOrError
   Async.err(super.err)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.err();
 
   @unsafeOrError
   Async.errValue(FutureOr<({Object error, int? statusCode})> error)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.err(
           Future.value(error)
               .then((e) => Err(e.error, statusCode: e.statusCode)),
@@ -127,7 +125,7 @@ final class Async<T extends Object> extends Resolvable<T>
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
-    assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
+    assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     return Async.result(() async {
       Result<T> result;
       try {
@@ -197,13 +195,9 @@ final class Async<T extends Object> extends Resolvable<T>
   Async<T> ifAsync(
     @noFutures void Function(Async<T> self, Async<T> async) noFutures,
   ) {
-    // The side-effect is synchronous (the callback is `void` and `@noFutures`)
-    // so we can run it inline. Absorbed errors must surface on the returned
-    // `Async`, which we build directly with `Async.err(...)` instead of going
-    // through `Sync(...).flatten().toAsync()` (which allocated four
-    // intermediate Outcomes per call). `on Err catch` preserves a user-thrown
-    // `Err` verbatim — matches the `Sync(...)` factory's behaviour the
-    // previous form went through.
+    // Callback is `void` + `@noFutures`, so we run it inline and absorb any
+    // throw onto the returned `Async`. `on Err catch` preserves a user-thrown
+    // `Err` verbatim — wrapping it would lose statusCode/breadcrumbs.
     try {
       noFutures(this, this);
       return this;
@@ -215,14 +209,45 @@ final class Async<T extends Object> extends Resolvable<T>
   }
 
   @override
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  Async<T> mapSync(@noFutures Sync<T> Function(Sync<T> sync) noFutures) {
+    return this;
+  }
+
+  @override
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  Async<T> mapAsync(@noFutures Async<T> Function(Async<T> async) noFutures) {
+    try {
+      return noFutures(this);
+    } on Err catch (err) {
+      return Async.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      return Async.err(Err<T>(error, stackTrace: stackTrace));
+    }
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Async<R> flatMap<R extends Object>(
+    @noFutures Resolvable<R> Function(T value) noFutures,
+  ) {
+    return Async<R>(() async {
+      final result = await value;
+      switch (result) {
+        case Ok(value: final v):
+          return await noFutures(v).unwrap();
+        case final Err<T> err:
+          throw err;
+      }
+    });
+  }
+
+  @override
   Resolvable<T> ifOk(
     @noFutures void Function(Async<T> self, Ok<T> ok) noFutures,
   ) {
-    // The old implementation built `Async<Resolvable<T>>` then flattened — that
-    // was four allocations per call on the Ok path (outer Async, inner
-    // Resolvable, two flatten-results). Throwing the absorbed `Err` inside
-    // the `Async()` factory lets it do the catch in one place, with one
-    // allocation total.
     return Async<T>(() async {
       final awaitedValue = await value;
       if (awaitedValue case Ok<T> ok) {
@@ -369,9 +394,9 @@ final class Async<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   Async<R> then<R extends Object>(@noFutures R Function(T value) noFutures) {
-    // Route through Async(() async {...}) so a synchronous throw from
-    // `noFutures` is captured as an Err on the chain instead of escaping
-    // to whoever awaits the resulting Async.
+    // Route through `Async(() async {...})` so a synchronous throw from
+    // `noFutures` is captured as an Err on the chain instead of escaping to
+    // whoever awaits the resulting Async.
     return Async<R>(() async {
       final result = await value;
       switch (result) {
@@ -388,13 +413,9 @@ final class Async<T extends Object> extends Resolvable<T>
   Async<R> whenComplete<R extends Object>(
     @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   ) {
-    // Build a single `Async<R>` directly. The previous form built
-    // `Async<Resolvable<R>>` then `.flatten().toAsync()`, which allocated
-    // four intermediate Outcomes per call.
     return Async<R>(() async {
       final result = await value;
-      result.unwrap(); // surface any Err as a throw caught by Async() below.
-      // Now invoke the user callback once and await its produced Resolvable.
+      result.unwrap(); // surface any Err as a throw caught by `Async()` below.
       return await noFutures(Sync<T>.result(result)).unwrap();
     });
   }
@@ -415,9 +436,17 @@ final class Async<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   void end() {
-    // Detach the internal cleanup future deliberately — `.end()` is the
-    // "discard this Outcome" marker. Anyone who actually needs to know when
-    // the async value settles should use `.value` instead.
-    unawaited(value.then((e) => e.end()).catchError((_) {}));
+    // `.end()` is the "discard this Outcome" marker — deliberately detach the
+    // future. Callers who need to await settlement should use `.value`. The
+    // outer `try` is belt-and-braces: `value.then(...).catchError(...)` is
+    // not expected to throw synchronously, but the package contract is that
+    // `.end()` *never* throws — so we absorb anything the getter or future
+    // chain could conceivably surface (e.g., a future-chain failure on a
+    // weird host platform).
+    try {
+      unawaited(value.then((e) => e.end()).catchError((_) {}));
+    } catch (_) {
+      // Swallow — `.end()` must never escape.
+    }
   }
 }

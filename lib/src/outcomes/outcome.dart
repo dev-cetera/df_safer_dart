@@ -65,14 +65,10 @@ sealed class Outcome<T extends Object> extends Equatable {
         return syncNone<R>();
       }
       if (current is Err) {
-        final err = current;
-        return Sync.err(
-          Err<Option<R>>(
-            err.error,
-            statusCode: err.statusCode.orNull(),
-            stackTrace: err.stackTrace,
-          ),
-        );
+        // `transfErr<Option<R>>` preserves statusCode, stackTrace AND
+        // breadcrumbs. A hand-rolled Err() reconstruction dropped breadcrumbs,
+        // so any `.named()` labels attached upstream vanished on reduce.
+        return Sync.err(current.transfErr<Option<R>>());
       }
       if (current is Async) {
         final futureResult = current.value;

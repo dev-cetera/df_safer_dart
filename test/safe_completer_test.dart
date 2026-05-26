@@ -180,6 +180,12 @@ void main() {
           expect(result, isA<Err>());
           expect((result as Err).error, isA<TypeError>());
         },
+        // VM-only: on dart2js / dart2wasm `int` and `double` collapse onto the
+        // same JS-Number, so `42 as double` succeeds and no TypeError is
+        // thrown. Cross-platform behaviour of bare-cast `transf` is therefore
+        // platform-dependent — callers needing portable widening should
+        // supply an explicit `(e) => e.toDouble()` converter.
+        testOn: 'vm',
       );
     });
   }

@@ -77,23 +77,23 @@ final class Sync<T extends Object> extends Resolvable<T>
   Result<T> get value => super.value as Result<T>;
 
   Sync.result(Result<T> super.value)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.result();
 
   Sync.ok(Ok<T> super.ok)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.ok();
 
   Sync.okValue(T okValue)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.ok(Ok(okValue));
 
   Sync.err(Err<T> super.err)
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.err();
 
   Sync.errValue(Object error, {int? statusCode})
-      : assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
+      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.'),
         super.err(Err(error, statusCode: statusCode));
 
   /// Creates a [Sync] executing a synchronous function [noFutures].
@@ -107,10 +107,7 @@ final class Sync<T extends Object> extends Resolvable<T>
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
-    assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
-    // Compute the inner Result inline instead of wrapping the try/catch in an
-    // IIFE — the closure allocation that `() { ... }()` would force on every
-    // `Sync(...)` call is unnecessary, and the control flow reads the same.
+    assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     Result<T> result;
     try {
       result = Ok(noFutures());
@@ -131,12 +128,10 @@ final class Sync<T extends Object> extends Resolvable<T>
         }
       }
     }
-    // Run `onFinalize` separately so its throws are absorbed into `result`
-    // instead of escaping `Sync(...)`. Following standard `try/finally`
-    // semantics, a thrown finalize error overrides whatever `result` held —
-    // a failed cleanup is a meaningful failure mode that callers need to
-    // see, and surfacing it as `Sync.err(...)` keeps the package's no-throw
-    // contract intact.
+    // Run `onFinalize` separately so its throws are absorbed into `result`.
+    // Following standard `try/finally` semantics, a thrown finalize error
+    // overrides whatever `result` held — a failed cleanup is a meaningful
+    // failure mode that callers need to see.
     if (onFinalize != null) {
       try {
         onFinalize();
@@ -172,17 +167,13 @@ final class Sync<T extends Object> extends Resolvable<T>
   Sync<T> ifSync(
     @noFutures void Function(Sync<T> self, Sync<T> sync) noFutures,
   ) {
-    // Side-effect path: if the user callback throws, the absorbed error must
-    // surface as an Err on the returned Sync. Doing the catch inline avoids
-    // the `Sync(...).flatten().sync().unwrap()` chain that the previous
-    // implementation needed — that allocated four Outcomes per call.
+    // Side-effect path: an absorbed throw from the callback must surface as an
+    // Err on the returned Sync. `on Err catch` preserves a user-thrown `Err`
+    // verbatim — wrapping it would lose statusCode/breadcrumbs/stackTrace.
     try {
       noFutures(this, this);
       return this;
     } on Err catch (err) {
-      // Preserve a user-thrown `Err` verbatim — matches the behaviour of the
-      // `Sync(...)` factory's `on Err catch` clause that this refactor
-      // replaced. Wrapping it would lose statusCode/breadcrumbs/stackTrace.
       return Sync.err(err.transfErr<T>());
     } catch (error, stackTrace) {
       return Sync.err(Err<T>(error, stackTrace: stackTrace));
@@ -198,18 +189,51 @@ final class Sync<T extends Object> extends Resolvable<T>
   }
 
   @override
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  Sync<T> mapSync(@noFutures Sync<T> Function(Sync<T> sync) noFutures) {
+    try {
+      return noFutures(this);
+    } on Err catch (err) {
+      return Sync.err(err.transfErr<T>());
+    } catch (error, stackTrace) {
+      return Sync.err(Err<T>(error, stackTrace: stackTrace));
+    }
+  }
+
+  @override
+  @visibleForTesting
+  @pragma('vm:prefer-inline')
+  Sync<T> mapAsync(@noFutures Async<T> Function(Async<T> async) noFutures) {
+    return this;
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  Resolvable<R> flatMap<R extends Object>(
+    @noFutures Resolvable<R> Function(T value) noFutures,
+  ) {
+    switch (value) {
+      case Ok(value: final v):
+        try {
+          return noFutures(v);
+        } on Err catch (err) {
+          return Sync.err(err.transfErr<R>());
+        } catch (error, stackTrace) {
+          return Sync.err(Err<R>(error, stackTrace: stackTrace));
+        }
+      case final Err<T> err:
+        return Sync.err(err.transfErr<R>());
+    }
+  }
+
+  @override
   @pragma('vm:prefer-inline')
   Resolvable<T> ifOk(
     @noFutures void Function(Sync<T> self, Ok<T> ok) noFutures,
   ) {
     final v = value;
     if (v is Ok<T>) {
-      // Direct try/catch is two allocations cheaper than the old
-      // `Resolvable(() {...}).flatten()` path, which materialised a
-      // `Sync<Result<T>>` plus a `Sync<T>` on the success branch. The
-      // `on Err catch` clause preserves a user-thrown `Err` verbatim, matching
-      // the behaviour of the `Sync(...)` factory the previous form went
-      // through.
       try {
         noFutures(this, v);
         return this;
@@ -246,11 +270,6 @@ final class Sync<T extends Object> extends Resolvable<T>
   Sync<R> resultMap<R extends Object>(
     @noFutures Result<R> Function(Result<T> value) noFutures,
   ) {
-    // The mapper returns a `Result<R>` we can wrap directly; only the user
-    // callback itself can throw, so we catch around its invocation and skip
-    // the `Sync(() { ... .unwrap() })` round trip the previous form did.
-    // `on Err catch` preserves a user-thrown `Err` verbatim — matches the
-    // `Sync(...)` factory's behaviour the previous form went through.
     try {
       return Sync.result(noFutures(value));
     } on Err catch (err) {
@@ -349,9 +368,6 @@ final class Sync<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   Sync<R> map<R extends Object>(@noFutures R Function(T value) noFutures) {
-    // Pass the user callback directly to `Result.map` rather than wrapping it
-    // in `(e) => noFutures(e)` — that wrapper would allocate one closure per
-    // call for no semantic benefit.
     return Sync(() => value.map(noFutures).unwrap());
   }
 
@@ -368,12 +384,8 @@ final class Sync<T extends Object> extends Resolvable<T>
   Resolvable<R> whenComplete<R extends Object>(
     @noFutures Resolvable<R> Function(Sync<T> resolved) noFutures,
   ) {
-    // The previous form built `Sync<Resolvable<R>>` and then `.flatten()`d it
-    // — two extra Outcome allocations per call. Inline the try/catch and
-    // return the user's Resolvable directly. `on Err catch` preserves a
-    // user-thrown `Err` verbatim — matches the `Sync(...)` factory's
-    // behaviour the previous form went through. The Err can come from either
-    // `value.unwrap()` (when `value` is an `Err`) or from the user callback.
+    // The Err can come from either `value.unwrap()` (when `value` is an `Err`)
+    // or from the user callback.
     try {
       value.unwrap();
       return noFutures(this);
@@ -387,10 +399,8 @@ final class Sync<T extends Object> extends Resolvable<T>
   @override
   @pragma('vm:prefer-inline')
   Sync<R> transf<R extends Object>([@noFutures R Function(T e)? noFutures]) {
-    // `Result.transf` already absorbs callback throws into an `Err` and
-    // never escapes, so we can wrap the result directly without going
-    // through `Sync(() { ... throw ... })`. Saves the inner closure
-    // allocation and the throw/catch round trip on every call.
+    // `Result.transf` already absorbs callback throws into an `Err`, so we
+    // can wrap the result directly.
     return Sync.result(value.transf<R>(noFutures));
   }
 

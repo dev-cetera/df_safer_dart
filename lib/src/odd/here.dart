@@ -37,28 +37,47 @@ final class Here {
   /// Returns the [Frame] for the current code location, skipping the initial
   /// stack levels specified by [level].
   ///
-  /// Returns `null` if no suitable frame is found.
+  /// Returns [None] if no suitable frame is found, or if the host platform
+  /// (notably dart2wasm) cannot parse its own stack-trace format.
   Option<Frame> call() {
-    final frames = Trace.current(level).frames;
-    for (var n = 0; n < frames.length; n++) {
-      final frame = frames[n];
-      final lineNumber = frame.line;
-      final columnNumber = frame.column;
-      if (lineNumber != null && columnNumber != null) {
-        return Some(frame);
+    try {
+      final frames = Trace.current(level).frames;
+      for (var n = 0; n < frames.length; n++) {
+        final frame = frames[n];
+        final lineNumber = frame.line;
+        final columnNumber = frame.column;
+        if (lineNumber != null && columnNumber != null) {
+          return Some(frame);
+        }
       }
+    } catch (_) {
+      // dart2wasm trips a host-level trap inside `path.Style.platform` when
+      // touching frames. Treat that as "no frame available" rather than
+      // crashing the isolate — `Here` is a debug-only utility.
     }
     return const None();
   }
 
   /// A string representing the basepath location of the call.
-  Option<String> get basepath => call().map(
+  Option<String> get basepath {
+    try {
+      return call().map(
         (e) => [
           p.basenameWithoutExtension(e.library),
           if (e.member != null) e.member,
         ].join('/'),
       );
+    } catch (_) {
+      return const None();
+    }
+  }
 
   /// A string representing the location of the call.
-  Option<String> get location => call().map((e) => e.location);
+  Option<String> get location {
+    try {
+      return call().map((e) => e.location);
+    } catch (_) {
+      return const None();
+    }
+  }
 }

@@ -74,9 +74,8 @@ void main() {
       expect(letIntOrNone(7).unwrap(), 7);
     });
 
-    test('int max safe', () {
-      expect(letIntOrNone(0x7FFFFFFFFFFFFFFF).unwrap(), 0x7FFFFFFFFFFFFFFF);
-    });
+    // int64.max boundary lives in `int64_boundary_vm_test.dart` because
+    // dart2js can't compile the literal `0x7FFFFFFFFFFFFFFF`.
 
     test('double with fractional truncates', () {
       expect(letIntOrNone(3.7).unwrap(), 3);

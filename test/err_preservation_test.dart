@@ -14,14 +14,12 @@
 // Locks in the medical-grade contract that **a user-thrown `Err` is
 // preserved verbatim** through every absorbing method on `Sync`/`Async`.
 //
-// The 2026-05-26 optimisation pass refactored several of these methods to use
-// inline `try/catch` blocks instead of going through `Sync(...)` / `Async(...)`
-// factories. The factories distinguish `on Err catch (err)` from generic
+// These methods distinguish `on Err catch (err)` from generic
 // `catch (error, stackTrace)` so that a user `throw Err('boom', statusCode:
 // 404)` arrives at the consumer with statusCode + breadcrumbs + stack trace
-// intact. The naïve `try { … } catch (error, stackTrace) { Err<T>(error, …) }`
-// form drops all of that — it wraps the original `Err` inside *another* `Err`,
-// hiding statusCode / breadcrumbs / original stack from the consumer.
+// intact. A naïve `try { … } catch (error, stackTrace) { Err<T>(error, …) }`
+// form would drop all of that — wrapping the original `Err` inside another
+// `Err`, hiding statusCode / breadcrumbs / original stack from the consumer.
 //
 // In life-critical pipelines a lost statusCode can change the operator's
 // response (e.g. retry vs. escalate), so these tests are non-negotiable.
@@ -29,7 +27,7 @@
 // The Lazy tests use inline lambdas (which the `@sendable` lint flags)
 // because they exercise local construct-fault behaviour, not isolate
 // sendability.
-// ignore_for_file: sendable
+// ignore_for_file: sendable, unnecessary_lambdas
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
@@ -296,10 +294,6 @@ void main() {
     });
 
     test('non-Err throw routes through caller-provided onError', () {
-      // Previously the factory wrapped a non-Err throw into a fresh `Sync()`
-      // factory whose `on Err catch` clause fired BEFORE `onError` could run.
-      // That bypass meant `onError` was effectively unreachable through
-      // `Resolvable.new`. The clean fix routes it correctly.
       final r = Resolvable<int>(
         () => throw StateError('primary'),
         onError: (e, s) => Err<int>('handled-by-onError', statusCode: 451),
@@ -526,6 +520,121 @@ void main() {
       expect(r, isA<Err<int>>());
       expect((r as Err<int>).statusCode.unwrap(), 503);
       expect(r.error, 'completer-transf-fault');
+    });
+  });
+
+  group('Err.mapErr — Err preservation', () {
+    test('user-thrown Err with statusCode preserved', () {
+      final r = Err<int>('original').mapErr(
+        (_) => throw Err<int>('replacement', statusCode: 470),
+      );
+      expect(r, isA<Err<int>>());
+      expect(r.statusCode.unwrap(), 470);
+      expect(r.error, 'replacement');
+    });
+
+    test('non-Err throw becomes Err', () {
+      final r = Err<int>('original').mapErr((_) => throw StateError('boom'));
+      expect(r, isA<Err<int>>());
+      expect(r.error, isA<StateError>());
+    });
+
+    test('non-throwing mapErr replaces error', () {
+      final r = Err<int>('original').mapErr(
+        (e) => Err<int>('transformed', statusCode: 200),
+      );
+      expect(r.error, 'transformed');
+      expect(r.statusCode.unwrap(), 200);
+    });
+  });
+
+  group('Async.end() — never throws', () {
+    test('end() on a future-erroring Async does not escape', () async {
+      // Future erroring asynchronously: `.end()` must absorb the error
+      // entirely rather than letting it propagate up.
+      final a = Async<int>(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        throw StateError('rejected');
+      });
+      expect(() => a.end(), returnsNormally);
+      // Give the swallowed error time to flow through the unawaited future.
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    });
+
+    test('end() on a normal Async does not throw', () {
+      final a = Async<int>(() async => 1);
+      expect(() => a.end(), returnsNormally);
+    });
+
+    test('end() on an Err Async does not throw', () {
+      final a = Async<int>.errValue((error: 'x', statusCode: null));
+      expect(() => a.end(), returnsNormally);
+    });
+  });
+
+  group('Cross-platform: WASM-safe stack traces', () {
+    test('Err.stackTrace.toString() never crashes', () {
+      // Locks in the dart2wasm safety fix: even if the platform can't parse
+      // its own stack format, `Err.stackTrace.toString()` must return a
+      // String (possibly empty) — never crash the isolate.
+      final err = Err<int>('x', stackTrace: StackTrace.current);
+      expect(() => err.stackTrace.toString(), returnsNormally);
+      expect(err.stackTrace.toString(), isA<String>());
+    });
+
+    test('Err.toJson() never crashes regardless of trace format', () {
+      final err = Err<int>('x', stackTrace: StackTrace.current);
+      final json = err.toJson();
+      expect(json['type'], 'Err<int>');
+      expect(json['stackTrace'], isA<List<String>>());
+    });
+
+    test('Err.toString() never crashes regardless of trace format', () {
+      final err = Err<int>('x', stackTrace: StackTrace.current);
+      expect(() => err.toString(), returnsNormally);
+      expect(err.toString(), contains('Err'));
+    });
+
+    test('Err with malformed StackTrace.fromString still constructs', () {
+      // Adversarial: a totally bogus stack trace string. `_safeStackTrace`
+      // must catch `Trace.parse`'s `FormatException` and fall back to empty.
+      expect(
+        () => Err<int>('x', stackTrace: StackTrace.fromString('garbage{[]}')),
+        returnsNormally,
+      );
+    });
+  });
+
+  group('Lazy — re-entrance from inside constructor is detected', () {
+    test('singleton re-entrance produces Sync.err, not stack overflow', () {
+      // The constructor reaches back to read `singleton` on the same Lazy.
+      // Without re-entrance detection this would recurse forever and
+      // stack-overflow the isolate. The detection short-circuits to a
+      // structured `Sync.err(...)`.
+      late final Lazy<int> lazy;
+      lazy = Lazy<int>(() {
+        // Touching `singleton` here is the circular dependency.
+        return lazy.singleton;
+      });
+      final result = (lazy.singleton as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect(
+        (result as Err<int>).error.toString(),
+        contains('re-entrantly'),
+      );
+    });
+
+    test('factory re-entrance produces Sync.err, not stack overflow', () {
+      late final Lazy<int> lazy;
+      lazy = Lazy<int>(() {
+        return lazy.factory;
+      });
+      final result = (lazy.factory as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect(
+        (result as Err<int>).error.toString(),
+        contains('re-entrantly'),
+      );
     });
   });
 

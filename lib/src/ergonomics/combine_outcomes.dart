@@ -68,16 +68,23 @@ Resolvable<List<T>> combineResolvable<T extends Object>(
 ///
 /// If any [Sync] contains an [Err], applies the [onErr] function to combine
 /// errors.
+///
+/// The input iterable is consumed exactly once, so it is safe to pass a
+/// single-pass iterable.
 Sync<List<T>> combineSync<T extends Object>(
   Iterable<Sync<T>> syncs, {
   @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
-  if (syncs.isEmpty) {
+  // Materialize once: `isEmpty` and the subsequent `.map(...).toList()`
+  // would otherwise iterate the input twice, which loses every element on
+  // a single-pass iterable.
+  final list = syncs.toList(growable: false);
+  if (list.isEmpty) {
     return Sync.okValue([]);
   }
 
   return Sync(() {
-    final results = syncs.map((s) => s.value).toList();
+    final results = list.map((s) => s.value).toList();
     final combined = combineResult(results, onErr: onErr);
     switch (combined) {
       case Ok(value: final value):
@@ -92,16 +99,22 @@ Sync<List<T>> combineSync<T extends Object>(
 ///
 /// The inputs are awaited concurrently. If any resolves to an [Err], applies
 /// the [onErr] function to combine errors.
+///
+/// The input iterable is consumed exactly once, so it is safe to pass a
+/// single-pass iterable.
 Async<List<T>> combineAsync<T extends Object>(
   Iterable<Async<T>> asyncs, {
   @noFutures Err<List<T>> Function(List<Result<T>> allResults)? onErr,
 }) {
-  if (asyncs.isEmpty) {
+  // Materialize once: `isEmpty` and the subsequent `.map(...)` passed to
+  // `Future.wait` would otherwise iterate the input twice.
+  final list = asyncs.toList(growable: false);
+  if (list.isEmpty) {
     return Async.okValue([]);
   }
 
   return Async(() async {
-    final results = await Future.wait(asyncs.map((a) => a.value));
+    final results = await Future.wait(list.map((a) => a.value));
     final combined = combineResult(results, onErr: onErr);
     switch (combined) {
       case Ok(value: final value):

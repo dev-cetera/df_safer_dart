@@ -104,6 +104,15 @@ sealed class Option<T extends Object> extends Outcome<T>
   /// Transforms the inner [Some] instance if this is a [Some].
   Option<T> mapSome(@noFutures Some<T> Function(Some<T> some) noFutures);
 
+  /// Transforms the inner [None] instance if this is a [None].
+  ///
+  /// All `None<T>` instances are structurally identical (no value), so a
+  /// caller-supplied transformer has nothing meaningful to change. Provided
+  /// for pair-axis symmetry with [mapSome] and [Result.mapErr] — real code
+  /// almost always wants [fold] or [ifNone] instead.
+  @visibleForTesting
+  Option<T> mapNone(@noFutures None<T> Function(None<T> none) noFutures);
+
   /// Maps an `Option<T>` to `Option<R>` by applying a function that returns
   /// another [Option].
   ///
