@@ -89,7 +89,6 @@ parseInt('not-a-number')
 
 ## Built for code that can't fail
 
-This package is held to a **military-/medical-grade reliability** standard.
 Every guarantee is backed by an abuse test in
 [`test/hardening_test.dart`](https://github.com/dev-cetera/df_safer_dart/blob/main/test/hardening_test.dart):
 
