@@ -96,7 +96,9 @@ void main() {
       final swapped = input.swap();
       expect(swapped, isA<Ok<Sync<int>>>());
       expect(
-          ((swapped as Ok<Sync<int>>).unwrap().value as Ok<int>).unwrap(), 7,);
+        ((swapped as Ok<Sync<int>>).unwrap().value as Ok<int>).unwrap(),
+        7,
+      );
     });
 
     test('SwapSyncResultExt.swap on Sync(Ok(Err)) yields Err', () {

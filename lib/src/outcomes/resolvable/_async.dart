@@ -85,32 +85,42 @@ final class Async<T extends Object> extends Resolvable<T>
 
   @unsafeOrError
   Async.result(super.value)
-      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.',),
+      : assert(
+          isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
         super.result();
 
   @unsafeOrError
   Async.ok(super.ok)
-      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.',),
+      : assert(
+          isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
         super.ok();
 
   @unsafeOrError
   Async.okValue(FutureOr<T> okValue)
-      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.',),
+      : assert(
+          isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
         super.ok(Future.value(okValue).then(Ok.new));
 
   @unsafeOrError
   Async.err(super.err)
-      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.',),
+      : assert(
+          isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
         super.err();
 
   @unsafeOrError
   Async.errValue(FutureOr<({Object error, int? statusCode})> error)
-      : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.',),
+      : assert(
+          isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+          '$T must never be a Future.',
+        ),
         super.err(
           Future.value(error)
               .then((e) => Err(e.error, statusCode: e.statusCode)),
@@ -130,8 +140,10 @@ final class Async<T extends Object> extends Resolvable<T>
     @noFutures TOnErrorCallback<T>? onError,
     @noFutures TVoidCallback? onFinalize,
   }) {
-    assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-        '$T must never be a Future.',);
+    assert(
+      isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
+      '$T must never be a Future.',
+    );
     return Async.result(() async {
       Result<T> result;
       try {

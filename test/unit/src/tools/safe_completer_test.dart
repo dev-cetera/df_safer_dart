@@ -55,7 +55,9 @@ void main() {
       c
           .complete(
             Future<String>.delayed(
-                const Duration(milliseconds: 5), () => 'fut',),
+              const Duration(milliseconds: 5),
+              () => 'fut',
+            ),
           )
           .end();
       expect(await c.resolvable().unwrap(), 'fut');
