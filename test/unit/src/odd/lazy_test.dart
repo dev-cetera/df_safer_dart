@@ -1,4 +1,8 @@
-// ignore_for_file: invalid_use_of_protected_member
+// ignore_for_file: sendable, invalid_use_of_protected_member
+// `sendable`: every test here exercises Lazy with local-state closures
+// (call-count probes, error injection, reset semantics). The point is local
+// memoization behaviour, not isolate sendability — the same precedent as
+// test/err_preservation_test.dart and test/chain_propagation_test.dart.
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
@@ -37,7 +41,7 @@ void main() {
         () {
       final lazy = Lazy<int>(() => Sync.okValue(7));
       expect(lazy.currentInstance, isA<None<Resolvable<int>>>());
-      lazy.singleton;
+      lazy.singleton.end();
       expect(lazy.currentInstance, isA<Some<Resolvable<int>>>());
     });
 

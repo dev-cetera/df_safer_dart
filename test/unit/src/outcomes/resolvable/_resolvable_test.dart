@@ -154,8 +154,8 @@ void main() {
     test('ifSync side-effect runs on Sync only', () {
       var ranOnSync = 0;
       var ranOnAsync = 0;
-      Sync.okValue(1).ifSync((self, s) => ranOnSync++);
-      Async<int>(() async => 1).ifSync((self, s) => ranOnAsync++);
+      Sync.okValue(1).ifSync((self, s) => ranOnSync++).end();
+      Async<int>(() async => 1).ifSync((self, s) => ranOnAsync++).end();
       expect(ranOnSync, 1);
       expect(ranOnAsync, 0);
     });
@@ -163,8 +163,8 @@ void main() {
     test('ifAsync side-effect runs on Async only', () {
       var ranOnSync = 0;
       var ranOnAsync = 0;
-      Sync.okValue(1).ifAsync((self, a) => ranOnSync++);
-      Async<int>(() async => 1).ifAsync((self, a) => ranOnAsync++);
+      Sync.okValue(1).ifAsync((self, a) => ranOnSync++).end();
+      Async<int>(() async => 1).ifAsync((self, a) => ranOnAsync++).end();
       expect(ranOnSync, 0);
       expect(ranOnAsync, 1);
     });
@@ -185,15 +185,15 @@ void main() {
 
     test('ifOk runs side-effect on Ok', () {
       var count = 0;
-      Sync.okValue(2).ifOk((self, ok) => count++);
-      Sync<int>.errValue('e').ifOk((self, ok) => count++);
+      Sync.okValue(2).ifOk((self, ok) => count++).end();
+      Sync<int>.errValue('e').ifOk((self, ok) => count++).end();
       expect(count, 1);
     });
 
     test('ifErr runs side-effect on Err', () {
       var count = 0;
-      Sync.okValue(2).ifErr((self, err) => count++);
-      Sync<int>.errValue('e').ifErr((self, err) => count++);
+      Sync.okValue(2).ifErr((self, err) => count++).end();
+      Sync<int>.errValue('e').ifErr((self, err) => count++).end();
       expect(count, 1);
     });
 

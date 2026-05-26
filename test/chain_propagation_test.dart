@@ -576,7 +576,7 @@ void main() {
       Async<int> failingBranch() => Async.okValue(1)
           .then((v) => v + 1)
           .then<int>(
-              (_) => throw Err<int>('async-branch-fail', statusCode: 461))
+              (_) => throw Err<int>('async-branch-fail', statusCode: 461),)
           .named('async-failing-branch');
 
       final combined = combineAsync<int>([
@@ -598,7 +598,7 @@ void main() {
         Sync.okValue(1).named('sync-leg'),
         Async.okValue(2)
             .then<int>(
-                (_) => throw Err<int>('mixed-branch-fail', statusCode: 462))
+                (_) => throw Err<int>('mixed-branch-fail', statusCode: 462),)
             .named('async-leg'),
         Sync.okValue(3),
       ]);

@@ -90,7 +90,7 @@ void main() {
       err.ifErr((self, e) {
         capturedSelf = self;
         capturedErr = e;
-      });
+      }).end();
       expect(identical(capturedSelf, err), isTrue);
       expect(identical(capturedErr, err), isTrue);
     });

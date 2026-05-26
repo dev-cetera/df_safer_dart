@@ -31,7 +31,10 @@ void main() {
     test('UNSAFE re-throws Err thrown via unwrap on Err', () {
       final Result<int> err = Err<int>('failure');
       expect(
-        () => UNSAFE<int>(err.unwrap),
+        // `UNSAFE` is annotated `@mustBeAnonymous`, which forbids a tear-off
+        // (`err.unwrap`) — the inline lambda satisfies that contract.
+        // ignore: unnecessary_lambdas
+        () => UNSAFE<int>(() => err.unwrap()),
         throwsA(isA<Err<int>>()),
       );
     });

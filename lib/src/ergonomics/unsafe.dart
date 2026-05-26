@@ -48,6 +48,6 @@ import '/_common.dart';
 // ignore: non_constant_identifier_names
 T UNSAFE<T>(@mustBeAnonymous @noFutures T Function() block) {
   assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-      '$T must never be a Future.');
+      '$T must never be a Future.',);
   return block();
 }

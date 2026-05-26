@@ -78,27 +78,27 @@ final class Sync<T extends Object> extends Resolvable<T>
 
   Sync.result(Result<T> super.value)
       : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.'),
+            '$T must never be a Future.',),
         super.result();
 
   Sync.ok(Ok<T> super.ok)
       : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.'),
+            '$T must never be a Future.',),
         super.ok();
 
   Sync.okValue(T okValue)
       : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.'),
+            '$T must never be a Future.',),
         super.ok(Ok(okValue));
 
   Sync.err(Err<T> super.err)
       : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.'),
+            '$T must never be a Future.',),
         super.err();
 
   Sync.errValue(Object error, {int? statusCode})
       : assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-            '$T must never be a Future.'),
+            '$T must never be a Future.',),
         super.err(Err(error, statusCode: statusCode));
 
   /// Creates a [Sync] executing a synchronous function [noFutures].
@@ -113,7 +113,7 @@ final class Sync<T extends Object> extends Resolvable<T>
     @noFutures TVoidCallback? onFinalize,
   }) {
     assert(isSubtype<T, Never>() || !isSubtype<T, Future<Object>>(),
-        '$T must never be a Future.');
+        '$T must never be a Future.',);
     Result<T> result;
     try {
       result = Ok(noFutures());

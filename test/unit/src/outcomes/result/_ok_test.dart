@@ -24,7 +24,7 @@ void main() {
       ok.ifOk((self, o) {
         capturedSelf = self;
         capturedOk = o;
-      });
+      }).end();
       expect(identical(capturedSelf, ok), isTrue);
       expect(identical(capturedOk, ok), isTrue);
     });

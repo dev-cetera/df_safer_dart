@@ -1,6 +1,11 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
+// Top-level sendable handler for the Task() field-storage smoke test.
+// `@sendable` requires a top-level function or static method.
+TResolvableOption<int> _okSome1(TResultOption<int> previous) =>
+    Sync.okValue(const Some(1));
+
 void main() {
   group('task_sequencer', () {
     test('default constructor — starts not executing with Some-None completion',
@@ -31,7 +36,7 @@ void main() {
           )
           .end();
       expect(seq.isExecuting, isTrue);
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(seq.isExecuting, isFalse);
     });
 
@@ -61,7 +66,7 @@ void main() {
         log.add(3);
         return Sync.okValue(const Some(3));
       }).end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(log, [1, 2, 3]);
     });
 
@@ -73,7 +78,7 @@ void main() {
         seen = prev.orNull()?.orNull() ?? -1;
         return Sync.okValue(const Some(0));
       }).end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(seen, 50);
     });
 
@@ -94,7 +99,7 @@ void main() {
       }
 
       schedule(200);
-      await seq.completion.value;
+      (await seq.completion.value).end();
       // Yield once for any trailing reentrant drains.
       await Future<void>.delayed(Duration.zero);
       expect(count[0], greaterThanOrEqualTo(200));
@@ -112,7 +117,7 @@ void main() {
           return Sync.okValue(const None());
         },
       ).end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(hit, 1);
     });
 
@@ -138,15 +143,15 @@ void main() {
       );
       final sw = Stopwatch()..start();
       seq.then((_) => Sync.okValue(const Some(1))).end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       sw.stop();
       expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(15));
     });
 
     test('convertHandler — wraps a (prev, err)->T handler into TTaskHandler',
         () async {
-      // ignore: sendable, local lambda test.
       final handler = TaskSequencer.convertHandler<int>(
+        // ignore: sendable, local lambda — tested via the returned wrapper.
         (prev, err) => (prev ?? 0) + 1,
       );
       final seq = TaskSequencer<int>();
@@ -157,11 +162,11 @@ void main() {
     });
 
     test('Task constructor — stores fields verbatim', () {
-      final t = Task<int>(
-        handler: (prev) => Sync.okValue(const Some(1)),
+      final t = const Task<int>(
+        handler: _okSome1,
         onError: null,
         eagerError: true,
-        minTaskDuration: const Duration(milliseconds: 5),
+        minTaskDuration: Duration(milliseconds: 5),
       );
       expect(t.eagerError, isTrue);
       expect(t.minTaskDuration, const Duration(milliseconds: 5));

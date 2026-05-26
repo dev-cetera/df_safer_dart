@@ -107,7 +107,7 @@ void main() {
       });
       // Async.result schedules the closure immediately; awaiting `.value`
       // drains the microtask queue. The closure is invoked exactly once.
-      await a.value;
+      (await a.value).end();
       expect(count, 1);
     });
 

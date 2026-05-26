@@ -38,7 +38,7 @@ void main() {
           }),
         );
       }
-      await batch.executeTasks().value;
+      (await batch.executeTasks().value).end();
       expect(batch.isExecuting, isFalse);
       expect(batch.executionIndex, 4);
     });
@@ -58,7 +58,7 @@ void main() {
         );
       }
       final sw = Stopwatch()..start();
-      await batch.executeTasks().value;
+      (await batch.executeTasks().value).end();
       sw.stop();
       // Sequential lower bound would be ~160ms; concurrent must be much less.
       expect(
@@ -72,7 +72,7 @@ void main() {
       batch.add((_) => Sync.okValue(const Some(1)));
       batch.add((_) => Sync.okValue(const Some(2)));
       batch.add((_) => Sync.okValue(const Some(3)));
-      await batch.executeTasks().value;
+      (await batch.executeTasks().value).end();
       expect(batch.executionIndex, 3);
     });
 
@@ -87,7 +87,7 @@ void main() {
       final batch = ConcurrentTaskBatch<int>();
       batch.add((_) => Sync.okValue(const Some(1)));
       batch.add((_) => Sync.okValue(const Some(2)));
-      await batch.executeTasks().value;
+      (await batch.executeTasks().value).end();
       expect(batch.executionProgress, closeTo(1.0, 0.0001));
     });
 
@@ -102,7 +102,7 @@ void main() {
       final fut = batch.executeTasks().value;
       // The internal flag flips to true synchronously during executeTasks.
       expect(batch.isExecuting, isTrue);
-      await fut;
+      (await fut).end();
       expect(batch.isExecuting, isFalse);
     });
 

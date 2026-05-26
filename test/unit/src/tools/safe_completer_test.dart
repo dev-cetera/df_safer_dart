@@ -55,7 +55,7 @@ void main() {
       c
           .complete(
             Future<String>.delayed(
-                const Duration(milliseconds: 5), () => 'fut'),
+                const Duration(milliseconds: 5), () => 'fut',),
           )
           .end();
       expect(await c.resolvable().unwrap(), 'fut');
@@ -91,7 +91,7 @@ void main() {
           .end();
       // Per CLAUDE.md hardening notes — committed point is observable.
       expect(c.isCompleted, isTrue);
-      await c.resolvable().value;
+      (await c.resolvable().value).end();
       expect(c.isCompleted, isTrue);
     });
 

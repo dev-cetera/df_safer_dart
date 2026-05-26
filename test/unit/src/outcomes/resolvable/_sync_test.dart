@@ -178,15 +178,15 @@ void main() {
 
     test('ifOk side-effect on Ok, no-op on Err', () {
       var ran = 0;
-      Sync.okValue(2).ifOk((self, ok) => ran++);
-      Sync<int>.errValue('e').ifOk((self, ok) => ran++);
+      Sync.okValue(2).ifOk((self, ok) => ran++).end();
+      Sync<int>.errValue('e').ifOk((self, ok) => ran++).end();
       expect(ran, 1);
     });
 
     test('ifErr side-effect on Err, no-op on Ok', () {
       var ran = 0;
-      Sync.okValue(2).ifErr((self, err) => ran++);
-      Sync<int>.errValue('e').ifErr((self, err) => ran++);
+      Sync.okValue(2).ifErr((self, err) => ran++).end();
+      Sync<int>.errValue('e').ifErr((self, err) => ran++).end();
       expect(ran, 1);
     });
 

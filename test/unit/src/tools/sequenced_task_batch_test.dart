@@ -16,7 +16,7 @@ void main() {
       final batch = SequencedTaskBatch<int>(sequencer: seq);
       batch.add((_) => Sync.okValue(const Some(1)));
       batch.executeTasks().end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(seq.isExecuting, isFalse);
     });
 
@@ -54,7 +54,7 @@ void main() {
         return Sync.okValue(const Some(3));
       });
       batch.executeTasks().end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(log, [1, 2, 3]);
     });
 
@@ -64,7 +64,7 @@ void main() {
       batch.add((_) => Sync.okValue(const Some(1)));
       batch.add((_) => Sync.okValue(const Some(2)));
       batch.executeTasks().end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(batch.executionIndex, 2);
     });
 
@@ -82,7 +82,7 @@ void main() {
       batch.add((_) => Sync.okValue(const Some(1)));
       batch.add((_) => Sync.okValue(const Some(2)));
       batch.executeTasks().end();
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(batch.executionProgress, closeTo(1.0, 0.0001));
     });
 
@@ -97,7 +97,7 @@ void main() {
       );
       batch.executeTasks().end();
       expect(batch.isExecuting, seq.isExecuting);
-      await seq.completion.value;
+      (await seq.completion.value).end();
       expect(batch.isExecuting, isFalse);
     });
   });

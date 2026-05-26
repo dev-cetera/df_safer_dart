@@ -88,10 +88,10 @@ void main() {
       var errCalls = 0;
       const Result<int> ok = Ok<int>(1);
       final Result<int> err = Err<int>('x');
-      ok.ifOk((_, __) => okCalls++);
-      ok.ifErr((_, __) => errCalls++);
-      err.ifOk((_, __) => okCalls++);
-      err.ifErr((_, __) => errCalls++);
+      ok.ifOk((_, __) => okCalls++).end();
+      ok.ifErr((_, __) => errCalls++).end();
+      err.ifOk((_, __) => okCalls++).end();
+      err.ifErr((_, __) => errCalls++).end();
       expect(okCalls, 1);
       expect(errCalls, 1);
     });

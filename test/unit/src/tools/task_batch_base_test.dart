@@ -1,6 +1,13 @@
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
 
+// Top-level sendable handler shared by the Task() construction tests below.
+// `@sendable` requires a top-level function or static method, and tests of
+// Task wiring don't care about handler internals — only that a valid handler
+// can be stored, removed, or iterated.
+TResolvableOption<int> _okSome1(TResultOption<int> previous) =>
+    Sync.okValue(const Some(1));
+
 void main() {
   group('task_batch_base', () {
     // TaskBatchBase is abstract — exercise its public surface via the
@@ -33,7 +40,7 @@ void main() {
       batch.add((_) => Sync.okValue(const Some(1)));
       final r = batch.executeTasks();
       expect(r, isA<Resolvable<Option<int>>>());
-      await r.value;
+      (await r.value).end();
     });
 
     test('add — appends a task to the queue', () {
@@ -45,8 +52,8 @@ void main() {
 
     test('addTask — appends a pre-built Task to the queue', () {
       final batch = ConcurrentTaskBatch<int>();
-      final t = Task<int>(
-        handler: (_) => Sync.okValue(const Some(1)),
+      final t = const Task<int>(
+        handler: _okSome1,
         onError: null,
         eagerError: false,
         minTaskDuration: null,
@@ -59,8 +66,8 @@ void main() {
       final batch = ConcurrentTaskBatch<int>();
       final tasks = List<Task<int>>.generate(
         3,
-        (_) => Task<int>(
-          handler: (_) => Sync.okValue(const Some(1)),
+        (_) => const Task<int>(
+          handler: _okSome1,
           onError: null,
           eagerError: false,
           minTaskDuration: null,
@@ -72,8 +79,8 @@ void main() {
 
     test('removeTask — removes a previously-added task', () {
       final batch = ConcurrentTaskBatch<int>();
-      final t = Task<int>(
-        handler: (_) => Sync.okValue(const Some(1)),
+      final t = const Task<int>(
+        handler: _okSome1,
         onError: null,
         eagerError: false,
         minTaskDuration: null,
@@ -85,8 +92,8 @@ void main() {
 
     test('removeTask — returns false for an unknown task', () {
       final batch = ConcurrentTaskBatch<int>();
-      final t = Task<int>(
-        handler: (_) => Sync.okValue(const Some(1)),
+      final t = const Task<int>(
+        handler: _okSome1,
         onError: null,
         eagerError: false,
         minTaskDuration: null,
