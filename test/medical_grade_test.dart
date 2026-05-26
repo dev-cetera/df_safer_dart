@@ -129,8 +129,7 @@ void main() {
       expect(s, contains('async-boom'));
     });
 
-    test('Err.toString with a synthetic empty StackTrace returns a string',
-        () {
+    test('Err.toString with a synthetic empty StackTrace returns a string', () {
       final e = Err<int>('x', stackTrace: StackTrace.empty);
       final s = e.toString();
       expect(s, contains('Err'));

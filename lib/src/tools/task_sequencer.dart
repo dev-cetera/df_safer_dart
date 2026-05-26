@@ -184,9 +184,8 @@ class TaskSequencer<T extends Object> {
     final taskOnError = task.onError;
     if (taskOnError != null) {
       final b = Resolvable(() => taskOnError(err)).flatten();
-      errorResolvable = errorResolvable == null
-          ? b
-          : Resolvable.combine2(errorResolvable, b);
+      errorResolvable =
+          errorResolvable == null ? b : Resolvable.combine2(errorResolvable, b);
     }
 
     // If eager error is enabled, short-circuit the sequence immediately but

@@ -18,6 +18,9 @@
 // All worker entrypoints MUST be top-level functions: `Isolate.run`'s closure
 // must itself be sendable, which only works for static/top-level refs.
 
+@TestOn('vm')
+library;
+
 import 'dart:isolate';
 
 import 'package:df_safer_dart/df_safer_dart.dart';

@@ -130,8 +130,21 @@ final class Sync<T extends Object> extends Resolvable<T>
           result = Err<T>(error, stackTrace: stackTrace);
         }
       }
-    } finally {
-      onFinalize?.call();
+    }
+    // Run `onFinalize` separately so its throws are absorbed into `result`
+    // instead of escaping `Sync(...)`. Following standard `try/finally`
+    // semantics, a thrown finalize error overrides whatever `result` held —
+    // a failed cleanup is a meaningful failure mode that callers need to
+    // see, and surfacing it as `Sync.err(...)` keeps the package's no-throw
+    // contract intact.
+    if (onFinalize != null) {
+      try {
+        onFinalize();
+      } on Err catch (err) {
+        result = err.transfErr<T>();
+      } catch (error, stackTrace) {
+        result = Err<T>(error, stackTrace: stackTrace);
+      }
     }
     return Sync.result(result);
   }
@@ -262,6 +275,9 @@ final class Sync<T extends Object> extends Resolvable<T>
   ) {
     try {
       return onSync(this) ?? this;
+    } on Err catch (err) {
+      // Preserve a user-thrown Err verbatim — statusCode/breadcrumbs matter.
+      return Sync.err(err.transfErr<Object>());
     } catch (error, stackTrace) {
       return Sync.err(Err(error, stackTrace: stackTrace));
     }

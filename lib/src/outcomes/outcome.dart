@@ -107,6 +107,17 @@ sealed class Outcome<T extends Object> extends Equatable {
   ///
   /// - [onErr]: A function that is called when an [Err] is encountered.
   /// - [onNone]: A function that is called when a [None] is encountered.
+  ///
+  /// ### ⚠️ Unsafe
+  ///
+  /// Unlike the rest of the package, this primitive does **not** absorb throws
+  /// from the [onErr] / [onNone] callbacks — they can escape directly to the
+  /// caller. Prefer [rawSync] / [rawAsync], which wrap this call in a [Sync] /
+  /// [Async] factory that catches any throw into a structured [Err]. Use
+  /// `UNSAFE(() => …)` (or the `UNSAFE:` label) when calling this method
+  /// directly, to signal at the call site that error handling has been
+  /// considered outside the [Outcome] type system.
+  @unsafeOrError
   FutureOr<Object> raw({
     required FutureOr<Object> Function(Err<Object> err) onErr,
     required FutureOr<Object> Function() onNone,

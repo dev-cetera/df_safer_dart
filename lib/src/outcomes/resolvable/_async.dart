@@ -129,26 +129,40 @@ final class Async<T extends Object> extends Resolvable<T>
   }) {
     assert(!isSubtype<T, Future<Object>>(), '$T must never be a Future.');
     return Async.result(() async {
+      Result<T> result;
       try {
-        return Ok<T>(await mustAwaitAllFutures());
+        result = Ok<T>(await mustAwaitAllFutures());
       } on Err catch (err) {
-        return err.transfErr<T>();
+        result = err.transfErr<T>();
       } catch (error, stackTrace) {
-        try {
-          if (onError == null) {
-            rethrow;
+        if (onError == null) {
+          result = Err<T>(error, stackTrace: stackTrace);
+        } else {
+          try {
+            result = onError(error, stackTrace);
+          } on Err catch (err) {
+            // `onError` itself can throw an `Err` — preserve its statusCode
+            // and breadcrumbs rather than nesting it as another Err's value.
+            result = err.transfErr<T>();
+          } catch (error, stackTrace) {
+            result = Err<T>(error, stackTrace: stackTrace);
           }
-          return onError(error, stackTrace);
-        } on Err catch (err) {
-          // `onError` itself can throw an `Err` — preserve its statusCode
-          // and breadcrumbs rather than nesting it as another Err's value.
-          return err.transfErr<T>();
-        } catch (error, stackTrace) {
-          return Err<T>(error, stackTrace: stackTrace);
         }
-      } finally {
-        onFinalize?.call();
       }
+      // Run `onFinalize` separately so its throws are absorbed into `result`
+      // instead of escaping the async block and leaving `Async.value` to
+      // reject with an uncaught error. Following standard `try/finally`
+      // semantics, a thrown finalize error overrides whatever `result` held.
+      if (onFinalize != null) {
+        try {
+          onFinalize();
+        } on Err catch (err) {
+          result = err.transfErr<T>();
+        } catch (error, stackTrace) {
+          result = Err<T>(error, stackTrace: stackTrace);
+        }
+      }
+      return result;
     }());
   }
 
@@ -268,6 +282,9 @@ final class Async<T extends Object> extends Resolvable<T>
   ) {
     try {
       return onAsync(this) ?? this;
+    } on Err catch (err) {
+      // Preserve a user-thrown Err verbatim — statusCode/breadcrumbs matter.
+      return Async.err(err.transfErr<Object>());
     } catch (error, stackTrace) {
       return Async.err(Err(error, stackTrace: stackTrace));
     }

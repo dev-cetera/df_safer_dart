@@ -314,8 +314,7 @@ void main() {
     test('onError that itself throws Err preserves statusCode', () {
       final r = Resolvable<int>(
         () => throw StateError('primary'),
-        onError: (e, s) =>
-            throw Err<int>('onError-rethrow', statusCode: 452),
+        onError: (e, s) => throw Err<int>('onError-rethrow', statusCode: 452),
       );
       final result = (r as Sync<int>).value;
       expect(result, isA<Err<int>>());
@@ -359,6 +358,99 @@ void main() {
     });
   });
 
+  group('Sync.fold / Async.fold — Err preservation', () {
+    test('Sync.fold preserves user-thrown Err statusCode', () {
+      final r = Sync.okValue(1).fold(
+        (_) => throw Err<int>('sync-fold-fault', statusCode: 460),
+        (_) => null,
+      );
+      expect(r, isA<Sync>());
+      final result = (r as Sync).value;
+      expect(result, isA<Err>());
+      expect((result as Err).statusCode.unwrap(), 460);
+      expect(result.error, 'sync-fold-fault');
+    });
+
+    test('Async.fold preserves user-thrown Err statusCode', () async {
+      final r = Async.okValue(1).fold(
+        (_) => null,
+        (_) => throw Err<int>('async-fold-fault', statusCode: 461),
+      );
+      expect(r, isA<Async>());
+      final result = await (r as Async).value;
+      expect(result, isA<Err>());
+      expect((result as Err).statusCode.unwrap(), 461);
+      expect(result.error, 'async-fold-fault');
+    });
+  });
+
+  group('onFinalize that throws — absorbed, never escapes', () {
+    test('Sync.new: finalize-thrown Err overrides Ok result', () {
+      final s = Sync<int>(
+        () => 1,
+        onFinalize: () => throw Err<int>('cleanup-fault', statusCode: 503),
+      );
+      expect(s.value, isA<Err<int>>());
+      expect((s.value as Err<int>).statusCode.unwrap(), 503);
+      expect((s.value as Err<int>).error, 'cleanup-fault');
+    });
+
+    test('Sync.new: finalize-thrown non-Err overrides Ok result', () {
+      final s = Sync<int>(
+        () => 1,
+        onFinalize: () => throw StateError('cleanup-boom'),
+      );
+      expect(s.value, isA<Err<int>>());
+      expect((s.value as Err<int>).error, isA<StateError>());
+    });
+
+    test('Async.new: finalize-thrown Err overrides Ok result', () async {
+      final a = Async<int>(
+        () async => 1,
+        onFinalize: () =>
+            throw Err<int>('async-cleanup-fault', statusCode: 504),
+      );
+      final r = await a.value;
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).statusCode.unwrap(), 504);
+      expect(r.error, 'async-cleanup-fault');
+    });
+
+    test('Async.new: finalize-thrown non-Err overrides Ok result', () async {
+      final a = Async<int>(
+        () async => 1,
+        onFinalize: () => throw StateError('async-cleanup-boom'),
+      );
+      final r = await a.value;
+      expect(r, isA<Err<int>>());
+      expect((r as Err<int>).error, isA<StateError>());
+    });
+
+    test('Resolvable.new: finalize-thrown Err overrides Ok result', () {
+      final r = Resolvable<int>(
+        () => 1,
+        onFinalize: () =>
+            throw Err<int>('resolvable-cleanup-fault', statusCode: 505),
+      );
+      final result = (r as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      expect((result as Err<int>).statusCode.unwrap(), 505);
+      expect(result.error, 'resolvable-cleanup-fault');
+    });
+
+    test('Resolvable.new with sync throw: finalize-throw still absorbed', () {
+      final r = Resolvable<int>(
+        () => throw StateError('primary'),
+        onFinalize: () => throw Err<int>('finalize-fault', statusCode: 506),
+      );
+      final result = (r as Sync<int>).value;
+      expect(result, isA<Err<int>>());
+      // Finalize error overrides the primary StateError-derived Err.
+      expect((result as Err<int>).statusCode.unwrap(), 506);
+      expect(result.error, 'finalize-fault');
+    });
+  });
+
   group('Lazy — never throws (constructor faults become Sync.err)', () {
     test('singleton absorbs a non-Err throw into Sync.err', () {
       final lazy = Lazy<int>(() => throw StateError('boot-fail'));
@@ -379,8 +471,7 @@ void main() {
       expect(err.error, 'config-missing');
     });
 
-    test('singleton caches the failed Sync.err just like a successful one',
-        () {
+    test('singleton caches the failed Sync.err just like a successful one', () {
       var calls = 0;
       final lazy = Lazy<int>(() {
         calls++;

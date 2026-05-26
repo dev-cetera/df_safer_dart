@@ -101,20 +101,20 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
     // The closure invocation must NOT escape — a synchronous throw needs to
     // become an Err on the returned Sync, not propagate to the caller. This
     // is the library's core "absorb all throws" contract.
+    Result<T> result;
     try {
-      final result = mustAwaitAllFutures();
-      if (result is Future<T>) {
-        return Async(() => result, onError: onError, onFinalize: onFinalize);
-      } else {
-        return Sync(() => result, onError: onError, onFinalize: onFinalize);
+      final v = mustAwaitAllFutures();
+      if (v is Future<T>) {
+        return Async(() => v, onError: onError, onFinalize: onFinalize);
       }
+      // Synchronous value — assemble Result inline, then finalize-with-absorb.
+      result = Ok(v);
     } on Err catch (err) {
       // Preserve a user-thrown Err verbatim — statusCode and breadcrumbs are
       // load-bearing for life-critical callers and must not be discarded by
       // an outer wrapping. `onError` does NOT fire for Err throws (an Err
       // is a structured error value already; nothing for `onError` to add).
-      onFinalize?.call();
-      return Sync.err(err.transfErr<T>());
+      result = err.transfErr<T>();
     } catch (error, stackTrace) {
       // Non-Err throw — route through `onError` if the caller supplied one.
       // The previous form here wrapped the throw inside a fresh `Sync()`
@@ -122,21 +122,32 @@ sealed class Resolvable<T extends Object> extends Outcome<T> {
       // bypassing `onError` entirely. That's a behaviour bug: `onError` is
       // exactly the hook callers expect to invoke on a raw throw.
       if (onError == null) {
-        onFinalize?.call();
-        return Sync.err(Err<T>(error, stackTrace: stackTrace));
-      }
-      try {
-        final recovered = onError(error, stackTrace);
-        onFinalize?.call();
-        return Sync.result(recovered);
-      } on Err catch (err) {
-        onFinalize?.call();
-        return Sync.err(err.transfErr<T>());
-      } catch (error, stackTrace) {
-        onFinalize?.call();
-        return Sync.err(Err<T>(error, stackTrace: stackTrace));
+        result = Err<T>(error, stackTrace: stackTrace);
+      } else {
+        try {
+          result = onError(error, stackTrace);
+        } on Err catch (err) {
+          result = err.transfErr<T>();
+        } catch (error, stackTrace) {
+          result = Err<T>(error, stackTrace: stackTrace);
+        }
       }
     }
+    // Run `onFinalize` separately so its throws are absorbed into `result`
+    // instead of escaping this factory. A thrown finalize error overrides
+    // whatever `result` held — failed cleanup is a meaningful failure mode
+    // that callers need to see, surfaced as `Sync.err(...)` to keep the
+    // package's no-throw contract intact.
+    if (onFinalize != null) {
+      try {
+        onFinalize();
+      } on Err catch (err) {
+        result = err.transfErr<T>();
+      } catch (error, stackTrace) {
+        result = Err<T>(error, stackTrace: stackTrace);
+      }
+    }
+    return Sync.result(result);
   }
 
   /// Returns `this` as a base [Resolvable] type.
