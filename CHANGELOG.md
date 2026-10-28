@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.22.1]
+
+- Merge branch 'main' into prod
+
+
 
 ## [0.22.0]
 
