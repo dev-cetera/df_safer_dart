@@ -1,4 +1,4 @@
-// ignore_for_file: sendable, invalid_use_of_protected_member
+// ignore_for_file: df_safer_dart_lints/sendable, invalid_use_of_protected_member
 // `sendable`: every test here exercises Lazy with local-state closures
 // (call-count probes, error injection, reset semantics). The point is local
 // memoization behaviour, not isolate sendability — the same precedent as

@@ -29,7 +29,7 @@
 // Tests intentionally throw from inline lambdas — `@sendable` lint complaints
 // are irrelevant in this defensive-behaviour context.
 //
-// ignore_for_file: sendable, prefer_const_constructors
+// ignore_for_file: df_safer_dart_lints/sendable, prefer_const_constructors
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';
