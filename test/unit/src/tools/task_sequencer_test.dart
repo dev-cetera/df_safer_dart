@@ -111,7 +111,7 @@ void main() {
       seq.then((_) => Sync.err(Err<Option<int>>('boom'))).end();
       seq.then(
         (_) => Sync.okValue(const Some(2)),
-        // ignore: sendable, local hit-counter test.
+        // ignore: df_safer_dart_lints/sendable, local hit-counter test.
         onPrevError: (err) {
           hit++;
           return Sync.okValue(const None());
@@ -151,7 +151,7 @@ void main() {
     test('convertHandler — wraps a (prev, err)->T handler into TTaskHandler',
         () async {
       final handler = TaskSequencer.convertHandler<int>(
-        // ignore: sendable, local lambda — tested via the returned wrapper.
+        // ignore: df_safer_dart_lints/sendable, local lambda — tested via the returned wrapper.
         (prev, err) => (prev ?? 0) + 1,
       );
       final seq = TaskSequencer<int>();

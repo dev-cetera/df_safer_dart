@@ -27,7 +27,7 @@
 // The Lazy tests use inline lambdas (which the `@sendable` lint flags)
 // because they exercise local construct-fault behaviour, not isolate
 // sendability.
-// ignore_for_file: sendable, unnecessary_lambdas
+// ignore_for_file: df_safer_dart_lints/sendable, unnecessary_lambdas
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';

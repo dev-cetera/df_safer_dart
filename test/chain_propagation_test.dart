@@ -34,7 +34,7 @@
 // and assert all the above on every one.
 //
 // Inline lambdas trip the `sendable` lint by design here.
-// ignore_for_file: sendable, prefer_const_constructors
+// ignore_for_file: df_safer_dart_lints/sendable, prefer_const_constructors
 
 import 'package:df_safer_dart/df_safer_dart.dart';
 import 'package:test/test.dart';

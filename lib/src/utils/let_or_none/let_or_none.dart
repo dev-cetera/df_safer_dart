@@ -151,7 +151,7 @@ Option<T> jsonDecodeOrNone<T extends Object>(dynamic input) {
     try {
       final decoded = const JsonDecoder().convert(rawInput);
       return decoded is T ? Some<T>(decoded) : None<T>();
-    } catch (e, _) {
+    } catch (_) {
       return None<T>();
     }
   }).flatten();

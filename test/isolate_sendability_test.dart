@@ -194,7 +194,7 @@ void main() {
     test('Lazy can be sent directly through a SendPort', () async {
       final port = ReceivePort();
       try {
-        // ignore: sendable, the constructor IS a top-level fn ref.
+        // ignore: df_safer_dart_lints/sendable, the constructor IS a top-level fn ref.
         port.sendPort.send(Lazy<int>(_lazyMake42));
         final received = await port.first as Lazy<int>;
         expect(received, isA<Lazy<int>>());
