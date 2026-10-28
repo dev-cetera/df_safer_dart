@@ -1,5 +1,11 @@
 # Changelog
 
+
+## [0.22.0]
+
+- chore: standardize README and CI/CD workflows, remove donation links, update contact info and repository links
+- chore: resolve analyzer issues
+
 ## 0.21.0
 
 - **feat**: `df_safer_dart` now re-exports `df_safer_dart_annotations`. Consumers
