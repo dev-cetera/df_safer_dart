@@ -272,9 +272,9 @@ void main() {
 
     test('Sync with duration becomes Async', () async {
       final s = Sync.okValue(1);
+      final stopwatch = Stopwatch()..start();
       final delayed = s.withMinDuration(const Duration(milliseconds: 20));
       expect(delayed, isA<Async<int>>());
-      final stopwatch = Stopwatch()..start();
       (await delayed.value).end();
       stopwatch.stop();
       expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(15));
